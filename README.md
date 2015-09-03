@@ -29,6 +29,7 @@ Plugin includes a ContainerProvisionner implementation based on Docker CLI.
 This implementation do run the slave remoting container using a plain `docker run` command and rely on docker stdin/stdout as remoting transport (i.e. CommandLauncher or equivalent). 
 The Launcher is decorated so command/process to be launched on the slave are directly executed with `docker exec`.
 
+General idea is to avoid to use Jenkins remoting to launch processes but directly rely on Docker for this (what docker finally is is just an `execve` on steriods!). That magically brings long-running tasks for free.
 
 ## Other ideas
 
