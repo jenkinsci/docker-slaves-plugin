@@ -31,6 +31,18 @@ The Launcher is decorated so command/process to be launched on the slave are dir
 
 General idea is to avoid to use Jenkins remoting to launch processes but directly rely on Docker for this (what docker finally is is just an `execve` on steriods!). That magically brings long-running tasks for free.
 
+## Kubernetes implementation
+
+Kubernetes has native support for Pod concept, so would embrace this design with minimal effort.
+
+## Amazon ECS implementation
+
+Comparable to Kubernetes.
+
+## Mesos implementation
+
+To be considered
+
 ## [Rkt](https://github.com/coreos/rkt) implementation
 
 Supporting rkt runtime could be great from a security POV. rkt is able to launch containers isolated inside a small KVM process, greatly enhancing security (https://coreos.com/blog/rkt-0.8-with-new-vm-support/)
