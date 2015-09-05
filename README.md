@@ -18,7 +18,8 @@ To host a build, plugin will :
 ## Architecture
 
 Plugin do rely on Jenkins Cloud API. Global configuration do only define a label, as slave template is actually declared in job configuration as a NodeProperty. 
-Internally a slave image is defined and is responsible to establish jenkins remoting.
+This property allow user to define a container image to host the build, and an optional set of additional images to link to this one - those can be used to host a test database, or comparable resources. Need to consider if we could rely on docker-compose.yml syntax.
+Internally, a unique slave image is defined and is responsible to establish jenkins remoting.
 
 When a job is triggered, job configuration + remoting image do define a container group ("pod") the plugin has to run. ContainerProvisionner is responsible to run this pod. 
 
