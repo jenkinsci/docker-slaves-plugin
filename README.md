@@ -35,6 +35,7 @@ General idea is to avoid to use Jenkins remoting to launch processes but directl
 ## Kubernetes implementation
 
 Kubernetes has native support for Pod concept, so would embrace this design with minimal effort.
+Data container would rely on a [kubernetes volume](https://github.com/kubernetes/kubernetes/blob/master/docs/user-guide/volumes.md)
 
 ## Amazon ECS implementation
 
