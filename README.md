@@ -13,6 +13,8 @@ Global configuration let administrator setup the container infrastructure. Typic
 To host a build, plugin will :
 * create a data container to host the project workspace.
 * run a predefined slave container which is designed to just establish jenkins remoting channel. 
+* run a container for the scm to checkout project code
+* (optionnaly) build a fresh new container image based on a Dockerfile stored in SCM
 * run a (set of) containers configured by user as part of the job configuration. All them are linked together and share network
 
 ## Architecture
