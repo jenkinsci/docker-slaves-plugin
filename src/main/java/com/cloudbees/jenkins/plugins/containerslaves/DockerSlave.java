@@ -25,12 +25,15 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.Extension;
+import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import hudson.model.Job;
+import hudson.model.Node;
 import hudson.model.TaskListener;
+import hudson.model.listeners.RunListener;
 import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
-import hudson.slaves.CloudRetentionStrategy;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
 
@@ -73,5 +76,17 @@ public class DockerSlave extends AbstractCloudSlave {
 
     }
 
-    private final static RetentionStrategy ONCE = new CloudRetentionStrategy(1);
+
+    @Extension
+    public static class DockerSlaveRunListrner extends RunListener<AbstractBuild> {
+
+        @Override
+        public void onStarted(AbstractBuild build, TaskListener listener) {
+            Node n = build.getBuiltOn();
+            if (n instanceof DockerSlave) {
+                n.setNodeName("Container for "+build.toString());
+            }
+
+        }
+    }
 }
