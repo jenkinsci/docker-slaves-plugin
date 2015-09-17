@@ -46,7 +46,8 @@ public class DockerSlave extends AbstractCloudSlave {
     private final Job job;
 
     public DockerSlave(Job job, String labelString, DockerEngine engine) throws Descriptor.FormException, IOException {
-        super(labelString, "Container slave for building " + job.getFullName(),
+        // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
+        super("Container for " +job.getName() + "#" + job.getNextBuildNumber(), "Container slave for building " + job.getFullName(),
                 "/home/jenkins", 1, Mode.EXCLUSIVE, labelString,
                 new DockerComputerLauncher(),
                 RetentionStrategy.NOOP, // Slave is stopped on completion see DockerComputer.taskCompleted
