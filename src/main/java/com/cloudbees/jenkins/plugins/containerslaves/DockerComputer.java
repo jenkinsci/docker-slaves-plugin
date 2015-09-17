@@ -40,11 +40,13 @@ import java.util.logging.Logger;
 public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
 
     private final Job job;
+    private final DockerEngine engine;
 
     private DockerProvisioner provisioner;
 
     public DockerComputer(DockerSlave dockerSlave, Job job) {
         super(dockerSlave);
+        this.engine = dockerSlave.getEngine();
         this.job = job;
     }
 
@@ -53,7 +55,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
      *
      */
     public DockerProvisioner createProvisioner(TaskListener listener) {
-        provisioner = getNode().getEngine().buildProvisioner(job, listener);
+        provisioner = engine.buildProvisioner(job, listener);
         return provisioner;
     }
 

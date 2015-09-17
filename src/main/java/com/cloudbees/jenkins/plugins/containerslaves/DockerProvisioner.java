@@ -27,6 +27,10 @@ public class DockerProvisioner  {
         localLauncher = new Launcher.LocalLauncher(listener);
     }
 
+    public DockerBuildContext getContext() {
+        return context;
+    }
+
     public void preparePod() {
         try {
             // if remoting container already exists, we just use it

@@ -26,10 +26,15 @@
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.Computer;
 import hudson.model.Descriptor;
+import hudson.model.Environment;
 import hudson.model.Job;
 import hudson.model.Node;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.slaves.AbstractCloudComputer;
@@ -59,7 +64,7 @@ public class DockerSlave extends AbstractCloudSlave {
         this.job = job;
     }
 
-    public AbstractCloudComputer createComputer() {
+    public DockerComputer createComputer() {
         return new DockerComputer(this, job);
     }
 
@@ -76,17 +81,17 @@ public class DockerSlave extends AbstractCloudSlave {
 
     }
 
-
     @Extension
     public static class DockerSlaveRunListrner extends RunListener<AbstractBuild> {
 
         @Override
-        public void onStarted(AbstractBuild build, TaskListener listener) {
-            Node n = build.getBuiltOn();
-            if (n instanceof DockerSlave) {
-                n.setNodeName("Container for "+build.toString());
+        public Environment setUpEnvironment(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException, Run.RunnerAbortedException {
+            Computer c = Computer.currentComputer();
+            if (c instanceof DockerComputer) {
+                build.addAction(((DockerComputer) c).getProvisioner().getContext());
             }
-
+            return new Environment() {};
         }
+
     }
 }

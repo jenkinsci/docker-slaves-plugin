@@ -69,7 +69,7 @@ public class DockerBuildContext implements BuildBadgeAction {
 
     @Override
     public String getIconFileName() {
-        return "images/16x16/docker-logo.png";
+        return "/plugin/container-slaves/images/24x24/docker-logo.png";
     }
 
     @Override

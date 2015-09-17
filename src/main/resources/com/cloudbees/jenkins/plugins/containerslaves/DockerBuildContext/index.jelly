@@ -25,12 +25,5 @@
 
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-  <l:layout norefresh="true">
-    <st:include page="sidepanel.jelly" it="${it.owner}"/>
-    <l:main-panel>
-      jenkins remoting container : ${it.remotingContainerId}
-      <br/>
-      build container : ${it.buildContainerId}
-    </l:main-panel>
-  </l:layout>
+      TODO
 </j:jelly>
