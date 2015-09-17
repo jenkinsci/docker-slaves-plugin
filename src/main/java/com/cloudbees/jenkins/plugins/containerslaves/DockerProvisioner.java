@@ -29,6 +29,12 @@ public class DockerProvisioner  {
 
     public void preparePod() {
         try {
+            // if remoting container already exists, we just use it
+            if (context.getRemotingContainerId() != null) {
+                if (driver.hasContainer(localLauncher, context.getRemotingContainerId())) {
+                    return;
+                }
+            }
             String remotingContainer = driver.createRemotingContainer(localLauncher, context.getRemotingContainerImageName());
             context.setRemotingContainerId(remotingContainer);
         } catch (IOException e) {

@@ -46,6 +46,23 @@ public class DockerDriver {
         verbose = true;
     }
 
+    public boolean hasContainer(Launcher launcher, String containerId) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("inspect", "-f", "'{{.Id}}'", containerId);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int status = launcher.launch()
+                .cmds(args)
+                .stdout(out).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public String createRemotingContainer(Launcher launcher, String image) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
                 .add("create", "--interactive")
