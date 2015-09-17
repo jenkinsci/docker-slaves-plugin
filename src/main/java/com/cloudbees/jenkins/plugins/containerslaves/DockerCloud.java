@@ -43,37 +43,22 @@ import java.util.Set;
  */
 public class DockerCloud extends Cloud {
 
-    private final String labelString;
-
     private final String defaultBuildImage;
-
-    private transient Set<LabelAtom> labels;
 
     private transient DockerEngine engine;
 
     @DataBoundConstructor
     public DockerCloud(String name, String labelString, String defaultBuildImage) {
         super(name);
-        this.labelString = labelString;
         this.defaultBuildImage = defaultBuildImage;
-        parseLabelString();
         engine = new DockerEngine(defaultBuildImage);
-    }
-
-    public String getLabelString() {
-        return labelString;
     }
 
     public DockerEngine getEngine() {
         return engine;
     }
 
-    public void parseLabelString() {
-        labels = Label.parse(labelString);
-    }
-
     private Object readResolve() {
-        parseLabelString();
         engine = new DockerEngine(defaultBuildImage);
         return this;
     }
@@ -90,7 +75,7 @@ public class DockerCloud extends Cloud {
 
     @Override
     public boolean canProvision(Label label) {
-        return label.matches(labels);
+        return false;
     }
 
     @Extension

@@ -26,6 +26,7 @@
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Job;
@@ -52,35 +53,37 @@ public class ProvisionQueueListener extends QueueListener {
 
     @Override
     public void onEnterBuildable(final Queue.BuildableItem bi) {
-        if (bi.task instanceof Job) {
+        if (bi.task instanceof AbstractProject) {
+            AbstractProject job = (AbstractProject) bi.task;
+            BuildContainersDefinition def = (BuildContainersDefinition) job.getProperty(BuildContainersDefinition.class);
+            if (def == null) return;
+            if (!def.isEnabled()) return;
+
             final DockerCloud cloud = getCloud();
-            if (cloud != null && cloud.canProvision(bi.getAssignedLabel())) {
-                Job job = (Job) bi.task;
 
-                LOGGER.info("Creating a Container slave to host " + bi.toString());
-                DockerLabelAssignmentAction action = cloud.getEngine().createLabelAssignmentAction(bi);
-                bi.addAction(action);
+            LOGGER.info("Creating a Container slave to host " + bi.toString());
+            DockerLabelAssignmentAction action = cloud.getEngine().createLabelAssignmentAction(bi);
+            bi.addAction(action);
 
-                // Immediately create a slave for this item
-                // Real provisioning will happen later
+            // Immediately create a slave for this item
+            // Real provisioning will happen later
 
-                try {
-                    final Node node = new DockerSlave(job, action.getLabel().toString(), cloud.getEngine());
-                    Computer.threadPoolForRemoting.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Jenkins.getInstance().addNode(node);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+            try {
+                final Node node = new DockerSlave(job, action.getLabel().toString(), cloud.getEngine());
+                Computer.threadPoolForRemoting.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Jenkins.getInstance().addNode(node);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Descriptor.FormException e) {
-                    e.printStackTrace();
-                }
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Descriptor.FormException e) {
+                e.printStackTrace();
             }
         }
     }

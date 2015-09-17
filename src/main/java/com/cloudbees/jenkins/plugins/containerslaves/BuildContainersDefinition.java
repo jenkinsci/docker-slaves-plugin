@@ -30,6 +30,7 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -49,6 +50,10 @@ public class BuildContainersDefinition extends JobProperty {
     public BuildContainersDefinition(String buildHostImage, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
         this.sideContainers = sideContainers;
+    }
+
+    public boolean isEnabled() {
+        return StringUtils.isNotBlank(buildHostImage);
     }
 
     public String getBuildHostImage() {
