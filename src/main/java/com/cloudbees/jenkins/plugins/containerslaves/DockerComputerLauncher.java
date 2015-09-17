@@ -56,5 +56,6 @@ public class DockerComputerLauncher extends ComputerLauncher {
         DockerJobContainersProvisioner provisioner = computer.createProvisioner(listener);
         provisioner.prepareRemotingContainer();
         provisioner.launchRemotingContainer(computer, listener);
+        provisioner.launchSideContainers(computer, listener);
     }
 }

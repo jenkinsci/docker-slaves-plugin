@@ -28,39 +28,52 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Job;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class JobBuildsContainersContext implements BuildBadgeAction {
 
-    protected final String remotingContainerImageName;
+    protected ContainerInstance remotingContainer;
 
-    protected final String buildContainerImageName;
+    protected final String buildContainerBaseImage;
 
-    String remotingContainerId;
+    protected List<ContainerInstance> buildContainers = new ArrayList<ContainerInstance>();
 
-    String buildContainerId;
+    protected List<ContainerInstance> sideContainers = new ArrayList<ContainerInstance>();
 
-    public JobBuildsContainersContext(String remotingContainerImageName, String buildContainerImageName) {
-        this.remotingContainerImageName = remotingContainerImageName;
-        this.buildContainerImageName = buildContainerImageName;
+    public JobBuildsContainersContext(String remotingContainerImageName, String buildContainerImageName, List<SideContainerDefinition> sideContainerDefinitions) {
+        remotingContainer = new ContainerInstance(remotingContainerImageName);
+        buildContainerBaseImage = buildContainerImageName;
+
+        if (sideContainerDefinitions != null) {
+            for (SideContainerDefinition definition: sideContainerDefinitions) {
+                sideContainers.add(new ContainerInstance(definition.getImage()));
+            }
+        }
     }
 
-    public String getRemotingContainerImageName() {
-        return remotingContainerImageName;
+    public ContainerInstance getRemotingContainer() {
+        return remotingContainer;
     }
 
-    String getRemotingContainerId() {
-        return remotingContainerId;
+    public void setRemotingContainer(ContainerInstance remotingContainer) {
+        this.remotingContainer = remotingContainer;
     }
 
-    String getBuildContainerId() {
-        return buildContainerId;
+    public ContainerInstance createBuildContainer() {
+        ContainerInstance current = new ContainerInstance(buildContainerBaseImage);
+        buildContainers.add(current);
+        return current;
     }
 
-    public void setRemotingContainerId(String remotingContainerId) {
-        this.remotingContainerId = remotingContainerId;
+    public List<ContainerInstance> getSideContainers() {
+        return sideContainers;
     }
 
-    public void setBuildContainerId(String buildContainerId) {
-        this.buildContainerId = buildContainerId;
+    public void setSideContainers(List<ContainerInstance> sideContainers) {
+        this.sideContainers = sideContainers;
     }
 
     @Override
@@ -78,7 +91,7 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         return "docker";
     }
 
-    public String getBuildContainerImageName() {
-        return buildContainerImageName;
+    public List<ContainerInstance> getBuildContainers() {
+        return buildContainers;
     }
 }

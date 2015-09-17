@@ -64,13 +64,15 @@ public class DockerJobContainersProvisioner {
             buildContainerImageName = jobBuildsContainersDefinition.getBuildHostImage();
         }
 
-        context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName);
+        context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName, jobBuildsContainersDefinition.getSideContainers());
 
         // reuse previous remoting container to retrieve workspace
         Run lastBuild = job.getBuilds().getLastBuild();
         if (lastBuild != null) {
             JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
-            context.setRemotingContainerId(previousContext.getRemotingContainerId());
+            if (previousContext.getRemotingContainer() != null) {
+                context.getRemotingContainer().setId(previousContext.getRemotingContainer().getId());
+            }
         }
     }
 
@@ -78,35 +80,42 @@ public class DockerJobContainersProvisioner {
         return context;
     }
 
-    public void prepareRemotingContainer() {
-        try {
-            // if remoting container already exists, we just use it
-            if (context.getRemotingContainerId() != null) {
-                if (driver.hasContainer(localLauncher, context.getRemotingContainerId())) {
-                    return;
-                }
+    public void prepareRemotingContainer()  throws IOException, InterruptedException {
+        // if remoting container already exists, we reuse it
+        if (context.getRemotingContainer() != null) {
+            if (driver.hasContainer(localLauncher, context.getRemotingContainer())) {
+                return;
             }
-            String remotingContainer = driver.createRemotingContainer(localLauncher, context.getRemotingContainerImageName());
-            context.setRemotingContainerId(remotingContainer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+        driver.createRemotingContainer(localLauncher, context.getRemotingContainer());
     }
 
     public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener) {
-        CommandLauncher launcher = new CommandLauncher("docker start -ia " + context.getRemotingContainerId());
+        CommandLauncher launcher = new CommandLauncher("docker start -ia " + context.getRemotingContainer().getId());
         launcher.launch(computer, listener);
     }
 
-    public String prepareBuildCommandLaunch(Launcher.ProcStarter starter) throws IOException, InterruptedException {
-        String containerId = driver.createBuildContainer(localLauncher,
-                context.getBuildContainerImageName(), context.getRemotingContainerId(), starter);
-        return containerId;
+    public void prepareBuildCommandLaunch(Launcher.ProcStarter starter, ContainerInstance buildContainer) throws IOException, InterruptedException {
+        driver.createBuildContainer(localLauncher, buildContainer, context.getRemotingContainer(), starter);
     }
 
-    public Proc launchBuildCommand(Launcher.ProcStarter starter, String containerId) throws IOException, InterruptedException {
-        return driver.runContainer(localLauncher, containerId).stdout(starter.stdout()).start();
+    public Proc launchBuildCommand(Launcher.ProcStarter starter, ContainerInstance buildContainer) throws IOException, InterruptedException {
+        return driver.runContainer(localLauncher, buildContainer.getId()).stdout(starter.stdout()).start();
+    }
+
+    public void launchSideContainers(DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
+        for (ContainerInstance instance : context.getSideContainers()) {
+            driver.launchSideContainer(localLauncher, instance, context.getRemotingContainer());
+        }
+    }
+
+    public void clean() throws IOException, InterruptedException {
+        for (ContainerInstance instance : context.getSideContainers()) {
+            driver.removeContainer(localLauncher, instance);
+        }
+
+        for (ContainerInstance instance : context.getBuildContainers()) {
+            driver.removeContainer(localLauncher, instance);
+        }
     }
 }

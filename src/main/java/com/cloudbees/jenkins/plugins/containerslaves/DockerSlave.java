@@ -74,7 +74,6 @@ public class DockerSlave extends AbstractCloudSlave {
 
     @Override
     protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
-
     }
 
     @Extension
