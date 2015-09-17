@@ -52,7 +52,7 @@ public class DockerComputerLauncher extends ComputerLauncher {
 
     public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
         // we need to capture taskListener here, as it's a private field of Computer
-        DockerProvisioner<?> provisioner = computer.createProvisioner(listener);
+        DockerProvisioner provisioner = computer.createProvisioner(listener);
         provisioner.preparePod();
 
         provisioner.connectRemoting(computer, listener);

@@ -76,6 +76,10 @@ public class DockerCloud extends Cloud {
 
 
     @Override
+    /**
+     * Not just considering delay for NodeProvisioner to call this, we also can't create the Build Pod here as we
+     * just don't know which {@link Job} it target, to retrieve the set of container images to launch.
+     */
     public Collection<NodeProvisioner.PlannedNode> provision(Label label, int excessWorkload) {
         return Collections.EMPTY_LIST;
     }

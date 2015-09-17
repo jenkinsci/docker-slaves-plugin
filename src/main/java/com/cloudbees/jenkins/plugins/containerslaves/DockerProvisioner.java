@@ -7,7 +7,10 @@ import hudson.slaves.SlaveComputer;
 
 import java.io.IOException;
 
-public class DockerProvisioner<T extends DockerBuildContext>  {
+/**
+ * Provision {@link DockerSlave} to provide queued task an executor.
+ */
+public class DockerProvisioner  {
 
     private final DockerBuildContext context;
 

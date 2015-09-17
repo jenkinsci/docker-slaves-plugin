@@ -36,14 +36,18 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
 
     private final Job job;
 
-    private DockerProvisioner<?> provisioner;
+    private DockerProvisioner provisioner;
 
     public DockerComputer(DockerSlave dockerSlave, Job job) {
         super(dockerSlave);
         this.job = job;
     }
 
-    public DockerProvisioner<?> createProvisioner(TaskListener listener) {
+    /**
+     * Create a container provisioner to setup this Jenkins "computer" (aka executor)
+     *
+     */
+    public DockerProvisioner createProvisioner(TaskListener listener) {
         provisioner = getNode().getEngine().buildProvisioner(job, listener);
         return provisioner;
     }
@@ -52,7 +56,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         return job;
     }
 
-    public DockerProvisioner<?> getProvisioner() {
+    public DockerProvisioner getProvisioner() {
         return provisioner;
     }
 }
