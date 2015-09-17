@@ -30,7 +30,7 @@
     <f:textbox default="ubuntu:latest"/>
   </f:entry>
 
-  <f:entry title="Default build image" field="remotingContainerImageName">
+  <f:entry title="Remoting image" field="remotingContainerImageName">
     <f:textbox default="jenkinsci/slave"/>
   </f:entry>
 

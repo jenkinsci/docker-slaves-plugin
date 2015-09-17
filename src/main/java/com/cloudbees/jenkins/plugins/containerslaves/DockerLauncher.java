@@ -54,11 +54,11 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
     public Proc launch(ProcStarter starter) throws IOException {
         try {
             if (!starter.quiet()) {
-                listener.getLogger().append("docker: creating build container from image "+provisioner.getContext().getBuildContainerImageName() + "'\n");
+                listener.getLogger().append("docker: creating build container from image '"+provisioner.getContext().getBuildContainerImageName() + "'\n");
             }
             String containerId = provisioner.prepareBuildCommandLaunch(starter);
             if (!starter.quiet()) {
-                listener.getLogger().append("docker: starting '"+provisioner.getContext().getBuildContainerImageName()+"' image (" + containerId.substring(0,9) + ")\n");
+                listener.getLogger().append("docker: starting build container " + containerId.substring(0,11) + "\n");
                 maskedPrintCommandLine(starter.cmds(), starter.masks(), starter.pwd());
             }
 
