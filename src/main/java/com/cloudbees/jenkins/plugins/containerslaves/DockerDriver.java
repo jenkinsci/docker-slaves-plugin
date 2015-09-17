@@ -49,7 +49,7 @@ public class DockerDriver {
         ArgumentListBuilder args = dockerCommand()
                 .add("create", "--interactive");
 
-        args.add(image).add("java").add("-jar").add("/usr/share/jenkins/slave.jar");
+        args.add(image).add("java").add("-Djava.io.tmpdir=/home/jenkins/.tmp").add("-jar").add("/usr/share/jenkins/slave.jar");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
