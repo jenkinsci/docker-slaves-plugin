@@ -25,9 +25,10 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.model.BuildBadgeAction;
 import hudson.model.Job;
 
-public class DockerBuildContext {
+public class DockerBuildContext implements BuildBadgeAction {
 
     protected final Job job;
 
@@ -64,5 +65,20 @@ public class DockerBuildContext {
 
     public void setBuildContainerId(String buildContainerId) {
         this.buildContainerId = buildContainerId;
+    }
+
+    @Override
+    public String getIconFileName() {
+        return "images/16x16/docker-logo.png";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Docker Build Context";
+    }
+
+    @Override
+    public String getUrlName() {
+        return "docker";
     }
 }
