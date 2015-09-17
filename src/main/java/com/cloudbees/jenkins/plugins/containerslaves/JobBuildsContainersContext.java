@@ -30,8 +30,6 @@ import hudson.model.Job;
 
 public class JobBuildsContainersContext implements BuildBadgeAction {
 
-    protected final Job job;
-
     protected final String remotingContainerImageName;
 
     protected final String buildContainerImageName;
@@ -40,14 +38,9 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     String buildContainerId;
 
-    public JobBuildsContainersContext(Job job, String remotingContainerImageName, String buildContainerImageName) {
-        this.job = job;
+    public JobBuildsContainersContext(String remotingContainerImageName, String buildContainerImageName) {
         this.remotingContainerImageName = remotingContainerImageName;
         this.buildContainerImageName = buildContainerImageName;
-    }
-
-    public Job getJob() {
-        return job;
     }
 
     public String getRemotingContainerImageName() {

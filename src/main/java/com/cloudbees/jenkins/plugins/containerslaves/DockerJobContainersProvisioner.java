@@ -64,7 +64,7 @@ public class DockerJobContainersProvisioner {
             buildContainerImageName = jobBuildsContainersDefinition.getBuildHostImage();
         }
 
-        context = new JobBuildsContainersContext(job, remotingContainerImageName, buildContainerImageName);
+        context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName);
 
         // reuse previous remoting container to retrieve workspace
         Run lastBuild = job.getBuilds().getLastBuild();
