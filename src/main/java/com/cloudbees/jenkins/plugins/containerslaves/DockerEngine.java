@@ -25,10 +25,9 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
-import hudson.model.Job;
-import hudson.model.Label;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
+import hudson.model.*;
+import hudson.util.RunList;
+import org.apache.commons.lang.StringUtils;
 
 /**
  */
@@ -68,11 +67,18 @@ public class DockerEngine {
         String buildContainerImageName = defaultBuildContainerImageName;
         BuildContainersDefinition buildContainersDefinition = (BuildContainersDefinition) job.getProperty(BuildContainersDefinition.class);
 
-        if (buildContainersDefinition != null) {
+        if (StringUtils.isNotEmpty(buildContainersDefinition.getBuildHostImage())) {
             buildContainerImageName = buildContainersDefinition.getBuildHostImage();
         }
 
         DockerBuildContext context = new DockerBuildContext(job, remotingContainerImageName, buildContainerImageName);
+
+        // reuse previous remoting container to retrieve workspace
+        Run lastBuild = job.getBuilds().getLastBuild();
+        if (lastBuild != null) {
+            DockerBuildContext previousContext = (DockerBuildContext) lastBuild.getAction(DockerBuildContext.class);
+            context.setRemotingContainerId(previousContext.getRemotingContainerId());
+        }
 
         return new DockerProvisioner(context, new DockerDriver(host), listener);
     }
