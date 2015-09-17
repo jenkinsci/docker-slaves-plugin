@@ -25,7 +25,7 @@ Internally, a unique slave image is defined and is responsible to establish jenk
 
 When a job is triggered, job configuration + remoting image do define a container group ("pod") the plugin has to run. ContainerProvisionner is responsible to run this pod. 
 
-also see [Architecture.md]
+also see [Architecture.md](Architecture.md)
 
 ## [Docker](https://www.docker.com) implementation
 
