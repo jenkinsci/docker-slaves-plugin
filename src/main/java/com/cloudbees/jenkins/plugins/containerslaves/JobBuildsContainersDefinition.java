@@ -40,14 +40,14 @@ import java.util.List;
  * Definition for a set of containers to host the build.
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class BuildContainersDefinition extends JobProperty {
+public class JobBuildsContainersDefinition extends JobProperty {
 
     private final String buildHostImage;
 
     private final List<SideContainerDefinition> sideContainers;
 
     @DataBoundConstructor
-    public BuildContainersDefinition(String buildHostImage, List<SideContainerDefinition> sideContainers) {
+    public JobBuildsContainersDefinition(String buildHostImage, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
         this.sideContainers = sideContainers;
     }
@@ -82,7 +82,7 @@ public class BuildContainersDefinition extends JobProperty {
             if (formData.isNullObject()) return null;
             JSONObject containersDefinition = formData.getJSONObject("containersDefinition");
             if (containersDefinition.isNullObject()) return null;
-            return req.bindJSON(BuildContainersDefinition.class, containersDefinition);
+            return req.bindJSON(JobBuildsContainersDefinition.class, containersDefinition);
         }
 
     }

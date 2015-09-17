@@ -1,14 +1,37 @@
+/*
+ * The MIT License
+ *
+ *  Copyright (c) 2015, CloudBees, Inc.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
+
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import hudson.util.ArgumentListBuilder;
-import jenkins.model.Jenkins;
 
 import java.io.IOException;
-import java.lang.Override;import java.lang.String;import java.util.List;
+import java.lang.Override;import java.lang.String;
 import java.util.logging.Logger;
 
 /**
@@ -17,11 +40,11 @@ import java.util.logging.Logger;
 public class DockerLauncher extends Launcher.DecoratedLauncher {
     private static final Logger LOGGER = Logger.getLogger(DockerLauncher.class.getName());
 
-    private final DockerProvisioner provisioner;
+    private final DockerJobContainersProvisioner provisioner;
 
     private final Launcher localLauncher;
 
-    public DockerLauncher(TaskListener listener, VirtualChannel channel, boolean isUnix, DockerProvisioner provisioner)  {
+    public DockerLauncher(TaskListener listener, VirtualChannel channel, boolean isUnix, DockerJobContainersProvisioner provisioner)  {
         super(new Launcher.RemoteLauncher(listener, channel, isUnix));
         this.provisioner = provisioner;
         this.localLauncher = new Launcher.LocalLauncher(listener);
@@ -30,13 +53,16 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
     @Override
     public Proc launch(ProcStarter starter) throws IOException {
         try {
-            String containerId = provisioner.prepareRunOnBuildContainer(starter);
             if (!starter.quiet()) {
-                listener.getLogger().append("In container "+provisioner.getContext().getBuildContainerName()+" (" + containerId.substring(0,9) + ")\n");
+                listener.getLogger().append("docker: creating build container from image "+provisioner.getContext().getBuildContainerImageName() + "'\n");
+            }
+            String containerId = provisioner.prepareBuildCommandLaunch(starter);
+            if (!starter.quiet()) {
+                listener.getLogger().append("docker: starting '"+provisioner.getContext().getBuildContainerImageName()+"' image (" + containerId.substring(0,9) + ")\n");
                 maskedPrintCommandLine(starter.cmds(), starter.masks(), starter.pwd());
             }
 
-            return provisioner.runOnBuildContainer(starter, containerId);
+            return provisioner.launchBuildCommand(starter, containerId);
         } catch (InterruptedException e) {
             throw new IOException(e);
         }

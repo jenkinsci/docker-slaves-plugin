@@ -28,22 +28,22 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Job;
 
-public class DockerBuildContext implements BuildBadgeAction {
+public class JobBuildsContainersContext implements BuildBadgeAction {
 
     protected final Job job;
 
     protected final String remotingContainerImageName;
 
-    protected final String buildContainerName;
+    protected final String buildContainerImageName;
 
     String remotingContainerId;
 
     String buildContainerId;
 
-    public DockerBuildContext(Job job, String remotingContainerImageName, String buildContainerName) {
+    public JobBuildsContainersContext(Job job, String remotingContainerImageName, String buildContainerImageName) {
         this.job = job;
         this.remotingContainerImageName = remotingContainerImageName;
-        this.buildContainerName = buildContainerName;
+        this.buildContainerImageName = buildContainerImageName;
     }
 
     public Job getJob() {
@@ -85,7 +85,7 @@ public class DockerBuildContext implements BuildBadgeAction {
         return "docker";
     }
 
-    public String getBuildContainerName() {
-        return buildContainerName;
+    public String getBuildContainerImageName() {
+        return buildContainerImageName;
     }
 }

@@ -35,27 +35,24 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * A computer on which a specific build will occur
  */
 public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
 
     private final Job job;
-    private final DockerEngine engine;
 
-    private DockerProvisioner provisioner;
+    private DockerJobContainersProvisioner provisioner;
 
     public DockerComputer(DockerSlave dockerSlave, Job job) {
         super(dockerSlave);
-        this.engine = dockerSlave.getEngine();
         this.job = job;
     }
 
     /**
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
-     *
      */
-    public DockerProvisioner createProvisioner(TaskListener listener) {
-        provisioner = engine.buildProvisioner(job, listener);
+    public DockerJobContainersProvisioner createProvisioner(TaskListener slaveListener) {
+        provisioner = DockerCloud.getCloud().buildProvisioner(job, slaveListener);
         return provisioner;
     }
 
@@ -86,7 +83,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         return job;
     }
 
-    public DockerProvisioner getProvisioner() {
+    public DockerJobContainersProvisioner getProvisioner() {
         return provisioner;
     }
 

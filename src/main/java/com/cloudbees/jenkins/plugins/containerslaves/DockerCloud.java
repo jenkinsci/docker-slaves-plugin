@@ -27,12 +27,18 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
+import hudson.model.Job;
 import hudson.model.Label;
+import hudson.model.Queue;
+import hudson.model.TaskListener;
 import hudson.model.labels.LabelAtom;
 import hudson.slaves.Cloud;
 import hudson.slaves.NodeProvisioner;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -43,26 +49,35 @@ import java.util.Set;
  */
 public class DockerCloud extends Cloud {
 
-    private final String defaultBuildImage;
+    /**
+     * Base Build image name. Build commands will run on it.
+     */
+    protected final String defaultBuildContainerImageName;
 
-    private transient DockerEngine engine;
+    /**
+     * Remoting Container image name. Jenkins Remoting will be launched in it.
+     */
+    protected final String remotingContainerImageName;
+
+    protected final String host;
 
     @DataBoundConstructor
-    public DockerCloud(String name, String labelString, String defaultBuildImage) {
+    public DockerCloud(String name, String defaultBuildContainerImageName, String remotingContainerImageName, String host) {
         super(name);
-        this.defaultBuildImage = defaultBuildImage;
-        engine = new DockerEngine(defaultBuildImage);
+        this.defaultBuildContainerImageName = defaultBuildContainerImageName;
+        this.host = host;
+        this.remotingContainerImageName = StringUtils.isEmpty(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
     }
 
-    public DockerEngine getEngine() {
-        return engine;
+    public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
+        final String id = Long.toHexString(System.nanoTime());
+        final Label label = Label.get("docker_" + id);
+        return new DockerLabelAssignmentAction(label);
     }
 
-    private Object readResolve() {
-        engine = new DockerEngine(defaultBuildImage);
-        return this;
+    public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) {
+        return new DockerJobContainersProvisioner(job, new DockerDriver(host), slaveListener, defaultBuildContainerImageName, remotingContainerImageName);
     }
-
 
     @Override
     /**
@@ -71,6 +86,16 @@ public class DockerCloud extends Cloud {
      */
     public Collection<NodeProvisioner.PlannedNode> provision(Label label, int excessWorkload) {
         return Collections.EMPTY_LIST;
+    }
+
+    public static @Nullable DockerCloud getCloud() {
+        for (Cloud cloud : Jenkins.getInstance().clouds) {
+            if (cloud instanceof DockerCloud) {
+                return (DockerCloud) cloud;
+            }
+        }
+
+        return null;
     }
 
     @Override

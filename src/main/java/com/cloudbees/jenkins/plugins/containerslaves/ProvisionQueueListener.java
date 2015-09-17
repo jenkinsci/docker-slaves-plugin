@@ -29,7 +29,6 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
-import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.queue.QueueListener;
@@ -55,21 +54,21 @@ public class ProvisionQueueListener extends QueueListener {
     public void onEnterBuildable(final Queue.BuildableItem bi) {
         if (bi.task instanceof AbstractProject) {
             AbstractProject job = (AbstractProject) bi.task;
-            BuildContainersDefinition def = (BuildContainersDefinition) job.getProperty(BuildContainersDefinition.class);
+            JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
             if (def == null) return;
             if (!def.isEnabled()) return;
 
-            final DockerCloud cloud = getCloud();
+            final DockerCloud cloud = DockerCloud.getCloud();
 
             LOGGER.info("Creating a Container slave to host " + bi.toString());
-            DockerLabelAssignmentAction action = cloud.getEngine().createLabelAssignmentAction(bi);
+            DockerLabelAssignmentAction action = cloud.createLabelAssignmentAction(bi);
             bi.addAction(action);
 
             // Immediately create a slave for this item
             // Real provisioning will happen later
 
             try {
-                final Node node = new DockerSlave(job, action.getLabel().toString(), cloud.getEngine());
+                final Node node = new DockerSlave(job, action.getLabel().toString());
                 Computer.threadPoolForRemoting.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -86,16 +85,6 @@ public class ProvisionQueueListener extends QueueListener {
                 e.printStackTrace();
             }
         }
-    }
-
-    protected @Nullable DockerCloud getCloud() {
-        for (Cloud cloud : Jenkins.getInstance().clouds) {
-            if (cloud instanceof DockerCloud) {
-                return (DockerCloud) cloud;
-            }
-        }
-
-        return null;
     }
 
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());

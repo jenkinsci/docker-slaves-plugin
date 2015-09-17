@@ -52,26 +52,20 @@ import java.util.Collections;
  */
 public class DockerSlave extends AbstractCloudSlave {
 
-    private final DockerEngine engine;
     private final Job job;
 
-    public DockerSlave(Job job, String labelString, DockerEngine engine) throws Descriptor.FormException, IOException {
+    public DockerSlave(Job job, String labelString) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
         super("Container for " +job.getName() + "#" + job.getNextBuildNumber(), "Container slave for building " + job.getFullName(),
                 "/home/jenkins", 1, Mode.EXCLUSIVE, labelString,
                 new DockerComputerLauncher(),
                 RetentionStrategy.NOOP, // Slave is stopped on completion see DockerComputer.taskCompleted
                 Collections.<NodeProperty<?>>emptyList());
-        this.engine = engine;
         this.job = job;
     }
 
     public DockerComputer createComputer() {
         return new DockerComputer(this, job);
-    }
-
-    public DockerEngine getEngine() {
-        return engine;
     }
 
     public Job getJob() {
@@ -84,7 +78,7 @@ public class DockerSlave extends AbstractCloudSlave {
     }
 
     @Extension
-    public static class DockerSlaveRunListrner extends RunListener<AbstractBuild> {
+    public static class DockerSlaveRunListener extends RunListener<AbstractBuild> {
 
         @Override
         public Environment setUpEnvironment(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException, Run.RunnerAbortedException {
@@ -94,7 +88,6 @@ public class DockerSlave extends AbstractCloudSlave {
             }
             return new Environment() {};
         }
-
     }
 
     @Override

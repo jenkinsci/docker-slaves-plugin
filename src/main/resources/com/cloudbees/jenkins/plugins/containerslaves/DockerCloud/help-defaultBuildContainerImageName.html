@@ -1,4 +1,3 @@
-<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
   ~
@@ -23,19 +22,9 @@
   ~  THE SOFTWARE.
   ~
   -->
+Docker image used to host the build environment and run build steps.
+Using this option, you have full control on your build environment to make it fully reproducible and isolated
+from other builds.
+You can use <i>arbitrary</i> docker images here, setup with the builds tools required by your job.
+There's <u>no</u> prerequisites on the docker image as the jenkins infrastructure setup is handled transparently.
 
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
-  <f:entry title="Default build image" field="defaultBuildContainerImageName">
-    <f:textbox default="ubuntu:latest"/>
-  </f:entry>
-
-  <f:entry title="Default build image" field="remotingContainerImageName">
-    <f:textbox default="jenkinsci/slave"/>
-  </f:entry>
-
-  <f:entry title="Docker host" field="host">
-    <f:textbox default=""/>
-  </f:entry>
-
-</j:jelly>

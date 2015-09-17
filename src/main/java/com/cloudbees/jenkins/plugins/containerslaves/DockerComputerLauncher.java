@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * Launchs initials containers
  */
 public class DockerComputerLauncher extends ComputerLauncher {
 
@@ -44,17 +44,17 @@ public class DockerComputerLauncher extends ComputerLauncher {
 
     @Override
     public void launch(final SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
-        if (computer instanceof DockerComputer)
+        if (computer instanceof DockerComputer) {
             launch((DockerComputer) computer, listener);
-        else
+        } else {
             throw new IllegalArgumentException("This launcher only can handle DockerComputer");
+        }
     }
 
     public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
         // we need to capture taskListener here, as it's a private field of Computer
-        DockerProvisioner provisioner = computer.createProvisioner(listener);
-        provisioner.preparePod();
-
-        provisioner.connectRemoting(computer, listener);
+        DockerJobContainersProvisioner provisioner = computer.createProvisioner(listener);
+        provisioner.prepareRemotingContainer();
+        provisioner.launchRemotingContainer(computer, listener);
     }
 }
