@@ -46,9 +46,11 @@ public class DockerSlave extends AbstractCloudSlave {
     private final Job job;
 
     public DockerSlave(Job job, String labelString, DockerEngine engine) throws Descriptor.FormException, IOException {
-        super("Container for "+ job.getFullName(), "Container slave for building " + job.getFullName(),
+        super(labelString, "Container slave for building " + job.getFullName(),
                 "/home/jenkins", 1, Mode.EXCLUSIVE, labelString,
-                new DockerComputerLauncher(), ONCE, Collections.<NodeProperty<?>>emptyList());
+                new DockerComputerLauncher(),
+                RetentionStrategy.NOOP, // Slave is stopped on completion see DockerComputer.taskCompleted
+                Collections.<NodeProperty<?>>emptyList());
         this.engine = engine;
         this.job = job;
     }

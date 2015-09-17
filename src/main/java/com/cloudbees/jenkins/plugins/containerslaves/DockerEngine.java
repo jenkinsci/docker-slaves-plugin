@@ -44,7 +44,7 @@ public class DockerEngine {
 
     public DockerEngine() {
         host = "TODO";
-        remotingContainerImageName = "jenkins/slave";
+        remotingContainerImageName = "jenkinsci/slave";
     }
 
     public DockerEngine(String host, String remotingContainerImageName) {

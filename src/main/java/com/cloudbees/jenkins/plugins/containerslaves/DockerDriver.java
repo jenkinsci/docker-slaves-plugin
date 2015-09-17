@@ -30,6 +30,7 @@ import hudson.util.ArgumentListBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -47,9 +48,16 @@ public class DockerDriver {
 
     public String createRemotingContainer(Launcher launcher, String image) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
-                .add("create", "--interactive");
+                .add("create", "--interactive")
 
-        args.add(image).add("java").add("-Djava.io.tmpdir=/home/jenkins/.tmp").add("-jar").add("/usr/share/jenkins/slave.jar");
+                // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
+                .add("--log-driver=none")
+
+                .add(image).add("java")
+
+                // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
+                .add("-Djava.io.tmpdir=/home/jenkins/.tmp")
+                .add("-jar").add("/usr/share/jenkins/slave.jar");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -58,7 +66,7 @@ public class DockerDriver {
                 .stdout(out).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
 
         if (status != 0) {
-            throw new RuntimeException("Failed to run docker image");
+            throw new IOException("Failed to run docker image");
         }
 
         String container = out.toString("UTF-8").trim();
@@ -68,4 +76,7 @@ public class DockerDriver {
     private ArgumentListBuilder dockerCommand() {
         return new ArgumentListBuilder().add("docker");
     }
+
+    private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
+
 }

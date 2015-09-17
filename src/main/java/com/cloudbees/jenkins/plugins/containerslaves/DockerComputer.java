@@ -25,9 +25,14 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.model.Executor;
 import hudson.model.Job;
+import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.slaves.AbstractCloudComputer;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -52,6 +57,29 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         return provisioner;
     }
 
+    @Override
+    public void taskCompleted(Executor executor, Queue.Task task, long durationMS) {
+        super.taskCompleted(executor, task, durationMS);
+        terminate();
+    }
+
+    @Override
+    public void taskCompletedWithProblems(Executor executor, Queue.Task task, long durationMS, Throwable problems) {
+        super.taskCompletedWithProblems(executor, task, durationMS, problems);
+        terminate();
+    }
+
+    private void terminate() {
+        LOGGER.info("Stopping Docker Slave after build completion");
+        setAcceptingTasks(false);
+        try {
+            if (!Boolean.getBoolean("com.cloudbees.jenkins.plugins.containerslaves.DockerComputer.keepContainer"))
+            getNode().terminate();
+        } catch (InterruptedException e) {
+        } catch (IOException e) {
+        }
+    }
+
     public Job getJob() {
         return job;
     }
@@ -59,4 +87,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
     public DockerProvisioner getProvisioner() {
         return provisioner;
     }
+
+    private static final Logger LOGGER = Logger.getLogger(DockerComputer.class.getName());
+
 }

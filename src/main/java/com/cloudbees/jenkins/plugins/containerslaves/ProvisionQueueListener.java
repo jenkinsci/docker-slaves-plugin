@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.Extension;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Job;
@@ -46,6 +47,7 @@ import java.util.logging.Logger;
  * immediately start a fresh new container executor with a unique label to enforce exclusive usage.
  *
  */
+@Extension
 public class ProvisionQueueListener extends QueueListener {
 
     @Override
@@ -55,6 +57,7 @@ public class ProvisionQueueListener extends QueueListener {
             if (cloud != null && cloud.canProvision(bi.getAssignedLabel())) {
                 Job job = (Job) bi.task;
 
+                LOGGER.info("Creating a Container slave to host " + bi.toString());
                 DockerLabelAssignmentAction action = cloud.getEngine().createLabelAssignmentAction(bi);
                 bi.addAction(action);
 
