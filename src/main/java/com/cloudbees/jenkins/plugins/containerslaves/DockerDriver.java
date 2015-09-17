@@ -25,34 +25,47 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
-import hudson.model.Job;
-import hudson.model.TaskListener;
-import hudson.slaves.AbstractCloudComputer;
+import hudson.Launcher;
+import hudson.util.ArgumentListBuilder;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
+public class DockerDriver {
 
-    private final Job job;
+    private final boolean verbose;
 
-    private DockerProvisioner<?> provisioner;
+    String host;
 
-    public DockerComputer(DockerSlave dockerSlave, Job job) {
-        super(dockerSlave);
-        this.job = job;
+    public DockerDriver(String host) {
+        this.host = host;
+        verbose = true;
     }
 
-    public DockerProvisioner<?> createProvisioner(TaskListener listener) {
-        provisioner = getNode().getEngine().buildProvisioner(job, listener);
-        return provisioner;
+    public String createRemotingContainer(Launcher launcher, String image) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("create", "--interactive");
+
+        args.add(image).add("java").add("-jar").add("/usr/share/jenkins/slave.jar");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int status = launcher.launch()
+                .cmds(args)
+                .stdout(out).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new RuntimeException("Failed to run docker image");
+        }
+
+        String container = out.toString("UTF-8").trim();
+        return container;
     }
 
-    public Job getJob() {
-        return job;
-    }
-
-    public DockerProvisioner<?> getProvisioner() {
-        return provisioner;
+    private ArgumentListBuilder dockerCommand() {
+        return new ArgumentListBuilder().add("docker");
     }
 }

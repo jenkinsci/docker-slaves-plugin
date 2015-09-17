@@ -1,18 +1,18 @@
 /*
  * The MIT License
- *  
+ *
  *  Copyright (c) 2015, CloudBees, Inc.
- *  
+ *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
- *  
+ *
  *  The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
- *  
+ *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,33 +26,43 @@
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.model.Job;
-import hudson.model.TaskListener;
-import hudson.slaves.AbstractCloudComputer;
 
-/**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
- */
-public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
+public class DockerBuildContext {
 
-    private final Job job;
+    protected final Job job;
 
-    private DockerProvisioner<?> provisioner;
+    protected final String remotingContainerImageName;
 
-    public DockerComputer(DockerSlave dockerSlave, Job job) {
-        super(dockerSlave);
+    String remotingContainerId;
+
+    String buildContainerId;
+
+    public DockerBuildContext(Job job, String remotingContainerImageName) {
         this.job = job;
-    }
-
-    public DockerProvisioner<?> createProvisioner(TaskListener listener) {
-        provisioner = getNode().getEngine().buildProvisioner(job, listener);
-        return provisioner;
+        this.remotingContainerImageName = remotingContainerImageName;
     }
 
     public Job getJob() {
         return job;
     }
 
-    public DockerProvisioner<?> getProvisioner() {
-        return provisioner;
+    public String getRemotingContainerImageName() {
+        return remotingContainerImageName;
+    }
+
+    String getRemotingContainerId() {
+        return remotingContainerId;
+    }
+
+    String getBuildContainerId() {
+        return buildContainerId;
+    }
+
+    public void setRemotingContainerId(String remotingContainerId) {
+        this.remotingContainerId = remotingContainerId;
+    }
+
+    public void setBuildContainerId(String buildContainerId) {
+        this.buildContainerId = buildContainerId;
     }
 }

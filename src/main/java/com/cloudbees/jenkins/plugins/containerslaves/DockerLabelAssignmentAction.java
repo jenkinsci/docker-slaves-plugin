@@ -25,23 +25,39 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
-import hudson.model.Job;
+import hudson.model.Label;
+import hudson.model.labels.LabelAssignmentAction;
+import hudson.model.queue.SubTask;
 
-public class ContainerBuildContext {
-    protected final Job job;
+public class DockerLabelAssignmentAction implements LabelAssignmentAction {
 
-    protected final String remotingContainerImageName;
+    private final Label label;
 
-    public ContainerBuildContext(Job job, String remotingContainerImageName) {
-        this.job = job;
-        this.remotingContainerImageName = remotingContainerImageName;
+    public DockerLabelAssignmentAction(Label label) {
+        this.label = label;
     }
 
-    public Job getJob() {
-        return job;
+    @Override
+    public String getIconFileName() {
+        return null;
     }
 
-    public String getRemotingContainerImageName() {
-        return remotingContainerImageName;
+    @Override
+    public String getDisplayName() {
+        return null;
+    }
+
+    @Override
+    public String getUrlName() {
+        return null;
+    }
+
+    @Override
+    public Label getAssignedLabel(SubTask task) {
+        return label;
+    }
+
+    public Label getLabel() {
+        return label;
     }
 }

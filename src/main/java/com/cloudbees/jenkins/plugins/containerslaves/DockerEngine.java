@@ -25,15 +25,38 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.Extension;
 import hudson.model.Job;
+import hudson.model.Label;
+import hudson.model.Queue;
 import hudson.model.TaskListener;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class DockerEngine {
 
-    public ContainerProvisioner<?> buildProvisioner(Job job, TaskListener listener) {
-        return null;
+    protected final String host;
+
+    /**
+     * Base Container image name. Jenkins Remoting will be launched in it.
+     */
+    protected final String remotingContainerImageName;
+
+    public DockerEngine(String host, String remotingContainerImageName) {
+        this.host = host;
+        this.remotingContainerImageName = remotingContainerImageName;
     }
+
+    public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
+        final String id = Long.toHexString(System.nanoTime());
+        final Label label = Label.get("docker_" + id);
+        return new DockerLabelAssignmentAction(label);
+    }
+
+    public DockerProvisioner buildProvisioner(Job job, TaskListener listener) {
+        DockerBuildContext context = new DockerBuildContext(job, remotingContainerImageName);
+
+        return new DockerProvisioner(context, new DockerDriver(host), listener);
+    }
+
 }

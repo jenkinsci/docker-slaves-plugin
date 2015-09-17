@@ -34,25 +34,34 @@ import hudson.slaves.NodeProvisioner;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * {@link Cloud} implementation designed to launch a set of containers (aka "pod") to establish a Jenkins executor.
+ *
  */
 public class DockerCloud extends Cloud {
 
     private final String labelString;
     private transient Set<LabelAtom> labels;
 
+    private DockerEngine engine;
+
     @DataBoundConstructor
     public DockerCloud(String name, String labelString) {
         super(name);
         this.labelString = labelString;
         parseLabelString();
+        engine = new DockerEngine();
     }
 
     public String getLabelString() {
         return labelString;
+    }
+
+    public DockerEngine getEngine() {
+        return engine;
     }
 
     public void parseLabelString() {
@@ -61,13 +70,14 @@ public class DockerCloud extends Cloud {
 
     private Object readResolve() {
         parseLabelString();
+        engine = new DockerEngine();
         return this;
     }
 
 
     @Override
     public Collection<NodeProvisioner.PlannedNode> provision(Label label, int excessWorkload) {
-        return null; // TODO
+        return Collections.EMPTY_LIST;
     }
 
     @Override
