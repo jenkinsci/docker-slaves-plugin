@@ -44,18 +44,18 @@ public class DockerEngine {
     /**
      * Base Build image name. Build commands will run on it.
      */
-    protected final String buildContainerImageName;
+    protected final String defaultBuildContainerImageName;
 
-    public DockerEngine(String buildContainerImageName) {
+    public DockerEngine(String defaultBuildContainerImageName) {
         host = "TODO";
         remotingContainerImageName = "jenkinsci/slave";
-        this.buildContainerImageName = buildContainerImageName;
+        this.defaultBuildContainerImageName = defaultBuildContainerImageName;
     }
 
-    public DockerEngine(String host, String remotingContainerImageName, String buildContainerImageName) {
+    public DockerEngine(String host, String remotingContainerImageName, String defaultBuildContainerImageName) {
         this.host = host;
         this.remotingContainerImageName = remotingContainerImageName;
-        this.buildContainerImageName = buildContainerImageName;
+        this.defaultBuildContainerImageName = defaultBuildContainerImageName;
     }
 
     public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
@@ -65,9 +65,15 @@ public class DockerEngine {
     }
 
     public DockerProvisioner buildProvisioner(Job job, TaskListener listener) {
+        String buildContainerImageName = defaultBuildContainerImageName;
+        BuildContainersDefinition buildContainersDefinition = (BuildContainersDefinition) job.getProperty(BuildContainersDefinition.class);
+
+        if (buildContainersDefinition != null) {
+            buildContainerImageName = buildContainersDefinition.getBuildHostImage();
+        }
+
         DockerBuildContext context = new DockerBuildContext(job, remotingContainerImageName, buildContainerImageName);
 
         return new DockerProvisioner(context, new DockerDriver(host), listener);
     }
-
 }
