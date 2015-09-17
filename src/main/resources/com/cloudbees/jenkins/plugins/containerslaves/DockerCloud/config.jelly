@@ -28,4 +28,7 @@
   <f:entry title="Label" field="labelString">
     <f:textbox default="docker"/>
   </f:entry>
+  <f:entry title="Default build image" field="defaultBuildImage">
+    <f:textbox default="ubuntu:latest"/>
+  </f:entry>
 </j:jelly>

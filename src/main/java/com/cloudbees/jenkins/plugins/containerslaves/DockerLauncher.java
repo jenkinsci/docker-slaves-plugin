@@ -32,7 +32,7 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
         try {
             String containerId = provisioner.prepareRunOnBuildContainer(starter);
             if (!starter.quiet()) {
-                listener.getLogger().append("Running in container " + containerId + "\n");
+                listener.getLogger().append("In container "+provisioner.getContext().getBuildContainerName()+" (" + containerId.substring(0,9) + ")\n");
                 maskedPrintCommandLine(starter.cmds(), starter.masks(), starter.pwd());
             }
 

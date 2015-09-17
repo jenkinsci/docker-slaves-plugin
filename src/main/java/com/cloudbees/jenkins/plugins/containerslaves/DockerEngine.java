@@ -25,7 +25,6 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
-import hudson.Extension;
 import hudson.model.Job;
 import hudson.model.Label;
 import hudson.model.Queue;
@@ -42,14 +41,21 @@ public class DockerEngine {
      */
     protected final String remotingContainerImageName;
 
-    public DockerEngine() {
+    /**
+     * Base Build image name. Build commands will run on it.
+     */
+    protected final String buildContainerImageName;
+
+    public DockerEngine(String buildContainerImageName) {
         host = "TODO";
         remotingContainerImageName = "jenkinsci/slave";
+        this.buildContainerImageName = buildContainerImageName;
     }
 
-    public DockerEngine(String host, String remotingContainerImageName) {
+    public DockerEngine(String host, String remotingContainerImageName, String buildContainerImageName) {
         this.host = host;
         this.remotingContainerImageName = remotingContainerImageName;
+        this.buildContainerImageName = buildContainerImageName;
     }
 
     public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
@@ -59,7 +65,7 @@ public class DockerEngine {
     }
 
     public DockerProvisioner buildProvisioner(Job job, TaskListener listener) {
-        DockerBuildContext context = new DockerBuildContext(job, remotingContainerImageName);
+        DockerBuildContext context = new DockerBuildContext(job, remotingContainerImageName, buildContainerImageName);
 
         return new DockerProvisioner(context, new DockerDriver(host), listener);
     }

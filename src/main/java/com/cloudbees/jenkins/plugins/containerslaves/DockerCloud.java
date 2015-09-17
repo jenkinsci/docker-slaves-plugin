@@ -44,16 +44,20 @@ import java.util.Set;
 public class DockerCloud extends Cloud {
 
     private final String labelString;
+
+    private final String defaultBuildImage;
+
     private transient Set<LabelAtom> labels;
 
-    private DockerEngine engine;
+    private transient DockerEngine engine;
 
     @DataBoundConstructor
-    public DockerCloud(String name, String labelString) {
+    public DockerCloud(String name, String labelString, String defaultBuildImage) {
         super(name);
         this.labelString = labelString;
+        this.defaultBuildImage = defaultBuildImage;
         parseLabelString();
-        engine = new DockerEngine();
+        engine = new DockerEngine(defaultBuildImage);
     }
 
     public String getLabelString() {
@@ -70,7 +74,7 @@ public class DockerCloud extends Cloud {
 
     private Object readResolve() {
         parseLabelString();
-        engine = new DockerEngine();
+        engine = new DockerEngine(defaultBuildImage);
         return this;
     }
 
@@ -96,5 +100,6 @@ public class DockerCloud extends Cloud {
         public String getDisplayName() {
             return "Containers Cloud";
         }
+
     }
 }

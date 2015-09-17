@@ -40,10 +40,10 @@ public class DockerBuildContext implements BuildBadgeAction {
 
     String buildContainerId;
 
-    public DockerBuildContext(Job job, String remotingContainerImageName) {
+    public DockerBuildContext(Job job, String remotingContainerImageName, String buildContainerName) {
         this.job = job;
         this.remotingContainerImageName = remotingContainerImageName;
-        buildContainerName = "ubuntu:latest";
+        this.buildContainerName = buildContainerName;
     }
 
     public Job getJob() {
