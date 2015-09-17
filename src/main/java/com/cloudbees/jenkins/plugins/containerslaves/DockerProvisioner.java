@@ -1,6 +1,7 @@
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
+import hudson.Proc;
 import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
@@ -46,6 +47,16 @@ public class DockerProvisioner  {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public String prepareRunOnBuildContainer(Launcher.ProcStarter starter) throws IOException, InterruptedException {
+        String containerId = driver.createBuildContainer(localLauncher,
+                context.getBuildContainerName(), context.getRemotingContainerId(), starter);
+        return containerId;
+    }
+
+    public Proc runOnBuildContainer(Launcher.ProcStarter starter, String containerId) throws IOException, InterruptedException {
+        return driver.runContainer(localLauncher, containerId).stdout(starter.stdout()).start();
     }
 
     public void connectRemoting(final SlaveComputer computer, TaskListener listener) {

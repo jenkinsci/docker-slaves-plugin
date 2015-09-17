@@ -25,15 +25,20 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.EnvVars;
 import hudson.Launcher;
+import hudson.Proc;
 import hudson.util.ArgumentListBuilder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
  */
 public class DockerDriver {
 
@@ -88,6 +93,75 @@ public class DockerDriver {
 
         String container = out.toString("UTF-8").trim();
         return container;
+    }
+
+    public String createBuildContainer(Launcher launcher, String image, String sideContainerId, Launcher.ProcStarter starter) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("create", "--tty")
+                // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
+                //.add("--log-driver=none")
+                .add("--workdir",  starter.pwd().toString())
+                .add("--volumes-from", sideContainerId)
+                .add("--net=container:" + sideContainerId)
+                .add("--user", "10000:10000")
+                .add(image);
+
+        List<String> originalCmds = starter.cmds();
+        boolean[] originalMask = starter.masks();
+        for (int i = 0; i < originalCmds.size(); i++) {
+            boolean masked = originalMask == null ? false : i < originalMask.length ? originalMask[i] : false;
+            args.add(originalCmds.get(i), masked);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int status = launcher.launch()
+                .cmds(args)
+                .stdout(out).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new IOException("Failed to run docker image");
+        }
+
+        final String containerId = out.toString("UTF-8").trim();
+
+        return containerId;
+    }
+
+    protected int getFileContent(Launcher launcher, String containerId, String filename, OutputStream content) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("cp", containerId + ":" + filename, "-");
+
+        return launcher.launch()
+                .cmds(args)
+                .stdout(content).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+    }
+
+    protected int putFileContent(Launcher launcher, String containerId, String filename, InputStream content) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("cp", "-", containerId + ":" + filename);
+
+        return launcher.launch()
+                .cmds(args).stdin(content).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+    }
+
+    public Launcher.ProcStarter runContainer(Launcher launcher, String containerId) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("start", "-ia", containerId);
+
+        return launcher.launch().cmds(args);
+    }
+
+    public int removeContainer(Launcher launcher, String containerId) throws IOException, InterruptedException {
+        ArgumentListBuilder args = dockerCommand()
+                .add("rm", containerId);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int status = launcher.launch()
+                .cmds(args)
+                .stdout(out).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+
+        return status;
     }
 
     private ArgumentListBuilder dockerCommand() {

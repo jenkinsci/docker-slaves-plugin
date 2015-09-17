@@ -27,7 +27,8 @@ RUN curl --create-dirs -sSLo /usr/share/jenkins/slave.jar http://repo.jenkins-ci
   && chmod 644 /usr/share/jenkins/slave.jar
 
 ENV HOME /home/jenkins
-RUN useradd -c "Jenkins user" -d $HOME -u 10000 -g 100 -m jenkins
+RUN groupadd -g 10000 jenkins
+RUN useradd -c "Jenkins user" -d $HOME -u 10000 -g 10000 -m jenkins
 
 WORKDIR $HOME
 USER jenkins

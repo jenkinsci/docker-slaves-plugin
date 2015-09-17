@@ -34,6 +34,8 @@ public class DockerBuildContext implements BuildBadgeAction {
 
     protected final String remotingContainerImageName;
 
+    protected final String buildContainerName;
+
     String remotingContainerId;
 
     String buildContainerId;
@@ -41,6 +43,7 @@ public class DockerBuildContext implements BuildBadgeAction {
     public DockerBuildContext(Job job, String remotingContainerImageName) {
         this.job = job;
         this.remotingContainerImageName = remotingContainerImageName;
+        buildContainerName = "ubuntu:latest";
     }
 
     public Job getJob() {
@@ -80,5 +83,9 @@ public class DockerBuildContext implements BuildBadgeAction {
     @Override
     public String getUrlName() {
         return "docker";
+    }
+
+    public String getBuildContainerName() {
+        return buildContainerName;
     }
 }
