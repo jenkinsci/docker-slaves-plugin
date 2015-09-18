@@ -36,6 +36,7 @@ import hudson.slaves.Cloud;
 import hudson.slaves.NodeProvisioner;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nullable;
@@ -52,21 +53,33 @@ public class DockerCloud extends Cloud {
     /**
      * Base Build image name. Build commands will run on it.
      */
-    protected final String defaultBuildContainerImageName;
+    private final String defaultBuildContainerImageName;
 
     /**
      * Remoting Container image name. Jenkins Remoting will be launched in it.
      */
-    protected final String remotingContainerImageName;
+    private final String remotingContainerImageName;
 
-    protected final String host;
+    private final DockerServerEndpoint dockerHost;
 
     @DataBoundConstructor
-    public DockerCloud(String name, String defaultBuildContainerImageName, String remotingContainerImageName, String host) {
+    public DockerCloud(String name, String defaultBuildContainerImageName, String remotingContainerImageName, DockerServerEndpoint dockerHost) {
         super(name);
         this.defaultBuildContainerImageName = defaultBuildContainerImageName;
-        this.host = host;
+        this.dockerHost = dockerHost;
         this.remotingContainerImageName = StringUtils.isEmpty(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
+    }
+
+    public String getDefaultBuildContainerImageName() {
+        return defaultBuildContainerImageName;
+    }
+
+    public String getRemotingContainerImageName() {
+        return remotingContainerImageName;
+    }
+
+    public DockerServerEndpoint getDockerHost() {
+        return dockerHost;
     }
 
     public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
@@ -76,7 +89,12 @@ public class DockerCloud extends Cloud {
     }
 
     public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) {
-        return new DockerJobContainersProvisioner(job, new DockerDriver(host), slaveListener, defaultBuildContainerImageName, remotingContainerImageName);
+        return new DockerJobContainersProvisioner(job, new DockerDriver(dockerHost), slaveListener, getDefaultBuildContainerImageName(job), remotingContainerImageName);
+    }
+
+    private String getDefaultBuildContainerImageName(Job job) {
+        // TODO iterate over job.getParent() to find configuration for a default container image at folder level
+        return defaultBuildContainerImageName;
     }
 
     @Override

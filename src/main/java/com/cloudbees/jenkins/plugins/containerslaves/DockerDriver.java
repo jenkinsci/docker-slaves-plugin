@@ -27,7 +27,6 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
 import hudson.util.ArgumentListBuilder;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.List;
@@ -48,6 +47,10 @@ public class DockerDriver {
         verbose = true;
     }
 
+    public DockerDriver(DockerServerEndpoint dockerHost) {
+        // TODO manage credentials
+        this(dockerHost.getUri());
+    }
     public boolean hasContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(instance.getId())) {
             return false;
