@@ -22,8 +22,25 @@
   ~  THE SOFTWARE.
   ~
   -->
-
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-      TODO
-</j:jelly>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <l:layout title="Containers" norefresh="true">
+    <l:main-panel>
+
+    <h1><l:icon src="${app.rootUrl}/plugin/container-slaves/images/48x48/docker-logo.png"/> Containers used for this build</h1>
+
+      <ul>
+        <li>${it.getRemotingContainerId()} (${it.remotingContainerImageName})</li>
+        <li>${it.buildContainerId} (${it.buildContainerImageName})</li>
+      </ul>
+
+
+
+
+
+
+
+
+    </l:main-panel>
+    </l:layout>
+  </j:jelly>
