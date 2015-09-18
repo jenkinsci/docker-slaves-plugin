@@ -64,7 +64,7 @@ public class DockerJobContainersProvisioner {
             buildContainerImageName = def.getBuildHostImage();
         }
 
-        context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName, jobBuildsContainersDefinition.getSideContainers());
+        context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName, def.getSideContainers());
 
         // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
         // could rely on docker volume driver

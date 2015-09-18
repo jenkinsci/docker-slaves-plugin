@@ -27,6 +27,8 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
 import hudson.util.ArgumentListBuilder;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.*;
 import java.util.List;

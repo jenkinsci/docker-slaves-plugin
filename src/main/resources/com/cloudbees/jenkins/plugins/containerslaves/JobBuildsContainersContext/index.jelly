@@ -30,8 +30,13 @@
     <h1><l:icon src="${app.rootUrl}/plugin/container-slaves/images/48x48/docker-logo.png"/> Containers used for this build</h1>
 
       <ul>
-        <li>${it.getRemotingContainerId()} (${it.remotingContainerImageName})</li>
-        <li>${it.buildContainerId} (${it.buildContainerImageName})</li>
+        <li>${it.remotingContainer.id} (${it.remotingContainer.imageName})</li>
+        <j:forEach var="container" items="${it.buildContainers}">
+          <li>${it.id} (${it.imageName})</li>
+        </j:forEach>
+        <j:forEach var="container" items="${it.sideContainers}">
+          <li>${it.id} (${it.imageName})</li>
+        </j:forEach>
       </ul>
 
 

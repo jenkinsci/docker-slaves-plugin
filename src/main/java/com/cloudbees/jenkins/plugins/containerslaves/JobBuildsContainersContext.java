@@ -58,6 +58,11 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         return remotingContainer;
     }
 
+    public List<ContainerInstance> getBuildContainers() {
+        return buildContainers;
+    }
+
+
     public void setRemotingContainer(ContainerInstance remotingContainer) {
         this.remotingContainer = remotingContainer;
     }
@@ -89,9 +94,5 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
     @Override
     public String getUrlName() {
         return "docker";
-    }
-
-    public List<ContainerInstance> getBuildContainers() {
-        return buildContainers;
     }
 }
