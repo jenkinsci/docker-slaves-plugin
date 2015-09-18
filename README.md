@@ -13,6 +13,8 @@ handled transparently by the plugin.
 Prototyping (Docker Global Hack Day). Don't run in production. Use at your own risk. etc.
 Current implementation focus on Docker runtime, after cleanup the docker specific code will be isolated in a dedicated docker-slaves pluigin.
 
+see https://issues.jenkins-ci.org/browse/JENKINS/component/2083 for issues/tasks/RFE
+
 ## General Design
 
 Global configuration let administrator setup the container infrastructure. Typically, a DockerHost URL, but could be extended by third party plugin to connect to another container hosting service, for sample to adapt to Kubernetes Pod API or Rkt container engine. Just need to be [opencontainer](https://www.opencontainers.org/) compliant.
