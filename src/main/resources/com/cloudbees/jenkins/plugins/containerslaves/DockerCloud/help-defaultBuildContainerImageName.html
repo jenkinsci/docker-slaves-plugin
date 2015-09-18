@@ -22,9 +22,7 @@
   ~  THE SOFTWARE.
   ~
   -->
-Docker image used to host the build environment and run build steps.
-Using this option, you have full control on your build environment to make it fully reproducible and isolated
-from other builds.
-You can use <i>arbitrary</i> docker images here, setup with the builds tools required by your job.
-There's <u>no</u> prerequisites on the docker image as the jenkins infrastructure setup is handled transparently.
+Docker image used to host the build environment and run build steps if none is configured at job level.
+If you don't want development teams to manage build environment images, but still benefits from docker isolated builds
+and test resources containers, you can prepare a generic toolbox image and use it here.
 
