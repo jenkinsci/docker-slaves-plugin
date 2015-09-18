@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.containerslaves;
 
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.SlaveComputer;
@@ -57,5 +58,7 @@ public class DockerComputerLauncher extends ComputerLauncher {
         provisioner.prepareRemotingContainer();
         provisioner.launchRemotingContainer(computer, listener);
         provisioner.launchSideContainers(computer, listener);
+
+        // TODO catch launch failure and mark the build as Result.NOT_BUILT
     }
 }
