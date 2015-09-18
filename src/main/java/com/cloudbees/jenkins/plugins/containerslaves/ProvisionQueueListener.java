@@ -56,7 +56,6 @@ public class ProvisionQueueListener extends QueueListener {
             AbstractProject job = (AbstractProject) bi.task;
             JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
             if (def == null) return;
-            if (!def.isEnabled()) return;
 
             final DockerCloud cloud = DockerCloud.getCloud();
 

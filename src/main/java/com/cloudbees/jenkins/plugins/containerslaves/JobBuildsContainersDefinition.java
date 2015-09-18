@@ -52,10 +52,6 @@ public class JobBuildsContainersDefinition extends JobProperty {
         this.sideContainers = sideContainers;
     }
 
-    public boolean isEnabled() {
-        return StringUtils.isNotBlank(buildHostImage);
-    }
-
     public String getBuildHostImage() {
         return buildHostImage;
     }
