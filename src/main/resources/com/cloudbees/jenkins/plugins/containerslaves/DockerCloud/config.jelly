@@ -26,14 +26,17 @@
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
+  <f:property field="dockerHost"/>
+
   <f:entry title="Default build image" field="defaultBuildContainerImageName">
     <f:textbox default="ubuntu:latest"/>
   </f:entry>
 
-  <f:entry title="Remoting image" field="remotingContainerImageName">
-    <f:textbox default="jenkinsci/slave"/>
-  </f:entry>
+  <f:advanced>
+    <f:entry title="Remoting image" field="remotingContainerImageName">
+      <f:textbox default="jenkinsci/slave"/>
+    </f:entry>
+  </f:advanced>
 
-  <f:property field="dockerHost"/>
 
 </j:jelly>
