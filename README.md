@@ -67,3 +67,4 @@ Supporting rkt runtime could be great from a security POV. rkt is able to launch
 
  * Browse workspace after build completion by running a fresh new container with columes-from build's data-container
  * Slave view do offer a terminal access to the slave environment. Could rely on https://wiki.jenkins-ci.org/display/JENKINS/Remote+Terminal+Access+Plugin
+ * Side containers or build container as a axis in multi-configuration job
