@@ -10,7 +10,8 @@ handled transparently by the plugin.
 
 ## Status
 
-Planning (to be worked during Global Hack Day). Don't run in production. Use at your own risk. etc.
+Prototyping (Docker Global Hack Day). Don't run in production. Use at your own risk. etc.
+Current implementation focus on Docker runtime, after cleanup the docker specific code will be isolated in a dedicated docker-slaves pluigin.
 
 ## General Design
 
@@ -35,12 +36,15 @@ also see [Architecture.md](Architecture.md)
 
 ## [Docker](https://www.docker.com) implementation
 
-Plugin includes a ContainerProvisionner implementation based on Docker CLI. 
+Plugin includes a ContainerProvisionner implementation based on Docker CLI. This one will move to docker-slaves plugin when we get a reasonable design and can isolate general container
+API.
 
 This implementation do run the slave remoting container using a plain `docker run` command and rely on docker stdin/stdout as remoting transport (i.e. CommandLauncher or equivalent). 
 The Launcher is decorated so command/process to be launched on the slave are directly executed with `docker exec`.
 
 General idea is to avoid to use Jenkins remoting to launch processes but directly rely on Docker for this (what docker finally is is just an `execve` on steriods!). That magically brings long-running tasks for free.
+
+![Docker implementation](docs/docker.png)
 
 ## Kubernetes implementation
 
