@@ -35,7 +35,9 @@ import java.lang.Override;import java.lang.String;
 import java.util.logging.Logger;
 
 /**
- * Process launcher which uses docker exec instead of execve
+ * Process launcher which uses docker exec instead of <code>execve</code>
+ * Jenkins relies on remoting channel to run commands / process on executor. As Docker can as well be used to run a
+ * process remotely, we can just bypass jenkins remoting.
  */
 public class DockerLauncher extends Launcher.DecoratedLauncher {
     private static final Logger LOGGER = Logger.getLogger(DockerLauncher.class.getName());

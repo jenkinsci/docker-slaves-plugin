@@ -58,13 +58,17 @@ public class DockerJobContainersProvisioner {
         localLauncher = new Launcher.LocalLauncher(slaveListener);
 
         String buildContainerImageName = defaultBuildContainerImageName;
-        JobBuildsContainersDefinition jobBuildsContainersDefinition = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
+        JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
 
-        if (StringUtils.isNotEmpty(jobBuildsContainersDefinition.getBuildHostImage())) {
-            buildContainerImageName = jobBuildsContainersDefinition.getBuildHostImage();
+        if (StringUtils.isNotEmpty(def.getBuildHostImage())) {
+            buildContainerImageName = def.getBuildHostImage();
         }
 
         context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName, jobBuildsContainersDefinition.getSideContainers());
+
+        // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
+        // could rely on docker volume driver
+        // in the meantime, we just rely on previous build's remoting container as a data volume container
 
         // reuse previous remoting container to retrieve workspace
         Run lastBuild = job.getBuilds().getLastBuild();

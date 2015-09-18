@@ -72,6 +72,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         LOGGER.info("Stopping Docker Slave after build completion");
         setAcceptingTasks(false);
         try {
+            // We use it during development for diagnostic purpose
             if (!Boolean.getBoolean("com.cloudbees.jenkins.plugins.containerslaves.DockerComputer.keepContainer")) {
 
                 provisioner.clean();
