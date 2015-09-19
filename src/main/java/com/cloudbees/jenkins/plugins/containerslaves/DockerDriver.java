@@ -113,10 +113,7 @@ public class DockerDriver {
     public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
                 .add("create")
-                .add("--tty")
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
-                // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
-                //.add("--log-driver=none")
                 .add("--workdir", starter.pwd().toString())
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
