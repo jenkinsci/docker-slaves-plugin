@@ -99,12 +99,16 @@ public class DockerJobContainersProvisioner {
         launcher.launch(computer, listener);
     }
 
-    public void prepareBuildCommandLaunch(Launcher.ProcStarter starter, ContainerInstance buildContainer) throws IOException, InterruptedException {
-        driver.createBuildContainer(localLauncher, buildContainer, context.getRemotingContainer(), starter);
+    public BuildContainer newBuildContainer(Launcher.ProcStarter procStarter) throws IOException, InterruptedException {
+        return new BuildContainer(context.createBuildContainer(), procStarter);
     }
 
-    public Proc launchBuildCommand(Launcher.ProcStarter starter, ContainerInstance buildContainer) throws IOException, InterruptedException {
-        return driver.runContainer(localLauncher, buildContainer.getId()).stdout(starter.stdout()).start();
+    public void createBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
+        driver.createBuildContainer(localLauncher, buildContainer.instance, context.getRemotingContainer(), buildContainer.procStarter);
+    }
+
+    public Proc startBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
+        return driver.startContainer(localLauncher, buildContainer.instance.getId(), buildContainer.procStarter.stdout());
     }
 
     public void launchSideContainers(DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
@@ -120,6 +124,24 @@ public class DockerJobContainersProvisioner {
 
         for (ContainerInstance instance : context.getBuildContainers()) {
             driver.removeContainer(localLauncher, instance);
+        }
+    }
+
+    public class BuildContainer {
+        final ContainerInstance instance;
+        final Launcher.ProcStarter procStarter;
+
+        protected BuildContainer(ContainerInstance instance, Launcher.ProcStarter procStarter) {
+            this.instance = instance;
+            this.procStarter = procStarter;
+        }
+
+        public String getId() {
+            return instance.getId();
+        }
+
+        public String getImageName() {
+            return instance.getImageName();
         }
     }
 }

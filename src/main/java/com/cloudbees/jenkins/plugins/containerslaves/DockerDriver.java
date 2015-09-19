@@ -26,6 +26,7 @@
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
+import hudson.Proc;
 import hudson.util.ArgumentListBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
@@ -53,6 +54,7 @@ public class DockerDriver {
         // TODO manage credentials
         this(dockerHost.getUri());
     }
+
     public boolean hasContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(instance.getId())) {
             return false;
@@ -103,14 +105,20 @@ public class DockerDriver {
 
     public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
-                .add("create", "--tty")
+                .add("create")
+                .add("--tty")
                 // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
                 //.add("--log-driver=none")
-                .add("--workdir",  starter.pwd().toString())
+                .add("--workdir", starter.pwd().toString())
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
-                .add("--user", "10000:10000")
-                .add(buildContainer.getImageName());
+                .add("--user", "10000:10000");
+
+        for (String env : starter.envs()) {
+            args.add("--env", env);
+        }
+
+        args.add(buildContainer.getImageName());
 
         List<String> originalCmds = starter.cmds();
         boolean[] originalMask = starter.masks();
@@ -149,11 +157,11 @@ public class DockerDriver {
                 .cmds(args).stdin(content).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
     }
 
-    public Launcher.ProcStarter runContainer(Launcher launcher, String containerId) throws IOException, InterruptedException {
+    public Proc startContainer(Launcher launcher, String containerId, OutputStream outputStream) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
                 .add("start", "-ia", containerId);
 
-        return launcher.launch().cmds(args);
+        return launcher.launch().cmds(args).stdout(outputStream).start();
     }
 
     public int removeContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {

@@ -31,7 +31,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 
 import java.io.IOException;
-import java.lang.Override;import java.lang.String;
+import java.lang.Override;
 import java.util.logging.Logger;
 
 /**
@@ -55,17 +55,19 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
     @Override
     public Proc launch(ProcStarter starter) throws IOException {
         try {
-            ContainerInstance buildContainer = provisioner.getContext().createBuildContainer();
+            DockerJobContainersProvisioner.BuildContainer buildContainer = provisioner.newBuildContainer(starter);
+
             if (!starter.quiet()) {
                 listener.getLogger().append("docker: creating build container from image '"+ buildContainer.getImageName() + "'\n");
             }
-            provisioner.prepareBuildCommandLaunch(starter, buildContainer);
+            provisioner.createBuildContainer(buildContainer);
+
             if (!starter.quiet()) {
                 listener.getLogger().append("docker: starting build container " + buildContainer.getId().substring(0, 11) + "\n");
                 maskedPrintCommandLine(starter.cmds(), starter.masks(), starter.pwd());
             }
 
-            return provisioner.launchBuildCommand(starter, buildContainer);
+            return provisioner.startBuildContainer(buildContainer);
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
