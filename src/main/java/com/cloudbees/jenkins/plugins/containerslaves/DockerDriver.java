@@ -27,8 +27,11 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
 import hudson.Proc;
+import hudson.org.apache.tools.tar.TarOutputStream;
 import hudson.util.ArgumentListBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.*;
@@ -138,23 +141,63 @@ public class DockerDriver {
         if (status != 0) {
             throw new IOException("Failed to run docker image");
         }
+
+        injectJenkinsUnixGroup(launcher, containerId);
+        injectJenkinsUnixUser(launcher, containerId);
     }
 
-    protected int getFileContent(Launcher launcher, String containerId, String filename, OutputStream content) throws IOException, InterruptedException {
+    protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        getFileContent(launcher, containerId, "/etc/group", out);
+        out.write("jenkins:x:10000:\n".getBytes());
+        putFileContent(launcher, containerId, "/etc", "group", out.toByteArray());
+    }
+
+    protected void injectJenkinsUnixUser(Launcher launcher, String containerId) throws IOException, InterruptedException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        getFileContent(launcher, containerId, "/etc/passwd", out);
+        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes());
+        putFileContent(launcher, containerId, "/etc", "passwd", out.toByteArray());
+    }
+
+    protected void getFileContent(Launcher launcher, String containerId, String filename, OutputStream outputStream) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
                 .add("cp", containerId + ":" + filename, "-");
 
-        return launcher.launch()
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int status = launcher.launch()
                 .cmds(args)
-                .stdout(content).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+                .stdout(out).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new IOException("Failed to get file");
+        }
+
+        TarInputStream tar = new TarInputStream(new ByteArrayInputStream(out.toByteArray()));
+        TarEntry entry = tar.getNextEntry();
+        tar.copyEntryContents(outputStream);
+        tar.close();
     }
 
-    protected int putFileContent(Launcher launcher, String containerId, String filename, InputStream content) throws IOException, InterruptedException {
+    protected int putFileContent(Launcher launcher, String containerId, String path, String filename, byte[] content) throws IOException, InterruptedException {
         ArgumentListBuilder args = dockerCommand()
-                .add("cp", "-", containerId + ":" + filename);
+                .add("cp", "-", containerId + ":" + path);
+
+        TarEntry entry = new TarEntry(filename);
+        entry.setUserId(0);
+        entry.setGroupId(0);
+        entry.setSize(content.length);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        TarOutputStream tar = new TarOutputStream(out);
+        tar.putNextEntry(entry);
+        tar.write(content);
+        tar.closeEntry();
+        tar.close();
 
         return launcher.launch()
-                .cmds(args).stdin(content).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
+                .cmds(args).stdin(new ByteArrayInputStream(out.toByteArray())).quiet(!verbose).stderr(launcher.getListener().getLogger()).join();
     }
 
     public Proc startContainer(Launcher launcher, String containerId, OutputStream outputStream) throws IOException, InterruptedException {
