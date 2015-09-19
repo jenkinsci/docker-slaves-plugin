@@ -27,6 +27,7 @@ package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Launcher;
 import hudson.Proc;
+import hudson.model.Slave;
 import hudson.org.apache.tools.tar.TarOutputStream;
 import hudson.util.ArgumentListBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -90,7 +91,7 @@ public class DockerDriver {
 
                 // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
                 .add("-Djava.io.tmpdir=/home/jenkins/.tmp")
-                .add("-jar").add("/usr/share/jenkins/slave.jar");
+                .add("-jar").add("/home/jenkins/slave.jar");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -104,6 +105,8 @@ public class DockerDriver {
         if (status != 0) {
             throw new IOException("Failed to run docker image");
         }
+
+        putFileContent(launcher, containerId, "/home/jenkins", "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
     }
 
     public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter) throws IOException, InterruptedException {
