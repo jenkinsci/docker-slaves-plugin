@@ -87,6 +87,7 @@ public class DockerDriver {
                 // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
                 .add("--log-driver=none")
 
+                .add("--env", "TMPDIR=/home/jenkins/.tmp")
                 .add(remotingContainer.getImageName()).add("java")
 
                 // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
@@ -113,6 +114,7 @@ public class DockerDriver {
         ArgumentListBuilder args = dockerCommand()
                 .add("create")
                 .add("--tty")
+                .add("--env", "TMPDIR=/home/jenkins/.tmp")
                 // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
                 //.add("--log-driver=none")
                 .add("--workdir", starter.pwd().toString())
