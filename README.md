@@ -15,6 +15,15 @@ Current implementation focus on Docker runtime, after cleanup the docker specifi
 
 see https://issues.jenkins-ci.org/browse/JENKINS/component/2083 for issues/tasks/RFE
 
+### What works?
+
+The following things have been tested and works
+
+* Freestyle job
+* Maven job (as long as you configure a Maven installation with an automatic installer and you have a JDK in the build container)
+* Timestamper plugin
+* Git plugin
+
 ## General Design
 
 Global configuration let administrator setup the container infrastructure. Typically, a DockerHost URL, but could be extended by third party plugin to connect to another container hosting service, for sample to adapt to Kubernetes Pod API or Rkt container engine. Just need to be [opencontainer](https://www.opencontainers.org/) compliant.
