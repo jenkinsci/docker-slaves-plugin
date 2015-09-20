@@ -226,7 +226,7 @@ public class DockerDriver implements Closeable {
 
     public void launchSideContainer(Launcher launcher, ContainerInstance instance, ContainerInstance remotingContainer) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("run")
+                .add("create")
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add(instance.getImageName());
@@ -241,6 +241,9 @@ public class DockerDriver implements Closeable {
         if (status != 0) {
             throw new IOException("Failed to run docker image");
         }
+
+        launchDockerCLI(launcher, new ArgumentListBuilder()
+                .add("start", containerId)).start();
     }
 
     private Launcher.ProcStarter launchDockerCLI(Launcher launcher, ArgumentListBuilder args) {
