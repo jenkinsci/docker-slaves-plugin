@@ -51,7 +51,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
     /**
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
      */
-    public DockerJobContainersProvisioner createProvisioner(TaskListener slaveListener) {
+    public DockerJobContainersProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
         provisioner = DockerCloud.getCloud().buildProvisioner(job, slaveListener);
         return provisioner;
     }

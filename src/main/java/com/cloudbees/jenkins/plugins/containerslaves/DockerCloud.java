@@ -40,6 +40,7 @@ import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -88,8 +89,8 @@ public class DockerCloud extends Cloud {
         return new DockerLabelAssignmentAction(label);
     }
 
-    public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) {
-        return new DockerJobContainersProvisioner(job, new DockerDriver(dockerHost), slaveListener, getDefaultBuildContainerImageName(job), remotingContainerImageName);
+    public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
+        return new DockerJobContainersProvisioner(job, new DockerDriver(dockerHost, job), slaveListener, getDefaultBuildContainerImageName(job), remotingContainerImageName);
     }
 
     private String getDefaultBuildContainerImageName(Job job) {

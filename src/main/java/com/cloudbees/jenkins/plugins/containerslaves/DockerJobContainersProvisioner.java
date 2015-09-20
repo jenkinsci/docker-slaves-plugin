@@ -125,6 +125,8 @@ public class DockerJobContainersProvisioner {
         for (ContainerInstance instance : context.getBuildContainers()) {
             driver.removeContainer(localLauncher, instance);
         }
+
+        driver.close();
     }
 
     public class BuildContainer {
