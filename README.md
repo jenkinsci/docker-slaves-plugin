@@ -57,6 +57,11 @@ General idea is to avoid to use Jenkins remoting to launch processes but directl
 
 ![Docker implementation](docs/docker.png)
 
+Also Read [Docker implementation](Docker.md)
+
+
+# Future (?)
+
 ## Kubernetes implementation
 
 Kubernetes has native support for Pod concept, so would embrace this design with minimal effort.
