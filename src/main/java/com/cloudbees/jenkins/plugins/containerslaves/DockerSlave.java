@@ -50,7 +50,7 @@ import java.util.Collections;
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerSlave extends AbstractCloudSlave {
+public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
 
     private final Job job;
 
@@ -74,6 +74,11 @@ public class DockerSlave extends AbstractCloudSlave {
 
     @Override
     protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
+    }
+
+    @Override
+    public Node asNode() {
+        return this;
     }
 
     @Extension
