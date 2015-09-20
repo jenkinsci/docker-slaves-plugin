@@ -1,4 +1,4 @@
-# container-slaves-plugin
+# Docker Slaves Plugin
 
 This plugin allows to execute a jenkins job inside a (set of) container(s).
 On Job configuration page, an option let you define a set of containers to host your build and provide test resources
@@ -23,6 +23,8 @@ The following things have been tested and works
 * Maven job (as long as you configure a Maven installation with an automatic installer and you have a JDK in the build container)
 * Timestamper plugin
 * Git plugin
+
+You can find sources of demos here: https://github.com/ydubreuil/docker-slaves-plugin-demos
 
 ## General Design
 
