@@ -90,7 +90,7 @@ public class DockerCloud extends Cloud {
     }
 
     public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
-        return new DockerJobContainersProvisioner(job, new DockerDriver(dockerHost, job), slaveListener, getDefaultBuildContainerImageName(job), remotingContainerImageName);
+        return new DockerJobContainersProvisioner(job, dockerHost, slaveListener, getDefaultBuildContainerImageName(job), remotingContainerImageName);
     }
 
     private String getDefaultBuildContainerImageName(Job job) {

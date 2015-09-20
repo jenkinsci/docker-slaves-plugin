@@ -33,6 +33,7 @@ import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.IOException;
 
@@ -51,10 +52,10 @@ public class DockerJobContainersProvisioner {
 
     private final Launcher localLauncher;
 
-    public DockerJobContainersProvisioner(Job job, DockerDriver driver, TaskListener slaveListener, String defaultBuildContainerImageName, String remotingContainerImageName) {
+    public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String defaultBuildContainerImageName, String remotingContainerImageName) throws IOException, InterruptedException {
         this.job = job;
         this.slaveListener = slaveListener;
-        this.driver = driver;
+        this.driver = new DockerDriver(dockerHost, job);
         localLauncher = new Launcher.LocalLauncher(slaveListener);
 
         String buildContainerImageName = defaultBuildContainerImageName;
