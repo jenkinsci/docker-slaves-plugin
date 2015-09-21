@@ -24,8 +24,7 @@
   ~
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -33,11 +32,11 @@
         <artifactId>plugin</artifactId>
         <!-- Baseline Jenkins version you use to build and test the plugin. Users must have this version or newer to run. -->
         <version>1.609.3</version>
-        <relativePath/>
+        <relativePath />
     </parent>
     <groupId>com.cloudbees.jenkins.plugins</groupId>
     <artifactId>container-slaves</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0-beta-1</version>
     <packaging>hpi</packaging>
 
     <name>Container Slaves Plugin</name>
@@ -67,7 +66,7 @@
         <connection>scm:git:git://github.com/ndeloof/container-slaves-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:ndeloof/container-slaves-plugin.git</developerConnection>
         <url>https://github.com/ndeloof/container-slaves-plugin</url>
-        <tag>HEAD</tag>
+        <tag>container-slaves-1.0-beta-1</tag>
     </scm>
 
     <repositories>
