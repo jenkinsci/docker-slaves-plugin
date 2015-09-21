@@ -7,6 +7,7 @@ handled transparently by the plugin.
 
 ![Configuration](docs/config.png)
 
+See [this demo](https://www.youtube.com/watch?v=HbwgN0UTTxo)
 
 ## Status
 
