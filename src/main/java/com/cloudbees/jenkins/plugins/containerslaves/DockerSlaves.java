@@ -26,49 +26,50 @@
 package com.cloudbees.jenkins.plugins.containerslaves;
 
 import hudson.Extension;
+import hudson.Plugin;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.Label;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
-import hudson.model.labels.LabelAtom;
 import hudson.slaves.Cloud;
 import hudson.slaves.NodeProvisioner;
 import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nullable;
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 /**
  * {@link Cloud} implementation designed to launch a set of containers (aka "pod") to establish a Jenkins executor.
  *
  */
-public class DockerCloud extends Cloud {
+public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
 
     /**
      * Base Build image name. Build commands will run on it.
      */
-    private final String defaultBuildContainerImageName;
+    private String defaultBuildContainerImageName;
 
     /**
      * Remoting Container image name. Jenkins Remoting will be launched in it.
      */
-    private final String remotingContainerImageName;
+    private final String remotingContainerImageName = System.getProperty("com.cloudbees.jenkins.plugins.containerslaves.DockerSlaves.image", "jenkinsci/slave");
 
-    private final DockerServerEndpoint dockerHost;
+    private DockerServerEndpoint dockerHost;
 
-    @DataBoundConstructor
-    public DockerCloud(String name, String defaultBuildContainerImageName, String remotingContainerImageName, DockerServerEndpoint dockerHost) {
-        super(name);
-        this.defaultBuildContainerImageName = defaultBuildContainerImageName;
-        this.dockerHost = dockerHost;
-        this.remotingContainerImageName = StringUtils.isEmpty(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
+    @Override
+    public void configure(StaplerRequest req, JSONObject formData) throws IOException, ServletException, Descriptor.FormException {
+        req.bindJSON(this, formData);
     }
 
     public String getDefaultBuildContainerImageName() {
@@ -98,37 +99,21 @@ public class DockerCloud extends Cloud {
         return defaultBuildContainerImageName;
     }
 
-    @Override
-    /**
-     * Not just considering delay for NodeProvisioner to call this, we also can't create the Build Pod here as we
-     * just don't know which {@link Job} it target, to retrieve the set of container images to launch.
-     */
-    public Collection<NodeProvisioner.PlannedNode> provision(Label label, int excessWorkload) {
-        return Collections.EMPTY_LIST;
-    }
-
-    public static @Nullable DockerCloud getCloud() {
-        for (Cloud cloud : Jenkins.getInstance().clouds) {
-            if (cloud instanceof DockerCloud) {
-                return (DockerCloud) cloud;
-            }
-        }
-
-        return null;
+    public static DockerSlaves get() {
+        return (DockerSlaves) Jenkins.getInstance().getPlugin("docker-slaves");
     }
 
     @Override
-    public boolean canProvision(Label label) {
-        return false;
+    public Descriptor<DockerSlaves> getDescriptor() {
+        return Jenkins.getInstance().getDescriptorOrDie(DockerSlaves.class);
     }
 
     @Extension
-    public static class DescriptorImpl extends Descriptor<Cloud> {
+    public static class DescriptorImpl extends Descriptor<DockerSlaves> {
 
         @Override
         public String getDisplayName() {
-            return "Containers Cloud";
+            return "Docker Slaves";
         }
-
     }
 }

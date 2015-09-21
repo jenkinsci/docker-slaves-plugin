@@ -36,7 +36,6 @@ import hudson.slaves.Cloud;
 import hudson.slaves.NodeProvisioner;
 import jenkins.model.Jenkins;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -57,7 +56,7 @@ public class ProvisionQueueListener extends QueueListener {
             JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
             if (def == null) return;
 
-            final DockerCloud cloud = DockerCloud.getCloud();
+            final DockerSlaves cloud = DockerSlaves.get();
 
             LOGGER.info("Creating a Container slave to host " + bi.toString());
             DockerLabelAssignmentAction action = cloud.createLabelAssignmentAction(bi);

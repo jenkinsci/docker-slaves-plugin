@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
   ~
@@ -22,9 +23,19 @@
   ~  THE SOFTWARE.
   ~
   -->
-Docker image used to open communication channel with Jenkins (a.k.a run slave.jar agent).
-<br>
-You should not change this UNLESS you have a very good reason to do so.
-<br>
-You can find Dockerfile for the recommended image here:
-<a href="https://github.com/jenkinsci/docker-slave">https://github.com/jenkinsci/docker-slave</a>.
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <f:section title="Docker Slaves">
+    <j:set var="instance" value="${it}"/>
+    <j:set var="descriptor" value="${it.descriptor}"/>
+
+    <f:property field="dockerHost"/>
+
+    <f:entry title="Default build image" field="defaultBuildContainerImageName">
+      <f:textbox default="ubuntu:latest"/>
+    </f:entry>
+
+  </f:section>
+
+</j:jelly>
