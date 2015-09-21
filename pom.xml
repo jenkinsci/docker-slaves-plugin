@@ -63,9 +63,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/ndeloof/container-slaves-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:ndeloof/container-slaves-plugin.git</developerConnection>
-        <url>https://github.com/ndeloof/container-slaves-plugin</url>
+        <connection>scm:git:git://github.com/ndeloof/docker-slaves-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:ndeloof/docker-slaves-plugin.git</developerConnection>
+        <url>https://github.com/ndeloof/docker-slaves-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
