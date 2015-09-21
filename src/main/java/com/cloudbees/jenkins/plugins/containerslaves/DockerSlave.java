@@ -30,7 +30,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
-import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.Environment;
 import hudson.model.Job;
@@ -38,11 +37,11 @@ import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
+import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
-import hudson.slaves.*;
+import hudson.slaves.SlaveComputer;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -99,7 +98,7 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
         SlaveComputer c = getComputer();
         if (c == null) {
             listener.error("Issue with creating launcher for slave " + name + ".");
-            return new Launcher.DummyLauncher(listener);
+            throw new IllegalStateException("Can't create a launcher if computer is gone.");
         } else {
             DockerComputer dc = (DockerComputer) c;
             return new DockerLauncher(listener, c.getChannel(), c.isUnix(), dc.getProvisioner()).decorateFor(this);
