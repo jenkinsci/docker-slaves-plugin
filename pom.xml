@@ -36,7 +36,7 @@
     </parent>
     <groupId>com.cloudbees.jenkins.plugins</groupId>
     <artifactId>container-slaves</artifactId>
-    <version>1.0-beta-1</version>
+    <version>1.0-beta-2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>Container Slaves Plugin</name>
@@ -66,7 +66,7 @@
         <connection>scm:git:git://github.com/ndeloof/container-slaves-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:ndeloof/container-slaves-plugin.git</developerConnection>
         <url>https://github.com/ndeloof/container-slaves-plugin</url>
-        <tag>container-slaves-1.0-beta-1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>
