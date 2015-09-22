@@ -75,7 +75,7 @@ public class DockerJobContainersProvisioner {
         Run lastBuild = job.getBuilds().getLastBuild();
         if (lastBuild != null) {
             JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
-            if (previousContext.getRemotingContainer() != null) {
+            if (previousContext != null && previousContext.getRemotingContainer() != null) {
                 context.getRemotingContainer().setId(previousContext.getRemotingContainer().getId());
             }
         }
