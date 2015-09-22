@@ -37,6 +37,7 @@ import hudson.slaves.Cloud;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
@@ -63,6 +64,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     @Override
     public void configure(StaplerRequest req, JSONObject formData) throws IOException, ServletException, Descriptor.FormException {
         req.bindJSON(this, formData);
+        save();
     }
 
     public String getDefaultBuildContainerImageName() {
@@ -75,6 +77,16 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
 
     public DockerServerEndpoint getDockerHost() {
         return dockerHost;
+    }
+
+    @DataBoundSetter
+    public void setDefaultBuildContainerImageName(String defaultBuildContainerImageName) {
+        this.defaultBuildContainerImageName = defaultBuildContainerImageName;
+    }
+
+    @DataBoundSetter
+    public void setDockerHost(DockerServerEndpoint dockerHost) {
+        this.dockerHost = dockerHost;
     }
 
     public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
