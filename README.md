@@ -63,22 +63,34 @@ General idea is to avoid to use Jenkins remoting to launch processes but directl
 Also Read [Docker implementation](Docker.md)
 
 
-# Future (?)
+# Future
 
-## Kubernetes implementation
+## Workflow support
+
+see [this document](Workflow.md)
+
+## Provisioning issue reporting
+
+As the build container(s) are only used by a build, we'd like the container bootstrap log to be included in the job logs, or at least attached to the build action. This would help to diagnose provisioning issues.
+For the same purpose, when the initial remoting container can't be provisionned, we'd like to mark the build as `NOT_BUILT` and attach docker logs
+
+## Alternate implementations
+Plugin is designed on top of Docker CLI features, but the general concept could apply to other container engines / docker cluster managers. We plan to extract a common skeleton into container-slaves-plugin, and experiment with alternate implementations.
+
+### Kubernetes implementation
 
 Kubernetes has native support for Pod concept, so would embrace this design with minimal effort.
 Data container would rely on a [kubernetes volume](https://github.com/kubernetes/kubernetes/blob/master/docs/user-guide/volumes.md)
 
-## Amazon ECS implementation
+### Amazon ECS implementation
 
 Comparable to Kubernetes.
 
-## Mesos implementation
+### Mesos implementation
 
 To be considered
 
-## [Rkt](https://github.com/coreos/rkt) implementation
+### [Rkt](https://github.com/coreos/rkt) implementation
 
 Supporting rkt runtime could be great from a security POV. rkt is able to launch containers isolated inside a small KVM process, greatly enhancing security (https://coreos.com/blog/rkt-0.8-with-new-vm-support/)
 
