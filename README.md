@@ -102,3 +102,8 @@ Supporting rkt runtime could be great from a security POV. rkt is able to launch
  * Build throttling
  * Memory High Water Mark monitoring
  * support Docker Swarm / scheduling
+ * integrate with ClearContainers for enhanced security
+
+### perf enhancements
+ * put remoting JAR cache into docker slave image so launching slave will be much faster (add a second, read-only cache directory in `hudson.remoting.FileSystemJarCache`)
+ 
