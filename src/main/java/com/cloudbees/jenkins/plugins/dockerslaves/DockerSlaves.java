@@ -23,7 +23,7 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.containerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
 import hudson.Plugin;
@@ -34,20 +34,13 @@ import hudson.model.Label;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.slaves.Cloud;
-import hudson.slaves.NodeProvisioner;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * {@link Cloud} implementation designed to launch a set of containers (aka "pod") to establish a Jenkins executor.

@@ -23,15 +23,12 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.containerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.model.BuildBadgeAction;
-import hudson.model.Job;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JobBuildsContainersContext implements BuildBadgeAction {
 

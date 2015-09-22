@@ -23,7 +23,7 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.containerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.model.Executor;
 import hudson.model.Job;

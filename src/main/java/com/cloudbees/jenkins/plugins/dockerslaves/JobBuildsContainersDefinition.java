@@ -23,14 +23,13 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.containerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 

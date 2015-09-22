@@ -1,4 +1,4 @@
-package com.cloudbees.jenkins.plugins.containerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves;
 
 public class ContainerInstance {
     final String imageName;

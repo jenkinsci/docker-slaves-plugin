@@ -35,7 +35,7 @@
         <relativePath />
     </parent>
     <groupId>com.cloudbees.jenkins.plugins</groupId>
-    <artifactId>container-slaves</artifactId>
+    <artifactId>docker-slaves</artifactId>
     <version>1.0-beta-2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 

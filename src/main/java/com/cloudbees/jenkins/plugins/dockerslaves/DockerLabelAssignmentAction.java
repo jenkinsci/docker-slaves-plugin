@@ -23,7 +23,7 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.containerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.model.Label;
 import hudson.model.labels.LabelAssignmentAction;
