@@ -6,7 +6,7 @@ We'd like the docker-slaves plugin to be usable with [workflow plugin](https://g
 
 ### Proposed syntax :
 ```
-onDockerNode( "maven:3-jdk8", database:"mysql", webserver:"jetty:9" ) {
+withContainers( "maven:3-jdk8", database:"mysql", webserver:"jetty:9" ) {
    // some build steps
 }
 ```
