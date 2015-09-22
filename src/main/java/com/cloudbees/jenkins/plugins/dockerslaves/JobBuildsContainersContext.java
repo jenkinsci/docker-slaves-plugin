@@ -36,19 +36,32 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     protected final String buildContainerBaseImage;
 
+    protected final String scmContainerImage;
+
     protected List<ContainerInstance> buildContainers = new ArrayList<ContainerInstance>();
 
     protected List<ContainerInstance> sideContainers = new ArrayList<ContainerInstance>();
 
+    /**
+     * Flag to indicate the SCM checkout build phase is running.
+     */
+    private transient boolean preScm;
+
     public JobBuildsContainersContext(String remotingContainerImageName, String buildContainerImageName, List<SideContainerDefinition> sideContainerDefinitions) {
         remotingContainer = new ContainerInstance(remotingContainerImageName);
         buildContainerBaseImage = buildContainerImageName;
+        scmContainerImage = DockerSlaves.get().getDefaultScmContainerImageName();
 
         if (sideContainerDefinitions != null) {
             for (SideContainerDefinition definition: sideContainerDefinitions) {
                 sideContainers.add(new ContainerInstance(definition.getImage()));
             }
         }
+        preScm = true;
+    }
+
+    protected void onScmChekoutCompleted() {
+        preScm = false;
     }
 
     public ContainerInstance getRemotingContainer() {
@@ -64,8 +77,12 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         this.remotingContainer = remotingContainer;
     }
 
+    public String getScmContainerImage() {
+        return scmContainerImage;
+    }
+
     public ContainerInstance createBuildContainer() {
-        ContainerInstance current = new ContainerInstance(buildContainerBaseImage);
+        ContainerInstance current = new ContainerInstance(preScm ? scmContainerImage : buildContainerBaseImage);
         buildContainers.add(current);
         return current;
     }

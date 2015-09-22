@@ -54,6 +54,8 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
      */
     private String defaultBuildContainerImageName;
 
+    private String defaultScmContainerImageName;
+
     /**
      * Remoting Container image name. Jenkins Remoting will be launched in it.
      */
@@ -71,6 +73,10 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return defaultBuildContainerImageName;
     }
 
+    public String getDefaultScmContainerImageName() {
+        return defaultScmContainerImageName;
+    }
+
     public String getRemotingContainerImageName() {
         return remotingContainerImageName;
     }
@@ -82,6 +88,10 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     @DataBoundSetter
     public void setDefaultBuildContainerImageName(String defaultBuildContainerImageName) {
         this.defaultBuildContainerImageName = defaultBuildContainerImageName;
+    }
+
+    public void setDefaultScmContainerImageName(String defaultScmContainerImageName) {
+        this.defaultScmContainerImageName = defaultScmContainerImageName;
     }
 
     @DataBoundSetter

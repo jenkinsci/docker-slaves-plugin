@@ -1,19 +1,18 @@
-<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
-  ~
+  ~  
   ~  Copyright (c) 2015, CloudBees, Inc.
-  ~
+  ~  
   ~  Permission is hereby granted, free of charge, to any person obtaining a copy
   ~  of this software and associated documentation files (the "Software"), to deal
   ~  in the Software without restriction, including without limitation the rights
   ~  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   ~  copies of the Software, and to permit persons to whom the Software is
   ~  furnished to do so, subject to the following conditions:
-  ~
+  ~  
   ~  The above copyright notice and this permission notice shall be included in
   ~  all copies or substantial portions of the Software.
-  ~
+  ~  
   ~  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   ~  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   ~  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,23 +22,7 @@
   ~  THE SOFTWARE.
   ~
   -->
-
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
-  <f:section title="Docker Slaves">
-    <j:set var="instance" value="${it}"/>
-    <j:set var="descriptor" value="${it.descriptor}"/>
-
-    <f:property field="dockerHost"/>
-
-    <f:entry title="Default SCM image" field="defaultScmContainerImageName">
-      <f:textbox default="buildpack-deps:scm"/>
-    </f:entry>
-
-    <f:entry title="Default build image" field="defaultBuildContainerImageName">
-      <f:textbox default="ubuntu:latest"/>
-    </f:entry>
-
-  </f:section>
-
-</j:jelly>
+As all build steps, the SCM checkout commands are ran inside a container. This option let you configure a docker image
+which has the adequate SCM tool installed. <code>buildpack-deps:scm</code> we recommend by default do support git,
+mercurial, bazaar and subversion. As it is an ancestry for the <code>jenkinsci/slave</code> image, you probably already
+have this image available on your Dockerhost.

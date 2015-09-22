@@ -37,6 +37,9 @@ import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import hudson.model.listeners.SCMListener;
+import hudson.scm.ChangeLogSet;
+import hudson.scm.SCM;
 import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
@@ -90,6 +93,17 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
                 build.addAction(((DockerComputer) c).getProvisioner().getContext());
             }
             return new Environment() {};
+        }
+    }
+
+    @Extension
+    public static class DockerSlaveSCMListener extends SCMListener {
+        @Override
+        public void onChangeLogParsed(Run<?, ?> build, SCM scm, TaskListener listener, ChangeLogSet<?> changelog) throws Exception {
+            final JobBuildsContainersContext action = build.getAction(JobBuildsContainersContext.class);
+            if (action != null) {
+                action.onScmChekoutCompleted();
+            }
         }
     }
 
