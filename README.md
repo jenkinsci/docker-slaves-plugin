@@ -62,6 +62,8 @@ General idea is to avoid to use Jenkins remoting to launch processes but directl
 
 Also Read [Docker implementation](Docker.md)
 
+Note: this implementation relies on docker cli ran from jenkins master, and as such is using threads to manage the transient slave stdin/stdout steams. A NIO version would be lot's more efficient.
+
 
 # Future
 
