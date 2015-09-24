@@ -56,16 +56,16 @@ public class ProvisionQueueListener extends QueueListener {
             JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
             if (def == null) return;
 
-            final DockerSlaves cloud = DockerSlaves.get();
-
-            LOGGER.info("Creating a Container slave to host " + bi.toString());
-            DockerLabelAssignmentAction action = cloud.createLabelAssignmentAction(bi);
-            bi.addAction(action);
-
-            // Immediately create a slave for this item
-            // Real provisioning will happen later
-
             try {
+                final DockerSlaves cloud = DockerSlaves.get();
+
+                LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
+                DockerLabelAssignmentAction action = cloud.createLabelAssignmentAction(bi);
+                bi.addAction(action);
+
+                // Immediately create a slave for this item
+                // Real provisioning will happen later
+
                 final Node node = new DockerSlave(job, action.getLabel().toString());
                 Computer.threadPoolForRemoting.submit(new Runnable() {
                     @Override

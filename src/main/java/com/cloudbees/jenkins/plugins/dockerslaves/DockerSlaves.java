@@ -36,6 +36,7 @@ import hudson.model.TaskListener;
 import hudson.slaves.Cloud;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -54,7 +55,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
      */
     private String defaultBuildContainerImageName;
 
-    private String defaultScmContainerImageName;
+    private String scmContainerImageName;
 
     /**
      * Remoting Container image name. Jenkins Remoting will be launched in it.
@@ -73,12 +74,12 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return defaultBuildContainerImageName;
     }
 
-    public String getDefaultScmContainerImageName() {
-        return defaultScmContainerImageName;
+    public String getScmContainerImageName() {
+        return StringUtils.isBlank(scmContainerImageName) ? "buildpack-deps:scm" : scmContainerImageName;
     }
 
     public String getRemotingContainerImageName() {
-        return remotingContainerImageName;
+        return StringUtils.isBlank(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
     }
 
     public DockerServerEndpoint getDockerHost() {
@@ -90,8 +91,8 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         this.defaultBuildContainerImageName = defaultBuildContainerImageName;
     }
 
-    public void setDefaultScmContainerImageName(String defaultScmContainerImageName) {
-        this.defaultScmContainerImageName = defaultScmContainerImageName;
+    public void setScmContainerImageName(String scmContainerImageName) {
+        this.scmContainerImageName = scmContainerImageName;
     }
 
     @DataBoundSetter
@@ -106,7 +107,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
-        return new DockerJobContainersProvisioner(job, dockerHost, slaveListener, getDefaultBuildContainerImageName(job), remotingContainerImageName);
+        return new DockerJobContainersProvisioner(job, dockerHost, slaveListener, remotingContainerImageName, scmContainerImageName, getDefaultBuildContainerImageName(job));
     }
 
     private String getDefaultBuildContainerImageName(Job job) {

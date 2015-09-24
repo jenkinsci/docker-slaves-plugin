@@ -34,10 +34,6 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     protected ContainerInstance remotingContainer;
 
-    protected final String buildContainerBaseImage;
-
-    protected final String scmContainerImage;
-
     protected List<ContainerInstance> buildContainers = new ArrayList<ContainerInstance>();
 
     protected List<ContainerInstance> sideContainers = new ArrayList<ContainerInstance>();
@@ -47,16 +43,7 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
      */
     private transient boolean preScm;
 
-    public JobBuildsContainersContext(String remotingContainerImageName, String buildContainerImageName, List<SideContainerDefinition> sideContainerDefinitions) {
-        remotingContainer = new ContainerInstance(remotingContainerImageName);
-        buildContainerBaseImage = buildContainerImageName;
-        scmContainerImage = DockerSlaves.get().getDefaultScmContainerImageName();
-
-        if (sideContainerDefinitions != null) {
-            for (SideContainerDefinition definition: sideContainerDefinitions) {
-                sideContainers.add(new ContainerInstance(definition.getImage()));
-            }
-        }
+    public JobBuildsContainersContext() {
         preScm = true;
     }
 
@@ -72,19 +59,12 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         return buildContainers;
     }
 
+    public boolean isPreScm() {
+        return preScm;
+    }
 
     public void setRemotingContainer(ContainerInstance remotingContainer) {
         this.remotingContainer = remotingContainer;
-    }
-
-    public String getScmContainerImage() {
-        return scmContainerImage;
-    }
-
-    public ContainerInstance createBuildContainer() {
-        ContainerInstance current = new ContainerInstance(preScm ? scmContainerImage : buildContainerBaseImage);
-        buildContainers.add(current);
-        return current;
     }
 
     public List<ContainerInstance> getSideContainers() {

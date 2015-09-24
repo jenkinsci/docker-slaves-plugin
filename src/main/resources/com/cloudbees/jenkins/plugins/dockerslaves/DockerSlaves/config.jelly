@@ -32,7 +32,7 @@
 
     <f:property field="dockerHost"/>
 
-    <f:entry title="Default SCM image" field="defaultScmContainerImageName">
+    <f:entry title="Default SCM image" field="scmContainerImageName">
       <f:textbox default="buildpack-deps:scm"/>
     </f:entry>
 

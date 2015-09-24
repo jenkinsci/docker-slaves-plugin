@@ -65,13 +65,13 @@ public class DockerDriver implements Closeable {
         dockerEnv.close();
     }
 
-    public boolean hasContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {
-        if (StringUtils.isEmpty(instance.getId())) {
+    public boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException {
+        if (StringUtils.isEmpty(id)) {
             return false;
         }
 
         ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("inspect", "-f", "'{{.Id}}'", instance.getId());
+                .add("inspect", "-f", "'{{.Id}}'", id);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -85,7 +85,8 @@ public class DockerDriver implements Closeable {
         }
     }
 
-    public void createRemotingContainer(Launcher launcher, ContainerInstance remotingContainer) throws IOException, InterruptedException {
+    public ContainerInstance createRemotingContainer(Launcher launcher, String image) throws IOException, InterruptedException {
+
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create", "--interactive")
 
@@ -93,7 +94,8 @@ public class DockerDriver implements Closeable {
                 .add("--log-driver=none")
 
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
-                .add(remotingContainer.getImageName()).add("java")
+                .add(image)
+                .add("java")
 
                 // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
                 .add("-Djava.io.tmpdir=/home/jenkins/.tmp")
@@ -105,20 +107,20 @@ public class DockerDriver implements Closeable {
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
         String containerId = out.toString("UTF-8").trim();
-        remotingContainer.setId(containerId);
 
         if (status != 0) {
             throw new IOException("Failed to run docker image");
         }
 
         putFileContent(launcher, containerId, "/home/jenkins", "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
+        return new ContainerInstance(image, containerId);
     }
 
     public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
-                .add("--workdir", starter.pwd().toString())
+                .add("--workdir", starter.pwd().getRemote())
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--user", "10000:10000");

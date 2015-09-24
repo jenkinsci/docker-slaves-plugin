@@ -38,11 +38,10 @@ import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import java.io.IOException;
 
 /**
- * Provision {@link DockerSlave} to provide queued task an executor.
+ * Provision {@link ContainerInstance}s based on ${@link JobBuildsContainersDefinition} to provide a queued task
+ * an executor.
  */
 public class DockerJobContainersProvisioner {
-
-    protected final Job job;
 
     private final JobBuildsContainersContext context;
 
@@ -52,20 +51,23 @@ public class DockerJobContainersProvisioner {
 
     private final Launcher localLauncher;
 
-    public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String defaultBuildContainerImageName, String remotingContainerImageName) throws IOException, InterruptedException {
-        this.job = job;
+    private final JobBuildsContainersDefinition spec;
+
+    private final String remotingImage;
+    private final String scmImage;
+    private final String buildImage;
+
+    public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String remotingImage, String scmImage, String defaultBuildImage) throws IOException, InterruptedException {
         this.slaveListener = slaveListener;
         this.driver = new DockerDriver(dockerHost, job);
         localLauncher = new Launcher.LocalLauncher(slaveListener);
+        spec = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
 
-        String buildContainerImageName = defaultBuildContainerImageName;
-        JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
-
-        if (StringUtils.isNotEmpty(def.getBuildHostImage())) {
-            buildContainerImageName = def.getBuildHostImage();
-        }
-
-        context = new JobBuildsContainersContext(remotingContainerImageName, buildContainerImageName, def.getSideContainers());
+        this.remotingImage = remotingImage;
+        this.scmImage = scmImage;
+        this.buildImage = StringUtils.isBlank(spec.getBuildHostImage()) ?
+                defaultBuildImage : spec.getBuildHostImage();
+        context = new JobBuildsContainersContext();
 
         // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
         // could rely on docker volume driver
@@ -76,7 +78,7 @@ public class DockerJobContainersProvisioner {
         if (lastBuild != null) {
             JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
             if (previousContext != null && previousContext.getRemotingContainer() != null) {
-                context.getRemotingContainer().setId(previousContext.getRemotingContainer().getId());
+                context.setRemotingContainer(previousContext.getRemotingContainer());
             }
         }
     }
@@ -88,11 +90,12 @@ public class DockerJobContainersProvisioner {
     public void prepareRemotingContainer()  throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
         if (context.getRemotingContainer() != null) {
-            if (driver.hasContainer(localLauncher, context.getRemotingContainer())) {
+            if (driver.hasContainer(localLauncher, context.getRemotingContainer().getId())) {
                 return;
             }
         }
-        driver.createRemotingContainer(localLauncher, context.getRemotingContainer());
+        final ContainerInstance remotingContainer = driver.createRemotingContainer(localLauncher, remotingImage);
+        context.setRemotingContainer(remotingContainer);
     }
 
     public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener) {
@@ -101,7 +104,9 @@ public class DockerJobContainersProvisioner {
     }
 
     public BuildContainer newBuildContainer(Launcher.ProcStarter procStarter) throws IOException, InterruptedException {
-        return new BuildContainer(context.createBuildContainer(), procStarter);
+        final ContainerInstance c = new ContainerInstance(context.isPreScm() ? scmImage : buildImage);
+        context.getBuildContainers().add(c);
+        return new BuildContainer(c, procStarter);
     }
 
     public void createBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
