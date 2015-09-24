@@ -30,6 +30,7 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -52,7 +53,7 @@ public class JobBuildsContainersDefinition extends JobProperty {
     }
 
     public String getBuildHostImage() {
-        return buildHostImage;
+        return StringUtils.isBlank(buildHostImage) ? DockerSlaves.get().getDefaultBuildContainerImageName() : buildHostImage;
     }
 
     public List<SideContainerDefinition> getSideContainers() {

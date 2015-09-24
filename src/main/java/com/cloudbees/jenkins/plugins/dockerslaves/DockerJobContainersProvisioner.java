@@ -57,7 +57,7 @@ public class DockerJobContainersProvisioner {
     private final String scmImage;
     private final String buildImage;
 
-    public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String remotingImage, String scmImage, String defaultBuildImage) throws IOException, InterruptedException {
+    public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.slaveListener = slaveListener;
         this.driver = new DockerDriver(dockerHost, job);
         localLauncher = new Launcher.LocalLauncher(slaveListener);
@@ -65,8 +65,7 @@ public class DockerJobContainersProvisioner {
 
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;
-        this.buildImage = StringUtils.isBlank(spec.getBuildHostImage()) ?
-                defaultBuildImage : spec.getBuildHostImage();
+        this.buildImage = spec.getBuildHostImage();
         context = new JobBuildsContainersContext();
 
         // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace

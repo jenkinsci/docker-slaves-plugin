@@ -107,12 +107,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
-        return new DockerJobContainersProvisioner(job, dockerHost, slaveListener, remotingContainerImageName, scmContainerImageName, getDefaultBuildContainerImageName(job));
-    }
-
-    private String getDefaultBuildContainerImageName(Job job) {
-        // TODO iterate over job.getParent() to find configuration for a default container image at folder level
-        return defaultBuildContainerImageName;
+        return new DockerJobContainersProvisioner(job, dockerHost, slaveListener, remotingContainerImageName, scmContainerImageName);
     }
 
     public static DockerSlaves get() {
