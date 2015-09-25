@@ -36,5 +36,5 @@ import java.io.IOException;
  */
 public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
 
-    abstract String getImage(TaskListener listener) throws IOException, InterruptedException;
+    abstract String getImage(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
 }

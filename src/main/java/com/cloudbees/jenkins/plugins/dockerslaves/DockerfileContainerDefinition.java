@@ -26,13 +26,26 @@
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
+import hudson.org.apache.tools.tar.TarOutputStream;
+import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -60,20 +73,38 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(TaskListener listener) throws IOException, InterruptedException {
+    public String getImage(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
         if (image != null) return image;
         String tag = Long.toHexString(System.nanoTime());
 
 
-        // TODO we need to run this command from a laucnher which can run docker cli, is configured to access dockerhost,
-        // and has workspace mounted. Not sure yet.
+        final FilePath workspace = procStarter.pwd();
+        FilePath contextRoot = workspace.child(contextPath);
 
-        final Launcher launcher = null;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        TarOutputStream tar = new TarOutputStream(new GZIPOutputStream(out));
+
+        final byte[] b = contextRoot.child(dockerfile).act(FILECONTENT);
+        TarEntry entry = new TarEntry("Dockerfile");
+        entry.setUserId(0);
+        entry.setGroupId(0);
+        entry.setSize(b.length);
+
+        tar.putNextEntry(entry);
+        tar.write(b);
+        tar.closeEntry();
+        tar.close();
+        out.close();
+
+        // TODO add context files to tar.gz
+
+        final Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launcher.launch()
-                .cmds("docker", "build", "-t", tag, "-f", dockerfile, contextPath)
+                .cmds("docker", "build", "-t", tag, "-")
+                .stdin(new ByteArrayInputStream(out.toByteArray()))
                 .join();
         if (status != 0) {
-            throw new IOException("Failed to build image from Dockerfile");
+            throw new IOException("Failed to build image from Dockerfile "+dockerfile);
         }
         this.image = tag;
         return tag;
@@ -87,4 +118,12 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
             return "Build Dockerfile";
         }
     }
+
+
+    private static MasterToSlaveFileCallable<byte[]> FILECONTENT = new MasterToSlaveFileCallable<byte[]>() {
+        @Override
+        public byte[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+            return FileUtils.readFileToByteArray(f);
+        }
+    };
 }

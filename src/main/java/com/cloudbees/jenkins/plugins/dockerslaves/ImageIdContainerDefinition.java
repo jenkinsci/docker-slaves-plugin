@@ -26,9 +26,13 @@
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -46,7 +50,17 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(TaskListener listener) {
+    public String getImage(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+        if (forcePull) {
+            final Launcher launcher = new Launcher.LocalLauncher(listener);
+            int status = launcher.launch()
+                    .cmds("docker", "pull", image)
+                    .join();
+            if (status != 0) {
+                throw new IOException("Failed to pull image "+image);
+            }
+        }
+
         return image;
     }
 

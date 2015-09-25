@@ -115,7 +115,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public static DockerSlaves get() {
-        return (DockerSlaves) Jenkins.getInstance().getPlugin("docker-slaves");
+        return Jenkins.getInstance().getPlugin(DockerSlaves.class);
     }
 
     @Override

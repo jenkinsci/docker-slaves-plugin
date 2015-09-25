@@ -104,7 +104,7 @@ public class DockerJobContainersProvisioner {
         if (context.isPreScm()) {
             return newBuildContainer(procStarter, scmImage);
         } else {
-            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(listener);
+            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(procStarter, listener);
             return newBuildContainer(procStarter, buildImage);
         }
     }
