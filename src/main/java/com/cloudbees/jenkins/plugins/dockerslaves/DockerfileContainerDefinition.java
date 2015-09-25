@@ -26,38 +26,65 @@
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
+import hudson.Launcher;
 import hudson.model.Descriptor;
+import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class SideContainerDefinition extends AbstractDescribableImpl<SideContainerDefinition> {
+public class DockerfileContainerDefinition extends ContainerDefinition {
 
-    private final String name;
-    private final ContainerDefinition spec;
+    private final String dockerfile;
+
+    private final String contextPath;
+
+    private transient String image;
 
     @DataBoundConstructor
-    public SideContainerDefinition(String name, ContainerDefinition spec) {
-        this.name = name;
-        this.spec = spec;
+    public DockerfileContainerDefinition(String contextPath, String dockerfile) {
+        this.contextPath = contextPath;
+        this.dockerfile = dockerfile;
     }
 
-    public String getName() {
-        return name;
+    public String getDockerfile() {
+        return dockerfile;
     }
 
-    public ContainerDefinition getSpec() {
-        return spec;
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    @Override
+    public String getImage(TaskListener listener) throws IOException, InterruptedException {
+        if (image != null) return image;
+        String tag = Long.toHexString(System.nanoTime());
+
+
+        // TODO we need to run this command from a laucnher which can run docker cli, is configured to access dockerhost,
+        // and has workspace mounted. Not sure yet.
+
+        final Launcher launcher = null;
+        int status = launcher.launch()
+                .cmds("docker", "build", "-t", tag, "-f", dockerfile, contextPath)
+                .join();
+        if (status != 0) {
+            throw new IOException("Failed to build image from Dockerfile");
+        }
+        this.image = tag;
+        return tag;
     }
 
     @Extension
-    public static class DescriptorImpl extends Descriptor<SideContainerDefinition> {
+    public static class DescriptorImpl extends Descriptor<ContainerDefinition> {
 
         @Override
         public String getDisplayName() {
-            return "Side Container";
+            return "Build Dockerfile";
         }
     }
 }

@@ -26,38 +26,36 @@
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import hudson.model.TaskListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class SideContainerDefinition extends AbstractDescribableImpl<SideContainerDefinition> {
+public class ImageIdContainerDefinition extends ContainerDefinition {
 
-    private final String name;
-    private final ContainerDefinition spec;
+    private final String image;
+
+    private final boolean forcePull;
 
     @DataBoundConstructor
-    public SideContainerDefinition(String name, ContainerDefinition spec) {
-        this.name = name;
-        this.spec = spec;
+    public ImageIdContainerDefinition(String image, boolean forcePull) {
+        this.image = image;
+        this.forcePull = forcePull;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public String getImage(TaskListener listener) {
+        return image;
     }
 
-    public ContainerDefinition getSpec() {
-        return spec;
-    }
-
-    @Extension
-    public static class DescriptorImpl extends Descriptor<SideContainerDefinition> {
+    @Extension(ordinal = 99)
+    public static class DescriptorImpl extends Descriptor<ContainerDefinition> {
 
         @Override
         public String getDisplayName() {
-            return "Side Container";
+            return "Docker image";
         }
     }
 }

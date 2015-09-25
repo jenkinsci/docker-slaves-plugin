@@ -1,4 +1,3 @@
-<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
   ~
@@ -24,21 +23,5 @@
   ~
   -->
 
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:optionalBlock title="Run the build inside Docker containers" checked="${not empty instance.buildHostImage}" name="containersDefinition">
-      <f:dropdownDescriptorSelector title="Main build container" field="buildHostImage"/>
-
-      <f:entry field="sideContainers" title="Side containers">
-        <f:repeatableProperty add="Add a side container" field="sideContainers">
-          <f:entry title="">
-            <div align="right">
-              <f:repeatableDeleteButton />
-            </div>
-          </f:entry>
-        </f:repeatableProperty>
-      </f:entry>
-
-  </f:optionalBlock>
-
-</j:jelly>
-
+Always pull the image before launching the container, to ensure the latest is ran during the build.
+Usefull if you use a <code>latest</code> image. Will slow down the build, but ensure you always run the up-to-date image.

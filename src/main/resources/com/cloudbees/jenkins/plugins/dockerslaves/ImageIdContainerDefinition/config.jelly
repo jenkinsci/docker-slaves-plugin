@@ -25,20 +25,14 @@
   -->
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:optionalBlock title="Run the build inside Docker containers" checked="${not empty instance.buildHostImage}" name="containersDefinition">
-      <f:dropdownDescriptorSelector title="Main build container" field="buildHostImage"/>
 
-      <f:entry field="sideContainers" title="Side containers">
-        <f:repeatableProperty add="Add a side container" field="sideContainers">
-          <f:entry title="">
-            <div align="right">
-              <f:repeatableDeleteButton />
-            </div>
-          </f:entry>
-        </f:repeatableProperty>
-      </f:entry>
+  <f:entry title="Docker Image" field="image">
+    <f:textbox />
+  </f:entry>
 
-  </f:optionalBlock>
+  <f:entry title="Force pull" field="forcePull">
+    <f:checkbox/>
+  </f:entry>
 
 </j:jelly>
 

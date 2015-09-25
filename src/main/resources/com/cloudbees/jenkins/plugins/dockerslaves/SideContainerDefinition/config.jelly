@@ -29,8 +29,6 @@
         <f:textbox/>
       </f:entry>
 
-      <f:entry field="image" title="Images">
-        <f:textbox/>
-      </f:entry>
+      <f:dropdownDescriptorSelector title="Container" field="spec"/>
 </j:jelly>
 

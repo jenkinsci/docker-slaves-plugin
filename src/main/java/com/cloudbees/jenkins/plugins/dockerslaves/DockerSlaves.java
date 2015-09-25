@@ -64,6 +64,10 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
 
     private DockerServerEndpoint dockerHost;
 
+    public void start() throws IOException {
+        load();
+    }
+
     @Override
     public void configure(StaplerRequest req, JSONObject formData) throws IOException, ServletException, Descriptor.FormException {
         req.bindJSON(this, formData);

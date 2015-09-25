@@ -30,7 +30,6 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -42,18 +41,19 @@ import java.util.List;
  */
 public class JobBuildsContainersDefinition extends JobProperty {
 
-    private final String buildHostImage;
+    private final ContainerDefinition buildHostImage;
 
     private final List<SideContainerDefinition> sideContainers;
 
     @DataBoundConstructor
-    public JobBuildsContainersDefinition(String buildHostImage, List<SideContainerDefinition> sideContainers) {
+    public JobBuildsContainersDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
         this.sideContainers = sideContainers;
     }
 
-    public String getBuildHostImage() {
-        return StringUtils.isBlank(buildHostImage) ? DockerSlaves.get().getDefaultBuildContainerImageName() : buildHostImage;
+    public ContainerDefinition getBuildHostImage() {
+        return buildHostImage;
+        // return StringUtils.isBlank(buildHostImage) ? DockerSlaves.get().getDefaultBuildContainerImageName() : buildHostImage;
     }
 
     public List<SideContainerDefinition> getSideContainers() {
@@ -80,6 +80,6 @@ public class JobBuildsContainersDefinition extends JobProperty {
             if (containersDefinition.isNullObject()) return null;
             return req.bindJSON(JobBuildsContainersDefinition.class, containersDefinition);
         }
-
     }
+
 }

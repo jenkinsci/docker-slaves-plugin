@@ -55,7 +55,7 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
     @Override
     public Proc launch(ProcStarter starter) throws IOException {
         try {
-            DockerJobContainersProvisioner.BuildContainer buildContainer = provisioner.newBuildContainer(starter);
+            DockerJobContainersProvisioner.BuildContainer buildContainer = provisioner.newBuildContainer(starter, listener);
 
             if (!starter.quiet()) {
                 listener.getLogger().append("docker: creating build container from image '"+ buildContainer.getImageName() + "'\n");

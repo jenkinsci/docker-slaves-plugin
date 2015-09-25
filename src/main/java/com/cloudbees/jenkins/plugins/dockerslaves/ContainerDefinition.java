@@ -25,39 +25,16 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
-import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractDescribableImpl;
-import hudson.model.Descriptor;
-import org.kohsuke.stapler.DataBoundConstructor;
+import hudson.model.TaskListener;
+
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class SideContainerDefinition extends AbstractDescribableImpl<SideContainerDefinition> {
+public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
 
-    private final String name;
-    private final ContainerDefinition spec;
-
-    @DataBoundConstructor
-    public SideContainerDefinition(String name, ContainerDefinition spec) {
-        this.name = name;
-        this.spec = spec;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ContainerDefinition getSpec() {
-        return spec;
-    }
-
-    @Extension
-    public static class DescriptorImpl extends Descriptor<SideContainerDefinition> {
-
-        @Override
-        public String getDisplayName() {
-            return "Side Container";
-        }
-    }
+    abstract String getImage(TaskListener listener) throws IOException, InterruptedException;
 }

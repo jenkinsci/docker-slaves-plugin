@@ -32,7 +32,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.IOException;
@@ -55,7 +54,7 @@ public class DockerJobContainersProvisioner {
 
     private final String remotingImage;
     private final String scmImage;
-    private final String buildImage;
+    private String buildImage;
 
     public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.slaveListener = slaveListener;
@@ -65,7 +64,6 @@ public class DockerJobContainersProvisioner {
 
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;
-        this.buildImage = spec.getBuildHostImage();
         context = new JobBuildsContainersContext();
 
         // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
@@ -102,7 +100,16 @@ public class DockerJobContainersProvisioner {
         launcher.launch(computer, listener);
     }
 
-    public BuildContainer newBuildContainer(Launcher.ProcStarter procStarter) throws IOException, InterruptedException {
+    public BuildContainer newBuildContainer(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+        if (context.isPreScm()) {
+            return newBuildContainer(procStarter, scmImage);
+        } else {
+            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(listener);
+            return newBuildContainer(procStarter, buildImage);
+        }
+    }
+
+    private BuildContainer newBuildContainer(Launcher.ProcStarter procStarter, String buildImage) {
         final ContainerInstance c = new ContainerInstance(context.isPreScm() ? scmImage : buildImage);
         context.getBuildContainers().add(c);
         return new BuildContainer(c, procStarter);
