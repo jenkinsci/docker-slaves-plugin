@@ -49,15 +49,32 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
         this.forcePull = forcePull;
     }
 
+    public String getImage() {
+        return image;
+    }
+
     @Override
     public String getImage(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
-        if (forcePull) {
-            final Launcher launcher = new Launcher.LocalLauncher(listener);
-            int status = launcher.launch()
+
+        boolean pull = forcePull;
+        final Launcher launcher = new Launcher.LocalLauncher(listener);
+        int status = launcher.launch()
+                .cmds("docker", "inspect", "-f", "'{{.Id}}'", image)
+                .join();
+
+        if (status != 0) {
+            // Could be a docker failure, but most probably image isn't available
+            pull = true;
+        }
+
+        if (pull) {
+            listener.getLogger().println("Pulling docker image " + image);
+            status = launcher.launch()
                     .cmds("docker", "pull", image)
+                    .stdout(listener)
                     .join();
             if (status != 0) {
-                throw new IOException("Failed to pull image "+image);
+                throw new IOException("Failed to pull image " + image);
             }
         }
 

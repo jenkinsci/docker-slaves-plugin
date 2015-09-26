@@ -102,7 +102,7 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
         public void onChangeLogParsed(Run<?, ?> build, SCM scm, TaskListener listener, ChangeLogSet<?> changelog) throws Exception {
             final JobBuildsContainersContext action = build.getAction(JobBuildsContainersContext.class);
             if (action != null) {
-                action.onScmChekoutCompleted();
+                action.onScmChekoutCompleted(build, listener);
             }
         }
     }

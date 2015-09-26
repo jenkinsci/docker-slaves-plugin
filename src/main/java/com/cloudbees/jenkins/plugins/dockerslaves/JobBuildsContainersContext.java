@@ -25,10 +25,15 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import hudson.model.AbstractBuild;
 import hudson.model.BuildBadgeAction;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JobBuildsContainersContext implements BuildBadgeAction {
 
@@ -36,7 +41,7 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     protected List<ContainerInstance> buildContainers = new ArrayList<ContainerInstance>();
 
-    protected List<ContainerInstance> sideContainers = new ArrayList<ContainerInstance>();
+    protected Map<String, ContainerInstance> sideContainers = new HashMap<String, ContainerInstance>();
 
     /**
      * Flag to indicate the SCM checkout build phase is running.
@@ -47,7 +52,7 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         preScm = true;
     }
 
-    protected void onScmChekoutCompleted() {
+    protected void onScmChekoutCompleted(Run<?, ?> build, TaskListener listener) {
         preScm = false;
     }
 
@@ -67,12 +72,8 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         this.remotingContainer = remotingContainer;
     }
 
-    public List<ContainerInstance> getSideContainers() {
+    public Map<String, ContainerInstance> getSideContainers() {
         return sideContainers;
-    }
-
-    public void setSideContainers(List<ContainerInstance> sideContainers) {
-        this.sideContainers = sideContainers;
     }
 
     @Override

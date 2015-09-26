@@ -32,10 +32,10 @@
       <ul>
         <li>${it.remotingContainer.id} (${it.remotingContainer.imageName})</li>
         <j:forEach var="container" items="${it.buildContainers}">
-          <li>${it.id} (${it.imageName})</li>
+          <li>${container.id} (${container.imageName})</li>
         </j:forEach>
         <j:forEach var="container" items="${it.sideContainers}">
-          <li>${it.id} (${it.imageName})</li>
+          <li>${container.key} : ${container.value.id} (${container.value.imageName})</li>
         </j:forEach>
       </ul>
 

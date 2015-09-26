@@ -100,12 +100,30 @@ public class DockerJobContainersProvisioner {
         launcher.launch(computer, listener);
     }
 
-    public BuildContainer newBuildContainer(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+    public BuildContainer newBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
+        if (!context.isPreScm() && spec.getSideContainers().size() > 0 && context.getSideContainers().size() == 0) {
+            // In a ideal world we would run side containers when DockerSlave.DockerSlaveSCMListener detect scm checkout completed
+            // but then we don't have a ProcStarter reference. So do it first time a command is ran during the build
+            // after scm checkout completed. We detect this is the first time as spec > context
+            createSideContainers(starter, listener);
+        }
+
         if (context.isPreScm()) {
-            return newBuildContainer(procStarter, scmImage);
+            return newBuildContainer(starter, scmImage);
         } else {
-            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(procStarter, listener);
-            return newBuildContainer(procStarter, buildImage);
+            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(starter, listener);
+            return newBuildContainer(starter, buildImage);
+        }
+    }
+
+    private void createSideContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
+        for (SideContainerDefinition definition : spec.getSideContainers()) {
+            final String name = definition.getName();
+            final String image = definition.getSpec().getImage(starter, listener);
+            listener.getLogger().println("Starting " + name + " container");
+            ContainerInstance container = new ContainerInstance(image);
+            context.getSideContainers().put(name, container);
+            driver.launchSideContainer(localLauncher, container, context.getRemotingContainer());
         }
     }
 
@@ -123,14 +141,8 @@ public class DockerJobContainersProvisioner {
         return driver.startContainer(localLauncher, buildContainer.instance.getId(), buildContainer.procStarter.stdout());
     }
 
-    public void launchSideContainers(DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
-        for (ContainerInstance instance : context.getSideContainers()) {
-            driver.launchSideContainer(localLauncher, instance, context.getRemotingContainer());
-        }
-    }
-
     public void clean() throws IOException, InterruptedException {
-        for (ContainerInstance instance : context.getSideContainers()) {
+        for (ContainerInstance instance : context.getSideContainers().values()) {
             driver.removeContainer(localLauncher, instance);
         }
 
