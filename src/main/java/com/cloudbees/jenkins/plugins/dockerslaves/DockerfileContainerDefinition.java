@@ -72,9 +72,19 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         final FilePath workspace = procStarter.pwd();
         FilePath contextRoot = workspace.child(contextPath);
 
+        final FilePath pathToContext = contextRoot.child(contextPath);
+        if (!pathToContext.exists()) {
+            throw new IOException(pathToContext.getRemote() + " does not exists.");
+        }
+
+        final FilePath pathToDockerfile = contextRoot.child(dockerfile);
+        if (!pathToDockerfile.exists()) {
+            throw new IOException( pathToContext.getRemote() + " does not exists.");
+        }
+
         final File context = Util.createTempDir();
-        contextRoot.child(contextPath).copyRecursiveTo(new FilePath(context));
-        contextRoot.child(dockerfile).copyTo(new FilePath(new File(context, "Dockerfile")));
+        pathToContext.copyRecursiveTo(new FilePath(context));
+        pathToDockerfile.copyTo(new FilePath(new File(context, "Dockerfile")));
 
         final Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launcher.launch()
