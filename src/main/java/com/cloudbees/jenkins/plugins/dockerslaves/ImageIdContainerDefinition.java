@@ -29,6 +29,7 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
+import hudson.util.ArgumentListBuilder;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.ByteArrayInputStream;
@@ -54,12 +55,17 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+    public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
 
         boolean pull = forcePull;
         final Launcher launcher = new Launcher.LocalLauncher(listener);
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("inspect")
+                .add("-f", "'{{.Id}}'")
+                .add(image);
+        driver.prependArgs(args);
         int status = launcher.launch()
-                .cmds("docker", "inspect", "-f", "'{{.Id}}'", image)
+                .cmds(args)
                 .join();
 
         if (status != 0) {
@@ -68,9 +74,13 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
         }
 
         if (pull) {
+            args = new ArgumentListBuilder()
+                    .add("pull")
+                    .add(image);
+            driver.prependArgs(args);
             listener.getLogger().println("Pulling docker image " + image);
             status = launcher.launch()
-                    .cmds("docker", "pull", image)
+                    .cmds(args)
                     .stdout(listener)
                     .join();
             if (status != 0) {
