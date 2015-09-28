@@ -33,6 +33,7 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,7 +49,7 @@ public class JobBuildsContainersDefinition extends JobProperty {
     @DataBoundConstructor
     public JobBuildsContainersDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
-        this.sideContainers = sideContainers;
+        this.sideContainers = sideContainers==null ? new ArrayList<SideContainerDefinition>() : sideContainers;
     }
 
     public ContainerDefinition getBuildHostImage() {
