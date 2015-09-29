@@ -41,6 +41,7 @@ import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 import java.io.*;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -248,11 +249,17 @@ public class DockerDriver implements Closeable {
                 .add("start", containerId)).start();
     }
 
-    private Launcher.ProcStarter launchDockerCLI(Launcher launcher, ArgumentListBuilder args) {
-        if (dockerHost.getUri() != null) {
+    public void prependArgs(ArgumentListBuilder args){
+        if( dockerHost.getUri() != null) {
             args.prepend("-H", dockerHost.getUri());
+        }else{
+            LOGGER.log(Level.FINE , "no specified docker host");
         }
         args.prepend("docker");
+    }
+
+    private Launcher.ProcStarter launchDockerCLI(Launcher launcher, ArgumentListBuilder args) {
+        prependArgs(args);
 
         return launcher.launch()
                 .envs(dockerEnv.env())

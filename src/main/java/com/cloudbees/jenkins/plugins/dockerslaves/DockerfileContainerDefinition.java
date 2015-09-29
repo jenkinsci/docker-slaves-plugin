@@ -32,6 +32,7 @@ import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import hudson.util.ArgumentListBuilder;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -65,7 +66,7 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+    public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
         if (image != null) return image;
         String tag = Long.toHexString(System.nanoTime());
 
@@ -87,8 +88,13 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         pathToDockerfile.copyTo(new FilePath(new File(context, "Dockerfile")));
 
         final Launcher launcher = new Launcher.LocalLauncher(listener);
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("build")
+                .add("-t", tag)
+                .add(context.getAbsolutePath());
+        driver.prependArgs(args);
         int status = launcher.launch()
-                .cmds("docker", "build", "-t", tag, context.getAbsolutePath())
+                .cmds(args)
                 .stdout(listener)
                 .join();
         if (status != 0) {

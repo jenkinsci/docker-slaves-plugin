@@ -32,6 +32,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
+import hudson.util.ArgumentListBuilder;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.IOException;
@@ -96,7 +97,11 @@ public class DockerJobContainersProvisioner {
     }
 
     public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener) {
-        CommandLauncher launcher = new CommandLauncher("docker start -ia " + context.getRemotingContainer().getId());
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("start")
+                .add("-ia", context.getRemotingContainer().getId());
+        driver.prependArgs(args);
+        CommandLauncher launcher = new CommandLauncher(args.toString());
         launcher.launch(computer, listener);
     }
 
@@ -111,7 +116,7 @@ public class DockerJobContainersProvisioner {
         if (context.isPreScm()) {
             return newBuildContainer(starter, scmImage);
         } else {
-            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(starter, listener);
+            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
             return newBuildContainer(starter, buildImage);
         }
     }
@@ -119,7 +124,7 @@ public class DockerJobContainersProvisioner {
     private void createSideContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
         for (SideContainerDefinition definition : spec.getSideContainers()) {
             final String name = definition.getName();
-            final String image = definition.getSpec().getImage(starter, listener);
+            final String image = definition.getSpec().getImage(driver, starter, listener);
             listener.getLogger().println("Starting " + name + " container");
             ContainerInstance container = new ContainerInstance(image);
             context.getSideContainers().put(name, container);
