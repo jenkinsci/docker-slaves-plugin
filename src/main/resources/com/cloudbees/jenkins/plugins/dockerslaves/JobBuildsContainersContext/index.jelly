@@ -27,7 +27,7 @@
     <l:layout title="Containers" norefresh="true">
     <l:main-panel>
 
-    <h1><l:icon src="${app.rootUrl}/plugin/container-slaves/images/48x48/docker-logo.png"/> Containers used for this build</h1>
+    <h1><l:icon src="${app.rootUrl}/plugin/docker-slaves/images/48x48/docker-logo.png"/> Containers used for this build</h1>
 
       <ul>
         <li>${it.remotingContainer.id} (${it.remotingContainer.imageName})</li>

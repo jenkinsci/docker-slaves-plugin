@@ -78,7 +78,7 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     @Override
     public String getIconFileName() {
-        return "/plugin/container-slaves/images/24x24/docker-logo.png";
+        return "/plugin/docker-slaves/images/24x24/docker-logo.png";
     }
 
     @Override
