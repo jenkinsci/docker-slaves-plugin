@@ -85,7 +85,7 @@ public class DockerJobContainersProvisioner {
         return context;
     }
 
-    public void prepareRemotingContainer()  throws IOException, InterruptedException {
+    public void prepareRemotingContainer() throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
         if (context.getRemotingContainer() != null) {
             if (driver.hasContainer(localLauncher, context.getRemotingContainer().getId())) {
@@ -101,7 +101,7 @@ public class DockerJobContainersProvisioner {
                 .add("start")
                 .add("-ia", context.getRemotingContainer().getId());
         driver.prependArgs(args);
-        CommandLauncher launcher = new CommandLauncher(args.toString());
+        CommandLauncher launcher = new CommandLauncher(args.toString(), driver.dockerEnv.env());
         launcher.launch(computer, listener);
     }
 

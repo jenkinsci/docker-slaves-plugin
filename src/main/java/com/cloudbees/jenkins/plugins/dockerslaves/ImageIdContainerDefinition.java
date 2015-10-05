@@ -59,33 +59,16 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
 
         boolean pull = forcePull;
         final Launcher launcher = new Launcher.LocalLauncher(listener);
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("inspect")
-                .add("-f", "'{{.Id}}'")
-                .add(image);
-        driver.prependArgs(args);
-        int status = launcher.launch()
-                .cmds(args)
-                .join();
+        boolean result = driver.checkImageExists(launcher, image);
 
-        if (status != 0) {
+        if (!result) {
             // Could be a docker failure, but most probably image isn't available
             pull = true;
         }
 
         if (pull) {
-            args = new ArgumentListBuilder()
-                    .add("pull")
-                    .add(image);
-            driver.prependArgs(args);
             listener.getLogger().println("Pulling docker image " + image);
-            status = launcher.launch()
-                    .cmds(args)
-                    .stdout(listener)
-                    .join();
-            if (status != 0) {
-                throw new IOException("Failed to pull image " + image);
-            }
+            driver.pullImage(launcher, image);
         }
 
         return image;

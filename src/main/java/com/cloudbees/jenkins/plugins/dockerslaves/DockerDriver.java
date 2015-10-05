@@ -249,12 +249,46 @@ public class DockerDriver implements Closeable {
                 .add("start", containerId)).start();
     }
 
-    public void prependArgs(ArgumentListBuilder args){
-        if( dockerHost.getUri() != null) {
-            args.prepend("-H", dockerHost.getUri());
-        }else{
-            LOGGER.log(Level.FINE , "no specified docker host");
+    public void pullImage(Launcher launcher, String image) throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("pull")
+                .add(image);
+
+        int status =  launchDockerCLI(launcher, args)
+                .stdout(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new IOException("Failed to pull image " + image);
         }
+    }
+
+    public boolean checkImageExists(Launcher launcher, String image) throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("inspect")
+                .add("-f", "'{{.Id}}'")
+                .add(image);
+
+        return launchDockerCLI(launcher, args)
+                .stdout(launcher.getListener().getLogger()).join() == 0;
+    }
+
+    public int buildDockerfile(Launcher launcher, String dockerfilePath, String tag)  throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("build")
+                .add("-t", tag)
+                .add(dockerfilePath);
+
+        return launchDockerCLI(launcher, args)
+                .stdout(launcher.getListener().getLogger()).join();
+    }
+
+    public void prependArgs(ArgumentListBuilder args){
+        if (dockerHost.getUri() != null) {
+            args.prepend("-H", dockerHost.getUri());
+        } else {
+            LOGGER.log(Level.FINE, "no specified docker host");
+        }
+
         args.prepend("docker");
     }
 
