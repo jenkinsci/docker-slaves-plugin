@@ -14,7 +14,7 @@ See [announcement](http://blog.loof.fr/2015/09/introducing-docker-slaves-jenkins
 Prototyping (Docker Global Hack Day). Don't run in production. Use at your own risk. etc.
 Current implementation focus on Docker runtime, after cleanup the docker specific code will be isolated in a dedicated docker-slaves pluigin.
 
-see https://issues.jenkins-ci.org/browse/JENKINS/component/2083 for issues/tasks/RFE
+see https://issues.jenkins-ci.org/browse/JENKINS/component/20839 for issues/tasks/RFE
 
 ### What works?
 
