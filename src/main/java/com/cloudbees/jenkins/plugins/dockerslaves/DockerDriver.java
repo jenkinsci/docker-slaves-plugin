@@ -272,9 +272,16 @@ public class DockerDriver implements Closeable {
                 .stdout(launcher.getListener().getLogger()).join() == 0;
     }
 
-    public int buildDockerfile(Launcher launcher, String dockerfilePath, String tag)  throws IOException, InterruptedException {
+    public int buildDockerfile(Launcher launcher, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException {
+        String pullOption = "--pull=";
+        if (pull) {
+            pullOption += "true";
+        } else {
+            pullOption += "false";
+        }
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("build")
+                .add(pullOption)
                 .add("-t", tag)
                 .add(dockerfilePath);
 

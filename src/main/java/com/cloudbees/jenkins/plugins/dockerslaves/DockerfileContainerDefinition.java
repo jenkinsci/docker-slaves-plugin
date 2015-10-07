@@ -49,12 +49,15 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
 
     private final String contextPath;
 
+    private final boolean forcePull;
+
     private transient String image;
 
     @DataBoundConstructor
-    public DockerfileContainerDefinition(String contextPath, String dockerfile) {
+    public DockerfileContainerDefinition(String contextPath, String dockerfile, boolean forcePull) {
         this.contextPath = contextPath;
         this.dockerfile = dockerfile;
+        this.forcePull = forcePull;
     }
 
     public String getDockerfile() {
@@ -67,6 +70,7 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
 
     @Override
     public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+        boolean pull = forcePull;
         if (image != null) return image;
         String tag = Long.toHexString(System.nanoTime());
 
@@ -88,7 +92,7 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         pathToDockerfile.copyTo(new FilePath(new File(context, "Dockerfile")));
 
         final Launcher launcher = new Launcher.LocalLauncher(listener);
-        if (driver.buildDockerfile(launcher, context.getAbsolutePath(), tag) != 0) {
+        if (driver.buildDockerfile(launcher, context.getAbsolutePath(), tag, pull) != 0) {
             throw new IOException("Failed to build image from Dockerfile "+dockerfile);
         }
         Util.deleteRecursive(context);

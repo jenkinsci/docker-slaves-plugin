@@ -32,6 +32,9 @@
   <f:entry title="Context Path" field="contextPath">
     <f:textbox />
   </f:entry>
+  <f:entry title="Force pull" field="forcePull">
+    <f:checkbox/>
+  </f:entry>
 
 </j:jelly>
 
