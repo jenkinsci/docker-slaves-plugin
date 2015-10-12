@@ -44,11 +44,14 @@ public class JobBuildsContainersDefinition extends JobProperty {
 
     private final ContainerDefinition buildHostImage;
 
+    private final String createOptions;
+
     private final List<SideContainerDefinition> sideContainers;
 
     @DataBoundConstructor
-    public JobBuildsContainersDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
+    public JobBuildsContainersDefinition(ContainerDefinition buildHostImage, String createOptions, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
+        this.createOptions = createOptions;
         this.sideContainers = sideContainers==null ? new ArrayList<SideContainerDefinition>() : sideContainers;
     }
 
@@ -59,6 +62,10 @@ public class JobBuildsContainersDefinition extends JobProperty {
 
     public List<SideContainerDefinition> getSideContainers() {
         return sideContainers;
+    }
+
+    public String getCreateOptions() {
+        return createOptions;
     }
 
     @Extension

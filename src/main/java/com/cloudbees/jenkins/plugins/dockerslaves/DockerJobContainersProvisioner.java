@@ -139,7 +139,7 @@ public class DockerJobContainersProvisioner {
     }
 
     public void createBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
-        driver.createBuildContainer(localLauncher, buildContainer.instance, context.getRemotingContainer(), buildContainer.procStarter);
+        driver.createBuildContainer(localLauncher, buildContainer.instance, context.getRemotingContainer(), buildContainer.procStarter, spec.getCreateOptions());
     }
 
     public Proc startBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
