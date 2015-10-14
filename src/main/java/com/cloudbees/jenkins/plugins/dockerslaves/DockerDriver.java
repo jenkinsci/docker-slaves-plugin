@@ -117,7 +117,7 @@ public class DockerDriver implements Closeable {
         return new ContainerInstance(image, containerId);
     }
 
-    public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter) throws IOException, InterruptedException {
+    public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter, String createOptions) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
@@ -128,6 +128,14 @@ public class DockerDriver implements Closeable {
 
         for (String env : starter.envs()) {
             args.add("--env", env);
+        }
+
+        String[] extra_args = createOptions.split("\\|");
+        for (String extra_arg: extra_args) {
+            if (!extra_arg.trim().isEmpty()) {
+              String[] res = extra_arg.trim().split(" ", 2);
+              args.add(res[0], res[1]);
+            }
         }
 
         args.add(buildContainer.getImageName());

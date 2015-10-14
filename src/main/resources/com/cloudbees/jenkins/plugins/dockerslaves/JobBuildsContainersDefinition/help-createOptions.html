@@ -1,4 +1,3 @@
-<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
   ~
@@ -23,26 +22,6 @@
   ~  THE SOFTWARE.
   ~
   -->
-
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:optionalBlock title="Run the build inside Docker containers" checked="${not empty instance.buildHostImage}" name="containersDefinition">
-      <f:dropdownDescriptorSelector title="Main build container" field="buildHostImage"/>
-
-      <f:entry field="createOptions" title="Option for 'docker create' cmd">
-        <f:textbox/>
-      </f:entry>
-
-      <f:entry field="sideContainers" title="Side containers">
-        <f:repeatableProperty add="Add a side container" field="sideContainers">
-          <f:entry title="">
-            <div align="right">
-              <f:repeatableDeleteButton />
-            </div>
-          </f:entry>
-        </f:repeatableProperty>
-      </f:entry>
-
-  </f:optionalBlock>
-
-</j:jelly>
-
+You can specify extra params to the docker command 'create'. Each options are separate by a '|'
+</br>
+Ex: -v /tmp/data:/tmp/data | -l my_job
