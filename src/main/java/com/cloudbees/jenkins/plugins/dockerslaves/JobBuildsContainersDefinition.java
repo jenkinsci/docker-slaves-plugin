@@ -26,15 +26,17 @@
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
-import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.Job;
+
+import java.util.Collections;
+import java.util.List;
+
 import net.sf.json.JSONObject;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Definition for a set of containers to host the build.
@@ -49,7 +51,22 @@ public class JobBuildsContainersDefinition extends JobProperty {
     @DataBoundConstructor
     public JobBuildsContainersDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
-        this.sideContainers = sideContainers==null ? new ArrayList<SideContainerDefinition>() : sideContainers;
+        this.sideContainers = sideContainers == null ? Collections.<SideContainerDefinition>emptyList() : sideContainers;
+    }
+
+    /**
+     * When deserializing the config.xml file, XStream will instantiate a JobBuildsContainersDefinition
+     * without going through the constructor; this means that any checks or default values that might
+     * have been written in said constructor will be bypassed.
+     * <p>
+     * Fortunately, XStream calls the <code>readResolve</code> before the deserialized object
+     * is returned to its parent. We simply recreate a JobBuildsContainersDefinition using the
+     * deserialized values to replace the original one.
+     *
+     * @return a replacement JobBuildsContainersDefinition that went through the constructor
+     */
+    private Object readResolve() {
+        return new JobBuildsContainersDefinition(buildHostImage, sideContainers);
     }
 
     public ContainerDefinition getBuildHostImage() {
