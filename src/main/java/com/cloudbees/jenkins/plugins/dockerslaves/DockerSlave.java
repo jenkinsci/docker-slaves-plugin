@@ -28,6 +28,7 @@ package com.cloudbees.jenkins.plugins.dockerslaves;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
@@ -91,6 +92,8 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
             Computer c = Computer.currentComputer();
             if (c instanceof DockerComputer) {
                 build.addAction(((DockerComputer) c).getProvisioner().getContext());
+                Action temporaryLabel = build.getAction(DockerLabelAssignmentAction.class);
+                build.getActions().remove(temporaryLabel);
             }
             return new Environment() {};
         }
