@@ -87,6 +87,10 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public DockerServerEndpoint getDockerHost() {
+        if (dockerHost == null) {
+            dockerHost = new DockerServerEndpoint(null, null);
+        }
+
         return dockerHost;
     }
 
@@ -111,7 +115,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
-        return new DockerJobContainersProvisioner(job, dockerHost, slaveListener, remotingContainerImageName, scmContainerImageName);
+        return new DockerJobContainersProvisioner(job, getDockerHost(), slaveListener, getRemotingContainerImageName(), getScmContainerImageName());
     }
 
     public static DockerSlaves get() {
