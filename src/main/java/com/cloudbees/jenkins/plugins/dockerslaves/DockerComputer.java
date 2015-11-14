@@ -68,6 +68,17 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         terminate();
     }
 
+    /**
+     * Don't record slave termination when termination is
+     * initiated by this class.
+     */
+    @Override
+    public void recordTermination() {
+        if (isAcceptingTasks()) {
+            super.recordTermination();
+        }
+    }
+
     private void terminate() {
         LOGGER.info("Stopping Docker Slave after build completion");
         setAcceptingTasks(false);
