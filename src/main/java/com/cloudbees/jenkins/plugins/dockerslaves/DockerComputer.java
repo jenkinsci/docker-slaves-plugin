@@ -31,6 +31,7 @@ import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.slaves.AbstractCloudComputer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -43,6 +44,8 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
 
     private DockerJobContainersProvisioner provisioner;
 
+    private TeeTaskListener teeTasklistener;
+
     public DockerComputer(DockerSlave dockerSlave, Job job) {
         super(dockerSlave);
         this.job = job;
@@ -51,8 +54,8 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
     /**
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
      */
-    public DockerJobContainersProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
-        provisioner = DockerSlaves.get().buildProvisioner(job, slaveListener);
+    public DockerJobContainersProvisioner createProvisioner() throws IOException, InterruptedException {
+        provisioner = DockerSlaves.get().buildProvisioner(job, teeTasklistener);
         return provisioner;
     }
 
@@ -79,7 +82,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         }
     }
 
-    private void terminate() {
+    public void terminate() {
         LOGGER.info("Stopping Docker Slave after build completion");
         setAcceptingTasks(false);
         try {
@@ -94,6 +97,16 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         }
     }
 
+    public TeeTaskListener initTeeListener(TaskListener computerListener) throws IOException {
+        teeTasklistener = new TeeTaskListener(computerListener, File.createTempFile(getName(),"log"));
+
+        return teeTasklistener;
+    }
+
+    public void connectJobListener(TaskListener jobListener) throws IOException {
+        teeTasklistener.setSideOutputStream(jobListener.getLogger());
+    }
+
     public Job getJob() {
         return job;
     }
@@ -103,5 +116,4 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
     }
 
     private static final Logger LOGGER = Logger.getLogger(DockerComputer.class.getName());
-
 }

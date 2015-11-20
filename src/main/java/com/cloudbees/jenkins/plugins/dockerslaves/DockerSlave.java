@@ -118,6 +118,11 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
             throw new IllegalStateException("Can't create a launcher if computer is gone.");
         } else {
             DockerComputer dc = (DockerComputer) c;
+            try {
+                dc.connectJobListener(listener);
+            } catch (IOException e) {
+                e.printStackTrace(listener.getLogger());
+            }
             return new DockerLauncher(listener, c.getChannel(), c.isUnix(), dc.getProvisioner()).decorateFor(this);
         }
     }
