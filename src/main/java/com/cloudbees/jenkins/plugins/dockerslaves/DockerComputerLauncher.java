@@ -61,6 +61,39 @@ public class DockerComputerLauncher extends ComputerLauncher {
         }
     }
 
+    public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
+        // we need to capture taskListener here, as it's a private field of Computer
+        TeeTaskListener teeListener = computer.initTeeListener(listener);
+
+        DockerJobContainersProvisioner provisioner = computer.createProvisioner();
+        try {
+            provisioner.prepareRemotingContainer();
+            provisioner.launchRemotingContainer(computer, teeListener);
+        } catch (IOException e) {
+            e.printStackTrace(teeListener.getLogger());
+            computer.terminate();
+            recordFailureOnBuild(computer, teeListener, e);
+            throw e;
+        }
+    }
+
+    // -- A terrible hack; but we can't find a better way so far ---
+
+    protected void recordFailureOnBuild(final DockerComputer computer, TeeTaskListener teeListener, IOException e) throws IOException, InterruptedException {
+        Queue.Item queued = computer.getJob().getQueueItem();
+        Jenkins.getInstance().getQueue().cancel(queued);
+        Queue.Executable executable = queued.task.createExecutable();
+        if (executable instanceof Run) {
+            Run run = ((Run) executable);
+            writeFakeBuild(new File(run.getRootDir(),"build.xml"), run);
+            writeLog(new File(run.getRootDir(),"log"), teeListener);
+            run.reload();
+        } else {
+            // find a way to undo the previous createExecutable....
+        }
+    }
+
+
     private void writeTagBegin(OutputStream out, String tag) throws IOException {
         StringBuilder builder = new StringBuilder();
         builder.append("<").append(tag).append(">");
@@ -110,33 +143,5 @@ public class DockerComputerLauncher extends ComputerLauncher {
         }
     }
 
-    protected void recordFailureOnBuild(final DockerComputer computer, TeeTaskListener teeListener, IOException e) throws IOException, InterruptedException {
-        Queue.Item queued = computer.getJob().getQueueItem();
-        Jenkins.getInstance().getQueue().cancel(queued);
-        Queue.Executable executable = queued.task.createExecutable();
-        if (executable instanceof Run) {
-            Run run = ((Run) executable);
-            writeFakeBuild(new File(run.getRootDir(),"build.xml"), run);
-            writeLog(new File(run.getRootDir(),"log"), teeListener);
-            run.reload();
-        } else {
-            // find a way to undo the previous createExecutable....
-        }
-    }
 
-    public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
-        // we need to capture taskListener here, as it's a private field of Computer
-        TeeTaskListener teeListener = computer.initTeeListener(listener);
-
-        DockerJobContainersProvisioner provisioner = computer.createProvisioner();
-        try {
-            provisioner.prepareRemotingContainer();
-            provisioner.launchRemotingContainer(computer, teeListener);
-        } catch (IOException e) {
-            e.printStackTrace(teeListener.getLogger());
-            computer.terminate();
-            recordFailureOnBuild(computer, teeListener, e);
-            throw e;
-        }
-    }
 }
