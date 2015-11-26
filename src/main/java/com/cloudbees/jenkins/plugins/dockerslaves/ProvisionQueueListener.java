@@ -29,6 +29,7 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
+import hudson.model.Label;
 import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.queue.QueueListener;
@@ -57,10 +58,8 @@ public class ProvisionQueueListener extends QueueListener {
             if (def == null) return;
 
             try {
-                final DockerSlaves cloud = DockerSlaves.get();
-
                 LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
-                DockerLabelAssignmentAction action = cloud.createLabelAssignmentAction(bi);
+                DockerLabelAssignmentAction action = createLabelAssignmentAction();
                 bi.addAction(action);
 
                 // Immediately create a slave for this item
@@ -83,6 +82,12 @@ public class ProvisionQueueListener extends QueueListener {
                 e.printStackTrace();
             }
         }
+    }
+
+    private DockerLabelAssignmentAction createLabelAssignmentAction() {
+        final String id = Long.toHexString(System.nanoTime());
+        final Label label = Label.get("docker_" + id);
+        return new DockerLabelAssignmentAction(label);
     }
 
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());

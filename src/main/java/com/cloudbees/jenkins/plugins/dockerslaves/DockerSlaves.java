@@ -108,12 +108,6 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         this.dockerHost = dockerHost;
     }
 
-    public DockerLabelAssignmentAction createLabelAssignmentAction(final Queue.BuildableItem bi) {
-        final String id = Long.toHexString(System.nanoTime());
-        final Label label = Label.get("docker_" + id);
-        return new DockerLabelAssignmentAction(label);
-    }
-
     public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
         return new DockerJobContainersProvisioner(job, getDockerHost(), slaveListener, getRemotingContainerImageName(), getScmContainerImageName());
     }
