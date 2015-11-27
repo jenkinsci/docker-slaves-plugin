@@ -52,6 +52,10 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
+ * An ${@link EphemeralNode} using docker containers to host the build processes.
+ * Slave is dedicated to a specific ${@link Job}, and even better to a specific build, but when this class
+ * is created the build does not yet exists due to Jenkins lifecycle.
+ *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class DockerSlave extends Slave implements EphemeralNode {
@@ -81,9 +85,36 @@ public class DockerSlave extends Slave implements EphemeralNode {
         return this;
     }
 
+    @Override
+    public DockerComputer getComputer() {
+        return (DockerComputer) super.getComputer();
+    }
+
+    /**
+     * Create a custom ${@link Launcher} which relies on plil <code>docker run</code> to start a new process
+     */
+    @Override
+    public Launcher createLauncher(TaskListener listener) {
+        DockerComputer c = getComputer();
+        if (c == null) {
+            listener.error("Issue with creating launcher for slave " + name + ".");
+            throw new IllegalStateException("Can't create a launcher if computer is gone.");
+        }
+
+        try {
+            c.connectJobListener(listener);
+        } catch (IOException e) {
+            e.printStackTrace(listener.getLogger());
+        }
+        return new DockerLauncher(listener, c.getChannel(), c.isUnix(), c.getProvisioner()).decorateFor(this);
+    }
+
+    /**
+     * This listener get notified as the build is going to start. We use it to remove the temporary unique Label we
+     * created to ensure exclusive executor usage, but which would pollute Jenkins labels set.
+     */
     @Extension
     public static class DockerSlaveRunListener extends RunListener<AbstractBuild> {
-
         @Override
         public Environment setUpEnvironment(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException, Run.RunnerAbortedException {
             Computer c = Computer.currentComputer();
@@ -94,8 +125,13 @@ public class DockerSlave extends Slave implements EphemeralNode {
             }
             return new Environment() {};
         }
+
     }
 
+    /**
+     * This listener get notified as the build completes the SCM checkout. We use this event to determine when the
+     * build has to switch from SCM docker images to Build images to host build steps execution.
+     */
     @Extension
     public static class DockerSlaveSCMListener extends SCMListener {
         @Override
@@ -105,22 +141,6 @@ public class DockerSlave extends Slave implements EphemeralNode {
                 action.onScmChekoutCompleted(build, listener);
             }
         }
-    }
 
-    @Override
-    public Launcher createLauncher(TaskListener listener) {
-        SlaveComputer c = getComputer();
-        if (c == null) {
-            listener.error("Issue with creating launcher for slave " + name + ".");
-            throw new IllegalStateException("Can't create a launcher if computer is gone.");
-        } else {
-            DockerComputer dc = (DockerComputer) c;
-            try {
-                dc.connectJobListener(listener);
-            } catch (IOException e) {
-                e.printStackTrace(listener.getLogger());
-            }
-            return new DockerLauncher(listener, c.getChannel(), c.isUnix(), dc.getProvisioner()).decorateFor(this);
-        }
     }
 }
