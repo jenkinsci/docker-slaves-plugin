@@ -77,10 +77,6 @@ public class DockerSlave extends Slave implements EphemeralNode {
     }
 
     @Override
-    protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
-    }
-
-    @Override
     public Node asNode() {
         return this;
     }
