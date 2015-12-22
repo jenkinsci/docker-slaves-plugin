@@ -36,7 +36,6 @@ import hudson.model.Environment;
 import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.Run;
-import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.model.listeners.SCMListener;
@@ -46,7 +45,6 @@ import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
-import hudson.slaves.SlaveComputer;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -58,7 +56,7 @@ import java.util.Collections;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerSlave extends Slave implements EphemeralNode {
+public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
 
     private final Job job;
 
@@ -141,6 +139,10 @@ public class DockerSlave extends Slave implements EphemeralNode {
                 action.onScmChekoutCompleted(build, listener);
             }
         }
+
+    }
+    public void _terminate(TaskListener task){
+        //Do nothing, although it would be nice to clean a bit docker images
 
     }
 }
