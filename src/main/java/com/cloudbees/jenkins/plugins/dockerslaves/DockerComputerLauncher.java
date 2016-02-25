@@ -63,11 +63,11 @@ public class DockerComputerLauncher extends ComputerLauncher {
         }
     }
 
-    private void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
+    public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
         // we need to capture taskListener here, as it's a private field of Computer
         TeeTaskListener teeListener = computer.initTeeListener(listener);
 
-        DockerJobContainersProvisioner provisioner = computer.createProvisioner();
+        DockerProvisioner provisioner = computer.createProvisioner();
         try {
             provisioner.prepareRemotingContainer();
             provisioner.launchRemotingContainer(computer, teeListener);
@@ -82,17 +82,16 @@ public class DockerComputerLauncher extends ComputerLauncher {
     // -- A terrible hack; but we can't find a better way so far ---
 
     protected void recordFailureOnBuild(final DockerComputer computer, TeeTaskListener teeListener, IOException e) throws IOException, InterruptedException {
-        final Job job = computer.getJob();
-        Queue.Item queued = job.getQueueItem();
+        Queue.Item queued = computer.getItem();
         Jenkins.getInstance().getQueue().cancel(queued);
+        Queue.Executable executable = queued.task.createExecutable();
 
         // DockerComputer can only be used with AbstractProject
-        Run run = ((AbstractProject) job).createExecutable();
+        Run run = ((AbstractProject) executable).createExecutable();
         writeFakeBuild(new File(run.getRootDir(),"build.xml"), run);
         writeLog(new File(run.getRootDir(),"log"), teeListener);
         run.reload();
     }
-
 
     private void writeTagBegin(OutputStream out, String tag) throws IOException {
         StringBuilder builder = new StringBuilder();

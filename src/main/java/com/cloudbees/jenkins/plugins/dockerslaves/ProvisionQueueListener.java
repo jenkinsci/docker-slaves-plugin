@@ -64,8 +64,11 @@ public class ProvisionQueueListener extends QueueListener {
 
                 // Immediately create a slave for this item
                 // Real provisioning will happen later
+                String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
+                String description = "Container slave for building " + job.getFullName();
+                DockerSlaves plugin = DockerSlaves.get();
+                final Node node = new DockerSlave(slaveName, description, action.getLabel().toString(), bi, plugin.createStandardJobProvisionerFactory(job));
 
-                final Node node = new DockerSlave(job, action.getLabel().toString());
                 Computer.threadPoolForRemoting.submit(new Runnable() {
                     @Override
                     public void run() {

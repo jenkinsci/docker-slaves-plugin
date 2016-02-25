@@ -52,6 +52,10 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         preScm = true;
     }
 
+    public JobBuildsContainersContext(boolean preScm) {
+        this.preScm = preScm;
+    }
+
     protected void onScmChekoutCompleted(Run<?, ?> build, TaskListener listener) {
         preScm = false;
     }

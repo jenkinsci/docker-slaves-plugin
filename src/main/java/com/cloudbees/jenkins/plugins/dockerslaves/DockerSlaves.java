@@ -108,8 +108,12 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         this.dockerHost = dockerHost;
     }
 
-    public DockerJobContainersProvisioner buildProvisioner(Job job, TaskListener slaveListener) throws IOException, InterruptedException {
-        return new DockerJobContainersProvisioner(job, getDockerHost(), slaveListener, getRemotingContainerImageName(), getScmContainerImageName());
+    public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) {
+        return new DockerProvisionerFactory.StandardJob(getDockerHost(), getRemotingContainerImageName(), getScmContainerImageName(), job);
+    }
+
+    public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, JobBuildsContainersDefinition spec) {
+        return new DockerProvisionerFactory.PipelineJob(getDockerHost(), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
     }
 
     public static DockerSlaves get() {

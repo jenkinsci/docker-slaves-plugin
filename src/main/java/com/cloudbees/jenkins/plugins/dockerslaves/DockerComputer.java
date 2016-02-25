@@ -30,6 +30,7 @@ import hudson.model.Job;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.slaves.AbstractCloudComputer;
+import hudson.slaves.SlaveComputer;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,22 +41,25 @@ import java.util.logging.Logger;
  */
 public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
 
-    private final Job job;
+    private final DockerProvisionerFactory provisionerFactory;
 
-    private DockerJobContainersProvisioner provisioner;
+    private DockerProvisioner provisioner;
 
     private TeeTaskListener teeTasklistener;
 
-    public DockerComputer(DockerSlave dockerSlave, Job job) {
+    private final Queue.Item item;
+
+    public DockerComputer(DockerSlave dockerSlave, DockerProvisionerFactory provisionerFactory, Queue.Item item) {
         super(dockerSlave);
-        this.job = job;
+        this.provisionerFactory = provisionerFactory;
+        this.item = item;
     }
 
     /**
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
      */
-    public DockerJobContainersProvisioner createProvisioner() throws IOException, InterruptedException {
-        provisioner = DockerSlaves.get().buildProvisioner(job, teeTasklistener);
+    public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
+        provisioner = provisionerFactory.createProvisioner(teeTasklistener);
         return provisioner;
     }
 
@@ -69,6 +73,10 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
     public void taskCompletedWithProblems(Executor executor, Queue.Task task, long durationMS, Throwable problems) {
         super.taskCompletedWithProblems(executor, task, durationMS, problems);
         terminate();
+    }
+
+    public Queue.Item getItem() {
+        return item;
     }
 
     /**
@@ -107,11 +115,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         teeTasklistener.setSideOutputStream(jobListener.getLogger());
     }
 
-    public Job getJob() {
-        return job;
-    }
-
-    public DockerJobContainersProvisioner getProvisioner() {
+    public DockerProvisioner getProvisioner() {
         return provisioner;
     }
 

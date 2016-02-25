@@ -35,6 +35,7 @@ import hudson.model.Descriptor;
 import hudson.model.Environment;
 import hudson.model.Job;
 import hudson.model.Node;
+import hudson.model.Queue;
 import hudson.model.Run;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
@@ -58,26 +59,28 @@ import java.util.Collections;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerSlave extends Slave implements EphemeralNode {
+public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
 
-    private final Job job;
+    private final DockerProvisionerFactory provisionerFactory;
 
-    public DockerSlave(Job job, String labelString) throws Descriptor.FormException, IOException {
+    private final Queue.Item item;
+
+    public DockerSlave(String name, String nodeDescription, String labelString, Queue.Item item, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
-        super("Container for " +job.getName() + "#" + job.getNextBuildNumber(), "Container slave for building " + job.getFullName(),
-                "/home/jenkins", 1, Mode.EXCLUSIVE, labelString,
+        super(name, nodeDescription, "/home/jenkins", 1, Mode.EXCLUSIVE, labelString,
                 new DockerComputerLauncher(),
                 RetentionStrategy.NOOP, // Slave is stopped on completion see DockerComputer.taskCompleted
                 Collections.<NodeProperty<?>>emptyList());
-        this.job = job;
+        this.provisionerFactory = provisionerFactory;
+        this.item = item;
     }
 
     public DockerComputer createComputer() {
-        return new DockerComputer(this, job);
+        return new DockerComputer(this, provisionerFactory, item);
     }
 
-    public Job getJob() {
-        return job;
+    @Override
+    protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
     }
 
     @Override

@@ -95,6 +95,7 @@ public class DockerDriver implements Closeable {
                 .add("--log-driver=none")
 
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
+                .add("--user", "10000:10000")
                 .add(image)
                 .add("java")
 
@@ -209,8 +210,14 @@ public class DockerDriver implements Closeable {
     }
 
     public Proc startContainer(Launcher launcher, String containerId, OutputStream outputStream) throws IOException, InterruptedException {
-        return launchDockerCLI(launcher, new ArgumentListBuilder()
-                .add("start", "-ia", containerId)).stdout(outputStream).start();
+        Launcher.ProcStarter procStarter = launchDockerCLI(launcher, new ArgumentListBuilder()
+                .add("start", "-ia", containerId));
+
+        if (outputStream != null) {
+            procStarter.stdout(outputStream);
+        }
+
+        return procStarter.start();
     }
 
     public int removeContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {

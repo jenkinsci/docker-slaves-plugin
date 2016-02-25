@@ -27,13 +27,10 @@ package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Launcher;
 import hudson.Proc;
-import hudson.model.Job;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.IOException;
 
@@ -41,44 +38,30 @@ import java.io.IOException;
  * Provision {@link ContainerInstance}s based on ${@link JobBuildsContainersDefinition} to provide a queued task
  * an executor.
  */
-public class DockerJobContainersProvisioner {
+public class DockerProvisioner {
 
-    private final JobBuildsContainersContext context;
+    protected final JobBuildsContainersContext context;
 
-    private final TaskListener slaveListener;
+    protected final TaskListener slaveListener;
 
-    private final DockerDriver driver;
+    protected final DockerDriver driver;
 
-    private final Launcher localLauncher;
+    protected final Launcher localLauncher;
 
-    private final JobBuildsContainersDefinition spec;
+    protected final JobBuildsContainersDefinition spec;
 
-    private final String remotingImage;
-    private final String scmImage;
-    private String buildImage;
+    protected final String remotingImage;
+    protected final String scmImage;
+    protected String buildImage;
 
-    public DockerJobContainersProvisioner(Job job, DockerServerEndpoint dockerHost, TaskListener slaveListener, String remotingImage, String scmImage) throws IOException, InterruptedException {
+    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher localLauncher, JobBuildsContainersDefinition spec, String remotingImage, String scmImage) {
+        this.context = context;
         this.slaveListener = slaveListener;
-        this.driver = new DockerDriver(dockerHost, job);
-        localLauncher = new Launcher.LocalLauncher(slaveListener);
-        spec = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
-
+        this.driver = driver;
+        this.localLauncher = localLauncher;
+        this.spec = spec;
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;
-        context = new JobBuildsContainersContext();
-
-        // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
-        // could rely on docker volume driver
-        // in the meantime, we just rely on previous build's remoting container as a data volume container
-
-        // reuse previous remoting container to retrieve workspace
-        Run lastBuild = job.getBuilds().getLastBuild();
-        if (lastBuild != null) {
-            JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
-            if (previousContext != null && previousContext.getRemotingContainer() != null) {
-                context.setRemotingContainer(previousContext.getRemotingContainer());
-            }
-        }
     }
 
     public JobBuildsContainersContext getContext() {

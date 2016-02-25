@@ -42,11 +42,11 @@ import java.util.logging.Logger;
 public class DockerLauncher extends Launcher.DecoratedLauncher {
     private static final Logger LOGGER = Logger.getLogger(DockerLauncher.class.getName());
 
-    private final DockerJobContainersProvisioner provisioner;
+    private final DockerProvisioner provisioner;
 
     private final Launcher localLauncher;
 
-    public DockerLauncher(TaskListener listener, VirtualChannel channel, boolean isUnix, DockerJobContainersProvisioner provisioner)  {
+    public DockerLauncher(TaskListener listener, VirtualChannel channel, boolean isUnix, DockerProvisioner provisioner)  {
         super(new Launcher.RemoteLauncher(listener, channel, isUnix));
         this.provisioner = provisioner;
         this.localLauncher = new Launcher.LocalLauncher(listener);
@@ -55,7 +55,7 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
     @Override
     public Proc launch(ProcStarter starter) throws IOException {
         try {
-            DockerJobContainersProvisioner.BuildContainer buildContainer = provisioner.newBuildContainer(starter, listener);
+            DockerProvisioner.BuildContainer buildContainer = provisioner.newBuildContainer(starter, listener);
 
             if (!starter.quiet()) {
                 listener.getLogger().append("docker: creating build container from image '"+ buildContainer.getImageName() + "'\n");
