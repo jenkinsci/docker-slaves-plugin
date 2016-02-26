@@ -67,9 +67,22 @@ Note: this implementation relies on docker cli ran from jenkins master, and as s
 
 # Future
 
-## Workflow support
+## Pipeline support
 
-see [this document](Workflow.md)
+Even if in the future section, there's an experimental support for Pipeline plugin. The idea is to replace `node` with `dockerNode`.
+
+This pipeline
+
+```groovy
+dockerNode("maven:3.3.3-jdk-8") {
+  git "https://github.com/wakaleo/game-of-life"
+  sh 'mvn clean package'
+}
+```
+
+will build Game of life with Maven 3.3.3 on JDK 8 on a disposable Docker pod.
+
+For discussion around the implementation, see [this document](Workflow.md)
 
 ## Provisioning issue reporting
 
