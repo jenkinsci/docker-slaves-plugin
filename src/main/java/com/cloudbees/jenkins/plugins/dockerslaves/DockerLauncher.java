@@ -44,30 +44,15 @@ public class DockerLauncher extends Launcher.DecoratedLauncher {
 
     private final DockerProvisioner provisioner;
 
-    private final Launcher localLauncher;
-
     public DockerLauncher(TaskListener listener, VirtualChannel channel, boolean isUnix, DockerProvisioner provisioner)  {
         super(new Launcher.RemoteLauncher(listener, channel, isUnix));
         this.provisioner = provisioner;
-        this.localLauncher = new Launcher.LocalLauncher(listener);
     }
 
     @Override
     public Proc launch(ProcStarter starter) throws IOException {
         try {
-            DockerProvisioner.BuildContainer buildContainer = provisioner.newBuildContainer(starter, listener);
-
-            if (!starter.quiet()) {
-                listener.getLogger().append("docker: creating build container from image '"+ buildContainer.getImageName() + "'\n");
-            }
-            provisioner.createBuildContainer(buildContainer);
-
-            if (!starter.quiet()) {
-                listener.getLogger().append("docker: starting build container " + buildContainer.getId().substring(0, 11) + "\n");
-                maskedPrintCommandLine(starter.cmds(), starter.masks(), starter.pwd());
-            }
-
-            return provisioner.startBuildContainer(buildContainer);
+            return provisioner.launchBuildProcess(starter, listener);
         } catch (InterruptedException e) {
             throw new IOException(e);
         }

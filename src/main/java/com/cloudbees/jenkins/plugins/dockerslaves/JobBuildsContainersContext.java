@@ -39,7 +39,9 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     protected ContainerInstance remotingContainer;
 
-    protected List<ContainerInstance> buildContainers = new ArrayList<ContainerInstance>();
+    protected ContainerInstance buildContainer;
+
+    protected ContainerInstance scmContainer;
 
     protected Map<String, ContainerInstance> sideContainers = new HashMap<String, ContainerInstance>();
 
@@ -64,8 +66,8 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         return remotingContainer;
     }
 
-    public List<ContainerInstance> getBuildContainers() {
-        return buildContainers;
+    public ContainerInstance getBuildContainer() {
+        return buildContainer;
     }
 
     public boolean isPreScm() {
@@ -74,6 +76,18 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     public void setRemotingContainer(ContainerInstance remotingContainer) {
         this.remotingContainer = remotingContainer;
+    }
+
+    public void setBuildContainer(ContainerInstance buildContainer) {
+        this.buildContainer = buildContainer;
+    }
+
+    public ContainerInstance getScmContainer() {
+        return scmContainer;
+    }
+
+    public void setScmContainer(ContainerInstance scmContainer) {
+        this.scmContainer = scmContainer;
     }
 
     public Map<String, ContainerInstance> getSideContainers() {

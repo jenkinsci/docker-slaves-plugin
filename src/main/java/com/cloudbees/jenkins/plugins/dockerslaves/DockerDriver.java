@@ -32,6 +32,7 @@ import hudson.model.Slave;
 import hudson.org.apache.tools.tar.TarOutputStream;
 import hudson.util.ArgumentListBuilder;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
@@ -39,7 +40,10 @@ import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -118,27 +122,19 @@ public class DockerDriver implements Closeable {
         return new ContainerInstance(image, containerId);
     }
 
-    public void createBuildContainer(Launcher launcher, ContainerInstance buildContainer, ContainerInstance remotingContainer, Launcher.ProcStarter starter) throws IOException, InterruptedException {
+    public ContainerInstance createBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException {
+        ContainerInstance buildContainer = new ContainerInstance(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
-                .add("--workdir", starter.pwd().getRemote())
+                .add("--workdir", "/home/jenkins")
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--user", "10000:10000");
 
-        for (String env : starter.envs()) {
-            args.add("--env", env);
-        }
-
         args.add(buildContainer.getImageName());
 
-        List<String> originalCmds = starter.cmds();
-        boolean[] originalMask = starter.masks();
-        for (int i = 0; i < originalCmds.size(); i++) {
-            boolean masked = originalMask == null ? false : i < originalMask.length ? originalMask[i] : false;
-            args.add(originalCmds.get(i), masked);
-        }
+        args.add("/trampoline", "wait");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int status = launchDockerCLI(launcher, args)
@@ -153,6 +149,16 @@ public class DockerDriver implements Closeable {
 
         injectJenkinsUnixGroup(launcher, containerId);
         injectJenkinsUnixUser(launcher, containerId);
+        injectTrampoline(launcher, containerId);
+
+        status = launchDockerCLI(launcher, new ArgumentListBuilder()
+                .add("start", containerId)).stdout(out).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new IOException("Failed to run docker image");
+        }
+
+        return buildContainer;
     }
 
     protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
@@ -167,6 +173,12 @@ public class DockerDriver implements Closeable {
         getFileContent(launcher, containerId, "/etc/passwd", out);
         out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes());
         putFileContent(launcher, containerId, "/etc", "passwd", out.toByteArray());
+    }
+
+    protected void injectTrampoline(Launcher launcher, String containerId) throws IOException, InterruptedException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        IOUtils.copy(getClass().getResourceAsStream("/com/cloudbees/jenkins/plugins/dockerslaves/trampoline"),out);
+        putFileContent(launcher, containerId, "/", "trampoline", out.toByteArray(), 555);
     }
 
     protected void getFileContent(Launcher launcher, String containerId, String filename, OutputStream outputStream) throws IOException, InterruptedException {
@@ -189,10 +201,17 @@ public class DockerDriver implements Closeable {
     }
 
     protected int putFileContent(Launcher launcher, String containerId, String path, String filename, byte[] content) throws IOException, InterruptedException {
+        return putFileContent(launcher, containerId, path, filename, content, null);
+    }
+
+    protected int putFileContent(Launcher launcher, String containerId, String path, String filename, byte[] content, Integer mode) throws IOException, InterruptedException {
         TarEntry entry = new TarEntry(filename);
         entry.setUserId(0);
         entry.setGroupId(0);
         entry.setSize(content.length);
+        if (mode != null) {
+            entry.setMode(mode);
+        }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         TarOutputStream tar = new TarOutputStream(out);
@@ -209,12 +228,26 @@ public class DockerDriver implements Closeable {
                 .stderr(launcher.getListener().getLogger()).join();
     }
 
-    public Proc startContainer(Launcher launcher, String containerId, OutputStream outputStream) throws IOException, InterruptedException {
-        Launcher.ProcStarter procStarter = launchDockerCLI(launcher, new ArgumentListBuilder()
-                .add("start", "-ia", containerId));
+    public Proc execInContainer(Launcher launcher, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("exec", containerId);
 
-        if (outputStream != null) {
-            procStarter.stdout(outputStream);
+        if (starter.pwd() != null) {
+            args.add("/trampoline", "cdexec", starter.pwd().getRemote());
+        }
+        args.add("env").add(starter.envs());
+
+        List<String> originalCmds = starter.cmds();
+        boolean[] originalMask = starter.masks();
+        for (int i = 0; i < originalCmds.size(); i++) {
+            boolean masked = originalMask == null ? false : i < originalMask.length ? originalMask[i] : false;
+            args.add(originalCmds.get(i), masked);
+        }
+
+        Launcher.ProcStarter procStarter = launchDockerCLI(launcher, args);
+
+        if (starter.stdout() != null) {
+            procStarter.stdout(starter.stdout());
         }
 
         return procStarter.start();

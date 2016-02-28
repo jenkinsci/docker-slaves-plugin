@@ -51,8 +51,8 @@ public class DockerProvisioner {
     protected final JobBuildsContainersDefinition spec;
 
     protected final String remotingImage;
+
     protected final String scmImage;
-    protected String buildImage;
 
     public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher localLauncher, JobBuildsContainersDefinition spec, String remotingImage, String scmImage) {
         this.context = context;
@@ -88,20 +88,24 @@ public class DockerProvisioner {
         launcher.launch(computer, listener);
     }
 
-    public BuildContainer newBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
-        if (!context.isPreScm() && spec.getSideContainers().size() > 0 && context.getSideContainers().size() == 0) {
+    public ContainerInstance launchBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
+        if (spec.getSideContainers().size() > 0 && context.getSideContainers().size() == 0) {
             // In a ideal world we would run side containers when DockerSlave.DockerSlaveSCMListener detect scm checkout completed
             // but then we don't have a ProcStarter reference. So do it first time a command is ran during the build
             // after scm checkout completed. We detect this is the first time as spec > context
             createSideContainers(starter, listener);
         }
 
-        if (context.isPreScm()) {
-            return newBuildContainer(starter, scmImage);
-        } else {
-            if (buildImage == null) buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
-            return newBuildContainer(starter, buildImage);
-        }
+        String buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
+        final ContainerInstance buildContainer = driver.createBuildContainer(localLauncher, buildImage, context.getRemotingContainer());
+        context.setBuildContainer(buildContainer);
+        return buildContainer;
+    }
+
+    public ContainerInstance launchScmContainer() throws IOException, InterruptedException {
+        final ContainerInstance scmContainer = driver.createBuildContainer(localLauncher, scmImage, context.getRemotingContainer());
+        context.setBuildContainer(scmContainer);
+        return scmContainer;
     }
 
     private void createSideContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
@@ -115,18 +119,22 @@ public class DockerProvisioner {
         }
     }
 
-    private BuildContainer newBuildContainer(Launcher.ProcStarter procStarter, String buildImage) {
-        final ContainerInstance c = new ContainerInstance(context.isPreScm() ? scmImage : buildImage);
-        context.getBuildContainers().add(c);
-        return new BuildContainer(c, procStarter);
-    }
+    public Proc launchBuildProcess(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+        ContainerInstance targetContainer = null;
 
-    public void createBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
-        driver.createBuildContainer(localLauncher, buildContainer.instance, context.getRemotingContainer(), buildContainer.procStarter);
-    }
+        if (context.isPreScm()) {
+            targetContainer = context.getScmContainer();
+            if (targetContainer == null) {
+                targetContainer = launchScmContainer();
+            }
+        } else {
+            targetContainer = context.getBuildContainer();
+            if (targetContainer == null) {
+                targetContainer = launchBuildContainer(procStarter, listener);
+            }
+        }
 
-    public Proc startBuildContainer(BuildContainer buildContainer) throws IOException, InterruptedException {
-        return driver.startContainer(localLauncher, buildContainer.instance.getId(), buildContainer.procStarter.stdout());
+        return driver.execInContainer(localLauncher, targetContainer.getId(), procStarter);
     }
 
     public void clean() throws IOException, InterruptedException {
@@ -134,28 +142,14 @@ public class DockerProvisioner {
             driver.removeContainer(localLauncher, instance);
         }
 
-        for (ContainerInstance instance : context.getBuildContainers()) {
-            driver.removeContainer(localLauncher, instance);
+        if (context.getBuildContainer() != null) {
+            driver.removeContainer(localLauncher, context.getBuildContainer());
+        }
+
+        if (context.getScmContainer() != null) {
+            driver.removeContainer(localLauncher, context.getScmContainer());
         }
 
         driver.close();
-    }
-
-    public class BuildContainer {
-        final ContainerInstance instance;
-        final Launcher.ProcStarter procStarter;
-
-        protected BuildContainer(ContainerInstance instance, Launcher.ProcStarter procStarter) {
-            this.instance = instance;
-            this.procStarter = procStarter;
-        }
-
-        public String getId() {
-            return instance.getId();
-        }
-
-        public String getImageName() {
-            return instance.getImageName();
-        }
     }
 }

@@ -117,7 +117,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
 
         final DockerSlaves cloud = DockerSlaves.get();
 
-        String slaveName = "Container for " + run.toString() + ", step " + flowNode.getId();
+        String slaveName = "Container for " + run.toString() + "." + flowNode.getId();
         String description = "Container building " + run.getParent().getFullName();
 
         Queue.Item item = Queue.getInstance().schedule2(task, 0).getCreateItem();
