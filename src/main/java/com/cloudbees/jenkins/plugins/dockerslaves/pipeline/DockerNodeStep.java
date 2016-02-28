@@ -33,18 +33,16 @@ import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Computer;
 import hudson.model.Executor;
-import hudson.model.Label;
 import hudson.model.Node;
 import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.support.steps.ExecutorStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.CheckForNull;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -53,24 +51,35 @@ import java.util.Set;
  * <p>
  * Used like:
  * <pre>
- *     dockerNode("cloudbees/java-tools") {
+ *     dockerNode(image:"cloudbees/java-tools", sideContainers: ["selenium/standalone-firefox"]) {
  *         // execute some stuff inside this container
  *     }
  * </pre>
  */
 
 public class DockerNodeStep extends AbstractStepImpl {
+    private List<String> sideContainers;
+
     @CheckForNull
-    private final String containerImage;
+    private final String image;
 
     @DataBoundConstructor
-    public DockerNodeStep(String containerImage) {
-        this.containerImage = Util.fixEmptyAndTrim(containerImage);
+    public DockerNodeStep(String image) {
+        this.image = Util.fixEmptyAndTrim(image);
     }
 
     @CheckForNull
-    public String getContainerImage() {
-        return this.containerImage;
+    public String getImage() {
+        return this.image;
+    }
+
+    public List<String> getSideContainers() {
+        return sideContainers;
+    }
+
+    @DataBoundSetter
+    public void setSideContainers(List<String> sideContainers) {
+        this.sideContainers = sideContainers;
     }
 
     @Extension

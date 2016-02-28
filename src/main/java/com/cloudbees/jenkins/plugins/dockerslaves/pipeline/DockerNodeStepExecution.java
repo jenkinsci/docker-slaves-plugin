@@ -23,11 +23,13 @@
  */
 package com.cloudbees.jenkins.plugins.dockerslaves.pipeline;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.ContainerDefinition;
 import com.cloudbees.jenkins.plugins.dockerslaves.DockerLabelAssignmentAction;
 import com.cloudbees.jenkins.plugins.dockerslaves.DockerSlave;
 import com.cloudbees.jenkins.plugins.dockerslaves.DockerSlaves;
 import com.cloudbees.jenkins.plugins.dockerslaves.ImageIdContainerDefinition;
 import com.cloudbees.jenkins.plugins.dockerslaves.JobBuildsContainersDefinition;
+import com.cloudbees.jenkins.plugins.dockerslaves.SideContainerDefinition;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
@@ -77,9 +79,11 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -126,10 +130,21 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
             throw new IllegalStateException("failed to schedule task");
         }
 
+        List<SideContainerDefinition> sideContainers = new ArrayList<>();
+        if (step.getSideContainers() != null) {
+            for (String entry : step.getSideContainers()) {
+                sideContainers.add(new SideContainerDefinition(entry,
+                        new ImageIdContainerDefinition(entry, false)));
+            }
+        }
+
+        JobBuildsContainersDefinition spec = new JobBuildsContainersDefinition(
+                new ImageIdContainerDefinition(step.getImage(), false), sideContainers);
+
         final Node node = new DockerSlave(slaveName, description, label, item,
                 cloud.createPipelineJobProvisionerFactory(
                         run.getParent(),
-                        new JobBuildsContainersDefinition(new ImageIdContainerDefinition(step.getContainerImage(), false), null)));
+                        spec));
 
         Jenkins.getInstance().addNode(node);
 

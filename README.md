@@ -74,7 +74,7 @@ Even if in the future section, there's an experimental support for Pipeline plug
 This pipeline
 
 ```groovy
-dockerNode("maven:3.3.3-jdk-8") {
+dockerNode(image: "maven:3.3.3-jdk-8", sideContainers: ["selenium/standalone-firefox"]) {
   git "https://github.com/wakaleo/game-of-life"
   sh 'mvn clean package'
 }
