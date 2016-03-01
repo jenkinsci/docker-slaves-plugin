@@ -27,7 +27,6 @@ package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleBuild;
-import hudson.model.Job;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -64,8 +63,7 @@ public class DockerComputerLauncher extends ComputerLauncher {
     }
 
     public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
-        // we need to capture taskListener here, as it's a private field of Computer
-        TeeTaskListener teeListener = computer.initTeeListener(listener);
+        TeeSpongeTaskListener teeListener = computer.getComputerListener();
 
         DockerProvisioner provisioner = computer.createProvisioner();
         try {
@@ -81,7 +79,7 @@ public class DockerComputerLauncher extends ComputerLauncher {
 
     // -- A terrible hack; but we can't find a better way so far ---
 
-    protected void recordFailureOnBuild(final DockerComputer computer, TeeTaskListener teeListener, IOException e) throws IOException, InterruptedException {
+    protected void recordFailureOnBuild(final DockerComputer computer, TeeSpongeTaskListener teeListener, IOException e) throws IOException, InterruptedException {
         Queue.Item queued = computer.getItem();
         Jenkins.getInstance().getQueue().cancel(queued);
         Queue.Executable executable = queued.task.createExecutable();
@@ -133,7 +131,7 @@ public class DockerComputerLauncher extends ComputerLauncher {
         }
     }
 
-    private void writeLog(File file, TeeTaskListener teeListener) throws IOException {
+    private void writeLog(File file, TeeSpongeTaskListener teeListener) throws IOException {
         FileOutputStream fos = new FileOutputStream(file);
         try {
             teeListener.setSideOutputStream(fos);

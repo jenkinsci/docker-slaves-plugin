@@ -41,7 +41,7 @@ import java.io.PrintWriter;
  *
  * Most of the code comes from hudson.maven.SplittableBuildListener}
  */
-public class TeeTaskListener implements TaskListener {
+public class TeeSpongeTaskListener implements TaskListener {
 
     private final TaskListener delegate;
 
@@ -64,7 +64,7 @@ public class TeeTaskListener implements TaskListener {
      */
     private final PrintStream logger;
 
-    public TeeTaskListener(TaskListener delegate, File deferredFile) {
+    public TeeSpongeTaskListener(TaskListener delegate, File deferredFile) {
         this.delegate = delegate;
         this.deferredFile = deferredFile;
 

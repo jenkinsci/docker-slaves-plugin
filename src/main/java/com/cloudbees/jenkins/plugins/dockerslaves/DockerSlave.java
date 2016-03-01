@@ -45,10 +45,12 @@ import hudson.model.listeners.SCMListener;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
 import hudson.slaves.AbstractCloudSlave;
+import hudson.slaves.ComputerLauncher;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -65,6 +67,9 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
     private final DockerProvisionerFactory provisionerFactory;
 
     private final Queue.Item item;
+
+    /** Listener to log computer's launch and activity */
+    private transient TeeSpongeTaskListener computerListener;
 
     public DockerSlave(String name, String nodeDescription, String labelString, Queue.Item item, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
@@ -89,6 +94,28 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
         return this;
     }
 
+    /*
+     * Assign the ${@link ComputerLauncher} listener as the node is actually started, so we can pipe it to the
+     * ${@link Run} log. We need this as we can't just use <code>getComputer().getListener()</code>
+     *
+     * @see DockerComputer#COMPUTER_LISTENER
+     */
+    public void setComputerListener(TaskListener computerListener) {
+        try {
+            final File log = File.createTempFile("one-shot", "log");
+
+            // We use a "Tee+Sponge" TaskListener here as Run's log is created after computer has been first acceded
+            // If this can be changed in core, we would just need a "Tee"
+            this.computerListener = new TeeSpongeTaskListener(computerListener, log);
+        } catch (IOException e) {
+            e.printStackTrace(); // FIXME
+        }
+    }
+
+    public TeeSpongeTaskListener getComputerListener() {
+        return computerListener;
+    }
+
     @Override
     public DockerComputer getComputer() {
         return (DockerComputer) super.getComputer();
@@ -105,7 +132,7 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
             Computer computer = Executor.currentExecutor().getOwner();
 
             if (computer instanceof DockerComputer) {
-                ((DockerComputer) computer).connectJobLogger(logger);
+                ((DockerComputer) computer).getNode().computerListener.setSideOutputStream(logger);
             }
 
             return logger;

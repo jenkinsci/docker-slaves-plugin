@@ -25,12 +25,13 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import hudson.Extension;
+import hudson.model.Computer;
 import hudson.model.Executor;
-import hudson.model.Job;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.slaves.AbstractCloudComputer;
-import hudson.slaves.SlaveComputer;
+import hudson.slaves.ComputerListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,25 +43,43 @@ import java.util.logging.Logger;
  */
 public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
 
+    private final DockerSlave slave;
+
     private final DockerProvisionerFactory provisionerFactory;
 
     private DockerProvisioner provisioner;
 
-    private TeeTaskListener teeTasklistener;
-
     private final Queue.Item item;
 
-    public DockerComputer(DockerSlave dockerSlave, DockerProvisionerFactory provisionerFactory, Queue.Item item) {
-        super(dockerSlave);
+    public DockerComputer(DockerSlave slave, DockerProvisionerFactory provisionerFactory, Queue.Item item) {
+        super(slave);
         this.provisionerFactory = provisionerFactory;
         this.item = item;
+        this.slave = slave;
     }
 
-    /**
+    @Override
+    public DockerSlave getNode() {
+        return slave;
+    }
+
+    @Extension
+    public final static ComputerListener COMPUTER_LISTENER = new ComputerListener() {
+
+        @Override
+        public void preLaunch(Computer c, TaskListener listener) throws IOException, InterruptedException {
+            if (c instanceof DockerComputer) {
+                ((DockerComputer) c).getNode().setComputerListener(listener);
+            }
+        }
+    };
+
+    /*
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
+     *
      */
     public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
-        provisioner = provisionerFactory.createProvisioner(teeTasklistener);
+        provisioner = provisionerFactory.createProvisioner(getComputerListener());
         return provisioner;
     }
 
@@ -106,14 +125,8 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         }
     }
 
-    public TeeTaskListener initTeeListener(TaskListener computerListener) throws IOException {
-        teeTasklistener = new TeeTaskListener(computerListener, File.createTempFile(getName(),"log"));
-
-        return teeTasklistener;
-    }
-
-    public void connectJobLogger(OutputStream logger) throws IOException {
-        teeTasklistener.setSideOutputStream(logger);
+    public TeeSpongeTaskListener getComputerListener() {
+        return getNode().getComputerListener();
     }
 
     public DockerProvisioner getProvisioner() {

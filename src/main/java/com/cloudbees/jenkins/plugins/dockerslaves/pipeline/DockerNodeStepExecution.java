@@ -107,7 +107,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
     @StepContextParameter
     private transient FlowNode flowNode;
 
-    /**
+    /*
      * General strategy of this step.
      * <p/>
      * 1. schedule {@link PlaceholderTask} into the {@link Queue} (what this method does)
