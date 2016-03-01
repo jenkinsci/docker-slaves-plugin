@@ -32,16 +32,19 @@ import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.ComputerListener;
+import hudson.slaves.SlaveComputer;
+import jenkins.model.Jenkins;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * A computer on which a specific build will occur
  */
-public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
+public class DockerComputer extends SlaveComputer {
 
     private final DockerSlave slave;
 
@@ -118,7 +121,7 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
             if (!Boolean.getBoolean("com.cloudbees.jenkins.plugins.containerslaves.DockerComputer.keepContainer")) {
 
                 provisioner.clean();
-                getNode().terminate();
+                Jenkins.getInstance().removeNode(getNode());
             }
         } catch (InterruptedException e) {
         } catch (IOException e) {

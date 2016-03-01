@@ -39,6 +39,7 @@ import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.Run;
+import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.model.listeners.SCMListener;
@@ -62,7 +63,7 @@ import java.util.Collections;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
+public class DockerSlave extends Slave implements EphemeralNode {
 
     private final DockerProvisionerFactory provisionerFactory;
 
@@ -83,10 +84,6 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
 
     public DockerComputer createComputer() {
         return new DockerComputer(this, provisionerFactory, item);
-    }
-
-    @Override
-    protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
     }
 
     @Override
