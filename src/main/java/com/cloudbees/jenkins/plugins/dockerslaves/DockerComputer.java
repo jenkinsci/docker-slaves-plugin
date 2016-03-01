@@ -34,6 +34,7 @@ import hudson.slaves.SlaveComputer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.logging.Logger;
 
 /**
@@ -111,8 +112,8 @@ public class DockerComputer extends AbstractCloudComputer<DockerSlave> {
         return teeTasklistener;
     }
 
-    public void connectJobListener(TaskListener jobListener) throws IOException {
-        teeTasklistener.setSideOutputStream(jobListener.getLogger());
+    public void connectJobLogger(OutputStream logger) throws IOException {
+        teeTasklistener.setSideOutputStream(logger);
     }
 
     public DockerProvisioner getProvisioner() {

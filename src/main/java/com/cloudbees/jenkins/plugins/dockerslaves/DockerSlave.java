@@ -27,17 +27,18 @@ package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.console.ConsoleLogFilter;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Environment;
+import hudson.model.Executor;
 import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.Run;
-import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.model.listeners.SCMListener;
@@ -47,9 +48,9 @@ import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
-import hudson.slaves.SlaveComputer;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 
 /**
@@ -94,6 +95,24 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
     }
 
     /**
+     * We listen to loggers creation by ${@link Run}s so we can write the executor's launch log into build log.
+     */
+    @Extension
+    public static final ConsoleLogFilter LOG_FILTER = new ConsoleLogFilter() {
+
+        @Override
+        public OutputStream decorateLogger(AbstractBuild run, OutputStream logger) throws IOException, InterruptedException {
+            Computer computer = Executor.currentExecutor().getOwner();
+
+            if (computer instanceof DockerComputer) {
+                ((DockerComputer) computer).connectJobLogger(logger);
+            }
+
+            return logger;
+        }
+    };
+
+    /**
      * Create a custom ${@link Launcher} which relies on plil <code>docker run</code> to start a new process
      */
     @Override
@@ -104,11 +123,6 @@ public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
             throw new IllegalStateException("Can't create a launcher if computer is gone.");
         }
 
-        try {
-            c.connectJobListener(listener);
-        } catch (IOException e) {
-            e.printStackTrace(listener.getLogger());
-        }
         return new DockerLauncher(listener, c.getChannel(), c.isUnix(), c.getProvisioner()).decorateFor(this);
     }
 
