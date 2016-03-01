@@ -39,7 +39,6 @@ import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.Run;
-import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.model.listeners.SCMListener;
@@ -63,7 +62,7 @@ import java.util.Collections;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerSlave extends Slave implements EphemeralNode {
+public class DockerSlave extends AbstractCloudSlave implements EphemeralNode {
 
     private final DockerProvisionerFactory provisionerFactory;
 
@@ -182,6 +181,10 @@ public class DockerSlave extends Slave implements EphemeralNode {
                 action.onScmChekoutCompleted(build, listener);
             }
         }
+
+    }
+    public void _terminate(TaskListener task){
+        //Do nothing, although it would be nice to clean a bit docker images
 
     }
 }
