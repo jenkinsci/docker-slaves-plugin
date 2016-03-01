@@ -22,10 +22,34 @@ The following things have been tested and works
 
 * Freestyle job
 * Maven job (as long as you configure a Maven installation with an automatic installer and you have a JDK in the build container)
+* Pipeline job
 * Timestamper plugin
 * Git plugin
 
 You can find sources of demos here: https://github.com/ydubreuil/docker-slaves-plugin-demos
+
+### Pipeline job support
+
+There's an experimental support for Pipeline plugin. The idea is to replace `node` with `dockerNode`.
+
+This pipeline
+
+```groovy
+dockerNode(image: "maven:3.3.3-jdk-8", sideContainers: ["selenium/standalone-firefox"]) {
+  git "https://github.com/wakaleo/game-of-life"
+  sh 'mvn clean test'
+}
+```
+
+will build Game of life with Maven 3.3.3 on JDK 8 on a disposable Docker pod. Tests use Firefox browser provided by a standalone Selenium driver hosted in a side container.
+
+Workspace caching does not work.
+
+For discussion around the implementation, see [this document](Workflow.md)
+
+### Swarm support
+
+As of Docker 1.10 and Swarm 1.1, some early tests showed that using a Swarm cluster works, ie builds are working. It means that Docker API used by the plugin works on Swarm. There's no dedicated code to manage Swarm.
 
 ## General Design
 
@@ -67,23 +91,6 @@ Note: this implementation relies on docker cli ran from jenkins master, and as s
 
 # Future
 
-## Pipeline support
-
-Even if in the future section, there's an experimental support for Pipeline plugin. The idea is to replace `node` with `dockerNode`.
-
-This pipeline
-
-```groovy
-dockerNode(image: "maven:3.3.3-jdk-8", sideContainers: ["selenium/standalone-firefox"]) {
-  git "https://github.com/wakaleo/game-of-life"
-  sh 'mvn clean package'
-}
-```
-
-will build Game of life with Maven 3.3.3 on JDK 8 on a disposable Docker pod.
-
-For discussion around the implementation, see [this document](Workflow.md)
-
 ## Provisioning issue reporting
 
 As the build container(s) are only used by a build, we'd like the container bootstrap log to be included in the job logs, or at least attached to the build action. This would help to diagnose provisioning issues.
@@ -115,7 +122,6 @@ Supporting rkt runtime could be great from a security POV. rkt is able to launch
  * Side containers or build container as a axis in multi-configuration job
  * Build throttling
  * Memory High Water Mark monitoring
- * support Docker Swarm / scheduling
  * integrate with ClearContainers for enhanced security
 
 ### Scalability
