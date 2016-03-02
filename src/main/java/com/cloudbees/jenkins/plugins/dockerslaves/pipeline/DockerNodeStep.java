@@ -100,15 +100,6 @@ public class DockerNodeStep extends AbstractStepImpl {
             return true;
         }
 
-        public AutoCompletionCandidates doAutoCompleteLabel(@QueryParameter String value) {
-            AutoCompletionCandidates c = new AutoCompletionCandidates();
-            return c;
-        }
-
-        public FormValidation doCheckLabel(@QueryParameter String value) {
-            return AbstractProject.AbstractProjectDescriptor.validateLabelExpression(value, (AbstractProject)null);
-        }
-
         @SuppressWarnings("unchecked")
         @Override
         public Set<Class<?>> getProvidedContext() {

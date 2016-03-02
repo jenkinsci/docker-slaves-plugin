@@ -25,26 +25,16 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
-import hudson.Extension;
-import hudson.model.Computer;
-import hudson.model.Executor;
+import com.cloudbees.jenkins.plugins.dockerslaves.api.OneShotComputer;
 import hudson.model.Queue;
-import hudson.model.TaskListener;
-import hudson.slaves.AbstractCloudComputer;
-import hudson.slaves.ComputerListener;
-import hudson.slaves.SlaveComputer;
-import jenkins.model.Jenkins;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * A computer on which a specific build will occur
  */
-public class DockerComputer extends SlaveComputer {
+public class DockerComputer extends OneShotComputer {
 
     private final DockerSlave slave;
 
@@ -52,12 +42,9 @@ public class DockerComputer extends SlaveComputer {
 
     private DockerProvisioner provisioner;
 
-    private final Queue.Item item;
-
     public DockerComputer(DockerSlave slave, DockerProvisionerFactory provisionerFactory, Queue.Item item) {
         super(slave);
         this.provisionerFactory = provisionerFactory;
-        this.item = item;
         this.slave = slave;
     }
 
@@ -65,17 +52,6 @@ public class DockerComputer extends SlaveComputer {
     public DockerSlave getNode() {
         return slave;
     }
-
-    @Extension
-    public final static ComputerListener COMPUTER_LISTENER = new ComputerListener() {
-
-        @Override
-        public void preLaunch(Computer c, TaskListener listener) throws IOException, InterruptedException {
-            if (c instanceof DockerComputer) {
-                ((DockerComputer) c).getNode().setComputerListener(listener);
-            }
-        }
-    };
 
     /*
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
@@ -87,49 +63,21 @@ public class DockerComputer extends SlaveComputer {
     }
 
     @Override
-    public void taskCompleted(Executor executor, Queue.Task task, long durationMS) {
-        super.taskCompleted(executor, task, durationMS);
-        terminate();
-    }
-
-    @Override
-    public void taskCompletedWithProblems(Executor executor, Queue.Task task, long durationMS, Throwable problems) {
-        super.taskCompletedWithProblems(executor, task, durationMS, problems);
-        terminate();
-    }
-
-    public Queue.Item getItem() {
-        return item;
-    }
-
-    /**
-     * Don't record slave termination when termination is
-     * initiated by this class.
-     */
-    @Override
-    public void recordTermination() {
-        if (isAcceptingTasks()) {
-            super.recordTermination();
-        }
-    }
-
-    public void terminate() {
+    protected void terminate() {
         LOGGER.info("Stopping Docker Slave after build completion");
         setAcceptingTasks(false);
         try {
-            // We use it during development for diagnostic purpose
-            if (!Boolean.getBoolean("com.cloudbees.jenkins.plugins.containerslaves.DockerComputer.keepContainer")) {
-
-                provisioner.clean();
-                Jenkins.getInstance().removeNode(getNode());
-            }
+            provisioner.clean();
         } catch (InterruptedException e) {
+            e.printStackTrace(); //FIXME
         } catch (IOException e) {
+            e.printStackTrace(); //FIXME
         }
+        super.terminate();
     }
 
     public TeeSpongeTaskListener getComputerListener() {
-        return getNode().getComputerListener();
+        return getNode().getTeeSpongeTaskListener();
     }
 
     public DockerProvisioner getProvisioner() {
