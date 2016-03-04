@@ -272,6 +272,7 @@ public class DockerDriver implements Closeable {
                 .add("create")
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
+                .add("--ipc=container:" + remotingContainer.getId())
                 .add(instance.getImageName());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
