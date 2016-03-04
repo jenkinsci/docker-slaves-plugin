@@ -130,6 +130,7 @@ public class DockerDriver implements Closeable {
                 .add("--workdir", "/home/jenkins")
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
+                .add("--ipc=container:" + remotingContainer.getId())
                 .add("--user", "10000:10000");
 
         args.add(buildContainer.getImageName());
