@@ -121,7 +121,7 @@ public class DockerSlave extends OneShotSlave {
             Computer c = Computer.currentComputer();
             if (c instanceof DockerComputer) {
                 build.addAction(((DockerComputer) c).getProvisioner().getContext());
-                Action temporaryLabel = build.getAction(DockerLabelAssignmentAction.class);
+                Action temporaryLabel = build.getAction(DockerSlaveAssignmentAction.class);
                 build.getActions().remove(temporaryLabel);
             }
             return new Environment() {};

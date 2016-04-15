@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import hudson.model.InvisibleAction;
 import hudson.model.Label;
 import hudson.model.labels.LabelAssignmentAction;
 import hudson.model.queue.SubTask;
@@ -32,27 +33,12 @@ import jenkins.model.Jenkins;
 
 import javax.annotation.CheckForNull;
 
-public class DockerLabelAssignmentAction implements LabelAssignmentAction {
+public class DockerSlaveAssignmentAction extends InvisibleAction implements LabelAssignmentAction {
 
     private final String assignedNodeName;
 
-    public DockerLabelAssignmentAction(String assignedNodeName) {
+    public DockerSlaveAssignmentAction(String assignedNodeName) {
         this.assignedNodeName = assignedNodeName;
-    }
-
-    @Override
-    public String getIconFileName() {
-        return null;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return null;
-    }
-
-    @Override
-    public String getUrlName() {
-        return null;
     }
 
     public @CheckForNull

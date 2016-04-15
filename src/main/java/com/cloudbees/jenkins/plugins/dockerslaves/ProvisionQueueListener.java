@@ -69,7 +69,7 @@ public class ProvisionQueueListener extends QueueListener {
                 DockerSlaves plugin = DockerSlaves.get();
                 final Node node = new DockerSlave(slaveName, description, null, bi, plugin.createStandardJobProvisionerFactory(job));
 
-                DockerLabelAssignmentAction action = new DockerLabelAssignmentAction(node.getNodeName());
+                DockerSlaveAssignmentAction action = new DockerSlaveAssignmentAction(node.getNodeName());
                 bi.addAction(action);
 
 
@@ -97,7 +97,7 @@ public class ProvisionQueueListener extends QueueListener {
     @Override
     public void onLeft(Queue.LeftItem item) {
         if (item.isCancelled()) {
-            DockerLabelAssignmentAction action = item.getAction(DockerLabelAssignmentAction.class);
+            DockerSlaveAssignmentAction action = item.getAction(DockerSlaveAssignmentAction.class);
             if( action == null) return;
             Node slave = action.getAssignedNodeName();
             if (slave == null) return;
