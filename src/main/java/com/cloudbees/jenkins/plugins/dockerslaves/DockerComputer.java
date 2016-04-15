@@ -42,7 +42,7 @@ public class DockerComputer extends OneShotComputer {
 
     private DockerProvisioner provisioner;
 
-    public DockerComputer(DockerSlave slave, DockerProvisionerFactory provisionerFactory, Queue.Item item) {
+    public DockerComputer(DockerSlave slave, DockerProvisionerFactory provisionerFactory) {
         super(slave);
         this.provisionerFactory = provisionerFactory;
         this.slave = slave;

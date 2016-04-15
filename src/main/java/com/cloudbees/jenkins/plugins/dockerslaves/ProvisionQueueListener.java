@@ -53,42 +53,44 @@ import java.util.logging.Logger;
 public class ProvisionQueueListener extends QueueListener {
 
     @Override
-    public void onEnterBuildable(final Queue.BuildableItem bi) {
-        if (bi.task instanceof AbstractProject) {
-            AbstractProject job = (AbstractProject) bi.task;
+    public void onEnterBuildable(final Queue.BuildableItem item) {
+        if (item.task instanceof AbstractProject) {
+            AbstractProject job = (AbstractProject) item.task;
             ContainerSetDefinition def = (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class);
             if (def == null) return;
 
             try {
-                LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
-
-                // Immediately create a slave for this item
-                // Real provisioning will happen later
-                String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
-                String description = "Container slave for building " + job.getFullName();
-                DockerSlaves plugin = DockerSlaves.get();
-                final Node node = new DockerSlave(slaveName, description, null, bi, plugin.createStandardJobProvisionerFactory(job));
+                final Node node = prepareExecutorFor(job);
 
                 DockerSlaveAssignmentAction action = new DockerSlaveAssignmentAction(node.getNodeName());
-                bi.addAction(action);
-
+                item.addAction(action);
 
                 Computer.threadPoolForRemoting.submit(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            Jenkins.getInstance().addNode(node);
+                            Jenkins.getActiveInstance().addNode(node);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                 });
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Descriptor.FormException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Failure to create Docker Slave", e);
+                Jenkins.getActiveInstance().getQueue().cancel(item);
             }
         }
+    }
+
+    private Node prepareExecutorFor(final AbstractProject job) throws Descriptor.FormException, IOException {
+        LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
+
+        // Immediately create a slave for this item
+        // Real provisioning will happen later
+        String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
+        String description = "Container slave for building " + job.getFullName();
+        DockerSlaves plugin = DockerSlaves.get();
+        return new DockerSlave(slaveName, description, null, plugin.createStandardJobProvisionerFactory(job));
     }
 
     /**
