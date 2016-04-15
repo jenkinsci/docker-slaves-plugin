@@ -1,5 +1,7 @@
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerSetDefinition;
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ImageIdContainerDefinition;
 import hudson.model.FreeStyleProject;
 
 import org.junit.Rule;
@@ -19,7 +21,7 @@ public class ConfigTest {
     @LocalData
     public void minimalXmlPropertyDefinitionYieldsSaneDefaultValues() throws Exception {
         FreeStyleProject p = (FreeStyleProject) j.jenkins.getItem("minimal");
-        JobBuildsContainersDefinition definition = p.getProperty(JobBuildsContainersDefinition.class);
+        ContainerSetDefinition definition = p.getProperty(ContainerSetDefinition.class);
 
         assertThat(definition.getSideContainers(), empty());
         assertThat(definition.getBuildHostImage(), instanceOf(ImageIdContainerDefinition.class));

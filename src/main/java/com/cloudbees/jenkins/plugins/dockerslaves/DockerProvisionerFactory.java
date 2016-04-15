@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -72,15 +73,15 @@ public abstract class DockerProvisionerFactory {
             }
 
             return new DockerProvisioner(context, slaveListener, new DockerDriver(dockerHost, job), new Launcher.LocalLauncher(slaveListener),
-                    (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class), remotingContainerImageName, scmContainerImageName);
+                    (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class), remotingContainerImageName, scmContainerImageName);
         }
     }
 
     public static class PipelineJob extends DockerProvisionerFactory {
         protected final Job job;
-        protected final JobBuildsContainersDefinition spec;
+        protected final ContainerSetDefinition spec;
 
-        public PipelineJob(DockerServerEndpoint dockerHost, String remotingContainerImageName, String scmContainerImageName, Job job, JobBuildsContainersDefinition spec) {
+        public PipelineJob(DockerServerEndpoint dockerHost, String remotingContainerImageName, String scmContainerImageName, Job job, ContainerSetDefinition spec) {
             super(dockerHost, remotingContainerImageName, scmContainerImageName);
             this.job = job;
             this.spec = spec;

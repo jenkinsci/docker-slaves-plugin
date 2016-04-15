@@ -23,12 +23,10 @@
  */
 package com.cloudbees.jenkins.plugins.dockerslaves.pipeline;
 
-import com.cloudbees.jenkins.plugins.dockerslaves.ContainerDefinition;
-import com.cloudbees.jenkins.plugins.dockerslaves.DockerLabelAssignmentAction;
 import com.cloudbees.jenkins.plugins.dockerslaves.DockerSlave;
 import com.cloudbees.jenkins.plugins.dockerslaves.DockerSlaves;
-import com.cloudbees.jenkins.plugins.dockerslaves.ImageIdContainerDefinition;
-import com.cloudbees.jenkins.plugins.dockerslaves.JobBuildsContainersDefinition;
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ImageIdContainerDefinition;
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerSetDefinition;
 import com.cloudbees.jenkins.plugins.dockerslaves.SideContainerDefinition;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -138,7 +136,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
             }
         }
 
-        JobBuildsContainersDefinition spec = new JobBuildsContainersDefinition(
+        ContainerSetDefinition spec = new ContainerSetDefinition(
                 new ImageIdContainerDefinition(step.getImage(), false), sideContainers);
 
         final Node node = new DockerSlave(slaveName, description, label, item,

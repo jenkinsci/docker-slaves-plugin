@@ -23,8 +23,10 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.dockerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves.spec;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.DockerDriver;
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerDefinition;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -32,7 +34,6 @@ import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import hudson.util.ArgumentListBuilder;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
 import org.kohsuke.stapler.DataBoundConstructor;

@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
@@ -35,7 +36,7 @@ import hudson.util.ArgumentListBuilder;
 import java.io.IOException;
 
 /**
- * Provision {@link ContainerInstance}s based on ${@link JobBuildsContainersDefinition} to provide a queued task
+ * Provision {@link ContainerInstance}s based on ${@link ContainerSetDefinition} to provide a queued task
  * an executor.
  */
 public class DockerProvisioner {
@@ -48,13 +49,13 @@ public class DockerProvisioner {
 
     protected final Launcher localLauncher;
 
-    protected final JobBuildsContainersDefinition spec;
+    protected final ContainerSetDefinition spec;
 
     protected final String remotingImage;
 
     protected final String scmImage;
 
-    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher localLauncher, JobBuildsContainersDefinition spec, String remotingImage, String scmImage) {
+    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher localLauncher, ContainerSetDefinition spec, String remotingImage, String scmImage) {
         this.context = context;
         this.slaveListener = slaveListener;
         this.driver = driver;

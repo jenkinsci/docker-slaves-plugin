@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerDefinition;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;

@@ -23,8 +23,9 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.dockerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves.spec;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.SideContainerDefinition;
 import hudson.Extension;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
@@ -42,14 +43,14 @@ import org.kohsuke.stapler.StaplerRequest;
  * Definition for a set of containers to host the build.
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class JobBuildsContainersDefinition extends JobProperty {
+public class ContainerSetDefinition extends JobProperty {
 
     private final ContainerDefinition buildHostImage;
 
     private final List<SideContainerDefinition> sideContainers;
 
     @DataBoundConstructor
-    public JobBuildsContainersDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
+    public ContainerSetDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
         this.buildHostImage = buildHostImage;
         this.sideContainers = sideContainers == null ? Collections.<SideContainerDefinition>emptyList() : sideContainers;
     }
@@ -66,7 +67,7 @@ public class JobBuildsContainersDefinition extends JobProperty {
      * @return a replacement JobBuildsContainersDefinition that went through the constructor
      */
     private Object readResolve() {
-        return new JobBuildsContainersDefinition(buildHostImage, sideContainers);
+        return new ContainerSetDefinition(buildHostImage, sideContainers);
     }
 
     public ContainerDefinition getBuildHostImage() {
@@ -96,7 +97,7 @@ public class JobBuildsContainersDefinition extends JobProperty {
             if (formData.isNullObject()) return null;
             JSONObject containersDefinition = formData.getJSONObject("containersDefinition");
             if (containersDefinition.isNullObject()) return null;
-            return req.bindJSON(JobBuildsContainersDefinition.class, containersDefinition);
+            return req.bindJSON(ContainerSetDefinition.class, containersDefinition);
         }
     }
 

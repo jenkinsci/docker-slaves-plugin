@@ -23,16 +23,16 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.dockerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves.spec;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.DockerDriver;
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerDefinition;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
-import hudson.util.ArgumentListBuilder;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**

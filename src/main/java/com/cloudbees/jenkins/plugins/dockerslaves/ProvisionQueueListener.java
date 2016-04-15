@@ -25,6 +25,7 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
@@ -38,6 +39,7 @@ import hudson.slaves.NodeProvisioner;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -54,20 +56,22 @@ public class ProvisionQueueListener extends QueueListener {
     public void onEnterBuildable(final Queue.BuildableItem bi) {
         if (bi.task instanceof AbstractProject) {
             AbstractProject job = (AbstractProject) bi.task;
-            JobBuildsContainersDefinition def = (JobBuildsContainersDefinition) job.getProperty(JobBuildsContainersDefinition.class);
+            ContainerSetDefinition def = (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class);
             if (def == null) return;
 
             try {
                 LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
-                DockerLabelAssignmentAction action = createLabelAssignmentAction();
-                bi.addAction(action);
 
                 // Immediately create a slave for this item
                 // Real provisioning will happen later
                 String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
                 String description = "Container slave for building " + job.getFullName();
                 DockerSlaves plugin = DockerSlaves.get();
-                final Node node = new DockerSlave(slaveName, description, action.getLabel().toString(), bi, plugin.createStandardJobProvisionerFactory(job));
+                final Node node = new DockerSlave(slaveName, description, null, bi, plugin.createStandardJobProvisionerFactory(job));
+
+                DockerLabelAssignmentAction action = new DockerLabelAssignmentAction(node.getNodeName());
+                bi.addAction(action);
+
 
                 Computer.threadPoolForRemoting.submit(new Runnable() {
                     @Override
@@ -87,10 +91,22 @@ public class ProvisionQueueListener extends QueueListener {
         }
     }
 
-    private DockerLabelAssignmentAction createLabelAssignmentAction() {
-        final String id = Long.toHexString(System.nanoTime());
-        final Label label = Label.get("docker_" + id);
-        return new DockerLabelAssignmentAction(label);
+    /**
+     * If item is canceled, remove the executor we created for it.
+     */
+    @Override
+    public void onLeft(Queue.LeftItem item) {
+        if (item.isCancelled()) {
+            DockerLabelAssignmentAction action = item.getAction(DockerLabelAssignmentAction.class);
+            if( action == null) return;
+            Node slave = action.getAssignedNodeName();
+            if (slave == null) return;
+            try {
+                Jenkins.getActiveInstance().removeNode(slave);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Failure to remove One-Shot Slave", e);
+            }
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());

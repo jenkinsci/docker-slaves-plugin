@@ -25,14 +25,12 @@
 
 package com.cloudbees.jenkins.plugins.dockerslaves;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Extension;
 import hudson.Plugin;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Job;
-import hudson.model.Label;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
 import hudson.slaves.Cloud;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -112,7 +110,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return new DockerProvisionerFactory.StandardJob(getDockerHost(), getRemotingContainerImageName(), getScmContainerImageName(), job);
     }
 
-    public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, JobBuildsContainersDefinition spec) {
+    public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) {
         return new DockerProvisionerFactory.PipelineJob(getDockerHost(), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
     }
 

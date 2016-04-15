@@ -23,8 +23,9 @@
  *
  */
 
-package com.cloudbees.jenkins.plugins.dockerslaves;
+package com.cloudbees.jenkins.plugins.dockerslaves.spec;
 
+import com.cloudbees.jenkins.plugins.dockerslaves.DockerDriver;
 import hudson.Launcher;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
@@ -36,5 +37,5 @@ import java.io.IOException;
  */
 public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
 
-    abstract String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
+    public abstract String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
 }

@@ -28,13 +28,16 @@ package com.cloudbees.jenkins.plugins.dockerslaves;
 import hudson.model.Label;
 import hudson.model.labels.LabelAssignmentAction;
 import hudson.model.queue.SubTask;
+import jenkins.model.Jenkins;
+
+import javax.annotation.CheckForNull;
 
 public class DockerLabelAssignmentAction implements LabelAssignmentAction {
 
-    private final Label label;
+    private final String assignedNodeName;
 
-    public DockerLabelAssignmentAction(Label label) {
-        this.label = label;
+    public DockerLabelAssignmentAction(String assignedNodeName) {
+        this.assignedNodeName = assignedNodeName;
     }
 
     @Override
@@ -52,12 +55,14 @@ public class DockerLabelAssignmentAction implements LabelAssignmentAction {
         return null;
     }
 
-    @Override
-    public Label getAssignedLabel(SubTask task) {
-        return label;
+    public @CheckForNull
+    DockerSlave getAssignedNodeName() {
+        return (DockerSlave) Jenkins.getActiveInstance().getNode(assignedNodeName);
     }
 
-    public Label getLabel() {
-        return label;
+    @Override
+    public Label getAssignedLabel(SubTask task) {
+        return Label.get(assignedNodeName);
     }
+
 }
