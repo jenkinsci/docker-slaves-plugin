@@ -58,7 +58,7 @@ public class DockerComputer extends OneShotComputer {
      *
      */
     public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
-        provisioner = provisionerFactory.createProvisioner(getComputerListener());
+        provisioner = provisionerFactory.createProvisioner(getListener());
         return provisioner;
     }
 
@@ -74,10 +74,6 @@ public class DockerComputer extends OneShotComputer {
             e.printStackTrace(); //FIXME
         }
         super.terminate();
-    }
-
-    public TeeSpongeTaskListener getComputerListener() {
-        return getNode().getTeeSpongeTaskListener();
     }
 
     public DockerProvisioner getProvisioner() {

@@ -63,10 +63,8 @@ public class DockerComputerLauncher extends ComputerLauncher {
     }
 
     public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
-        TeeSpongeTaskListener teeListener = computer.getComputerListener();
-
         DockerProvisioner provisioner = computer.createProvisioner();
         provisioner.prepareRemotingContainer();
-        provisioner.launchRemotingContainer(computer, teeListener);
+        provisioner.launchRemotingContainer(computer, listener);
     }
 }

@@ -24,11 +24,8 @@
  */
 package com.cloudbees.jenkins.plugins.dockerslaves.api;
 
-import com.cloudbees.jenkins.plugins.dockerslaves.DockerComputer;
-import com.cloudbees.jenkins.plugins.dockerslaves.TeeSpongeTaskListener;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.console.ConsoleLogFilter;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Executor;
@@ -37,6 +34,7 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
+import hudson.model.listeners.RunListener;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
@@ -44,12 +42,8 @@ import hudson.slaves.RetentionStrategy;
 import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A slave that is designed to be used only once, for a specific ${@link hudson.model.Run}, and as such has a life cycle
@@ -67,8 +61,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * </ul>
  */
 public abstract class OneShotSlave extends Slave implements EphemeralNode {
-    /** Listener to log computer's launch and activity */
-    protected transient TeeSpongeTaskListener teeSpongeTaskListener;
 
     /**
      * The ${@link Queue.Executable} associated to this OneShotSlave. By design, only one Run can be assigned, then slave is shut down.
@@ -90,28 +82,6 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         return 1;
     }
 
-    /*
-     * Assign the ${@link ComputerLauncher} listener as the node is actually started, so we can pipe it to the
-     * ${@link Run} log. We need this as we can't just use <code>getComputer().getListener()</code>
-     *
-     * @see DockerComputer#COMPUTER_LISTENER
-     */
-    public void setTeeSpongeTaskListener(TaskListener teeSpongeTaskListener) {
-        try {
-            final File log = File.createTempFile("one-shot", "log");
-
-            // We use a "Tee+Sponge" TaskListener here as Run's log is created after computer has been first acceded
-            // If this can be changed in core, we would just need a "Tee"
-            this.teeSpongeTaskListener = new TeeSpongeTaskListener(teeSpongeTaskListener, log);
-        } catch (IOException e) {
-            e.printStackTrace(); // FIXME
-        }
-    }
-
-    public TeeSpongeTaskListener getTeeSpongeTaskListener() {
-        return teeSpongeTaskListener;
-    }
-
     /*package*/  boolean hasExecutable() {
         return executable != null;
     }
@@ -128,12 +98,13 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
     /**
      * Assign a ${@link Queue.Executable} to this OneShotSlave. By design, only one Queue.Executable can be assigned, then slave is shut down.
      * This method has to be called just as the ${@link Run} as been created. It run the actual launch of the executor
-     * and collect it's log so we can pipe it to the Run's ${@link hudson.model.BuildListener} (which is created later).
+     * and use Run's ${@link hudson.model.BuildListener} as computer launcher listener to collect the startup log as part of the build.
      * <p>
      * Delaying launch of the executor until the Run is actually started allows to fail the build on launch failure,
      * so we have a strong 1:1 relation between a Run and it's Executor.
+     * @param listener
      */
-    synchronized void provision() {
+    synchronized void provision(TaskListener listener) {
         if (executable != null) {
             // already provisioned
             return;
@@ -145,7 +116,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         }
 
         try {
-            realLauncher.launch(this.getComputer(), teeSpongeTaskListener);
+            realLauncher.launch(this.getComputer(), listener);
 
             if (getComputer().isActuallyOffline()) {
                 provisionFailed(new IllegalStateException("Computer is offline after launch"));
@@ -176,7 +147,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
      */
     @Override
     public Launcher createLauncher(TaskListener listener) {
-        provision();
+        provision(listener);
         return super.createLauncher(listener);
     }
 
@@ -186,17 +157,14 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
      * option yet.
      */
     @Extension
-    public static final ConsoleLogFilter LOG_FILTER = new ConsoleLogFilter() {
-
+    public final static RunListener RUN_LISTENER = new RunListener<Run>() {
         @Override
-        public OutputStream decorateLogger(Run run, OutputStream logger) throws IOException, InterruptedException {
-            Computer computer = Executor.currentExecutor().getOwner();
-
-            if (computer instanceof DockerComputer) {
-                OneShotSlave slave = ((DockerComputer) computer).getNode();
-                slave.teeSpongeTaskListener.setSideOutputStream(logger);
+        public void onStarted(Run run, TaskListener listener) {
+            Computer c = Computer.currentComputer();
+            if (c instanceof OneShotComputer) {
+                final OneShotSlave node = ((OneShotComputer) c).getNode();
+                node.provision(listener);
             }
-            return logger;
         }
     };
 
@@ -206,4 +174,5 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
             //noop;
         }
     };
+
 }

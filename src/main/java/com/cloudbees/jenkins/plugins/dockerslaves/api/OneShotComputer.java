@@ -26,11 +26,8 @@ package com.cloudbees.jenkins.plugins.dockerslaves.api;
 
 import hudson.Extension;
 import hudson.model.Computer;
-import hudson.model.Executor;
-import hudson.model.Queue;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.remoting.Channel;
 import hudson.slaves.ComputerListener;
 import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
@@ -39,7 +36,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 public abstract class OneShotComputer extends SlaveComputer {
+
+    public static final Charset UTF8 = Charset.forName("UTF-8");
+
     private final OneShotSlave slave;
+
 
     public OneShotComputer(OneShotSlave slave) {
         super(slave);
@@ -67,16 +68,6 @@ public abstract class OneShotComputer extends SlaveComputer {
         return slave;
     }
 
-    @Extension
-    public final static ComputerListener COMPUTER_LISTENER = new ComputerListener() {
-        @Override
-        public void preLaunch(Computer c, TaskListener listener) throws IOException, InterruptedException {
-            if (c instanceof OneShotComputer) {
-                ((OneShotComputer) c).getNode().setTeeSpongeTaskListener(listener);
-            }
-        }
-    };
-
     @Override
     protected boolean isAlive() {
         if (getNode().hasExecutable()) {
@@ -95,14 +86,35 @@ public abstract class OneShotComputer extends SlaveComputer {
         }
     }
     /**
-     * ${@link Computer#getDefaultCharset()} is the first computer method used by
-     * ${@link hudson.model.Run#execute(Run.RunExecution)} when a job is executed.
-     * Relying on this implementation detail is fragile, but we don't really have a better
-     * option yet.
+     * We only do support Linux docker images, so we assume UTF-8.
+     * This let us wait for build log to be created and setup as a
+     * ${@link hudson.model.BuildListener} before we actually launch
      */
     @Override
     public Charset getDefaultCharset() {
-        getNode().provision();
-        return super.getDefaultCharset();
+        return UTF8;
+    }
+
+
+
+    // --- we need this to workaround hudson.slaves.SlaveComputer#taskListener being private
+    private TaskListener listener;
+
+    @Extension
+    public final static ComputerListener COMPUTER_LISTENER = new ComputerListener() {
+        @Override
+        public void preLaunch(Computer c, TaskListener listener) throws IOException, InterruptedException {
+            if (c instanceof OneShotComputer) {
+                ((OneShotComputer) c).setListener(listener);
+            }
+        }
+    };
+
+    public void setListener(TaskListener listener) {
+        this.listener = listener;
+    }
+
+    public TaskListener getListener() {
+        return listener;
     }
 }
