@@ -27,6 +27,9 @@ package com.cloudbees.jenkins.plugins.dockerslaves;
 
 import com.cloudbees.jenkins.plugins.dockerslaves.api.OneShotComputer;
 import hudson.model.Queue;
+import hudson.model.TaskListener;
+import hudson.slaves.ComputerLauncher;
+import hudson.slaves.SlaveComputer;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -81,4 +84,21 @@ public class DockerComputer extends OneShotComputer {
     }
 
     private static final Logger LOGGER = Logger.getLogger(DockerComputer.class.getName());
+
+    class DockerComputerLauncher extends ComputerLauncher {
+
+        public DockerComputerLauncher() {
+        }
+
+        @Override
+        public void launch(final SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
+            DockerProvisioner provisioner = createProvisioner();
+            provisioner.prepareRemotingContainer();
+            provisioner.launchRemotingContainer(computer, listener);
+        }
+    }
+
+    public ComputerLauncher createComputerLauncher() {
+        return new DockerComputerLauncher();
+    }
 }
