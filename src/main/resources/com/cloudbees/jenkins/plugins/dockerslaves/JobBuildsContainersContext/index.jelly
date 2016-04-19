@@ -30,10 +30,8 @@
     <h1><l:icon src="${app.rootUrl}/plugin/docker-slaves/images/48x48/docker-logo.png"/> Containers used for this build</h1>
 
       <ul>
-        <li>${it.remotingContainer.id} (${it.remotingContainer.imageName})</li>
-        <j:forEach var="container" items="${it.buildContainers}">
-          <li>${container.id} (${container.imageName})</li>
-        </j:forEach>
+        <li>jenkins agent : ${it.remotingContainer.id} (${it.remotingContainer.imageName})</li>
+        <li>main build container : ${it.buildContainer.id} (${it.buildContainer.imageName})</li>
         <j:forEach var="container" items="${it.sideContainers}">
           <li>${container.key} : ${container.value.id} (${container.value.imageName})</li>
         </j:forEach>
