@@ -58,7 +58,7 @@ public class DockerSlave extends OneShotSlave {
 
     public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
-        super(name.replaceAll("/", " » "), nodeDescription, "/home/jenkins", labelString);
+        super(name.replaceAll("/", " » "), nodeDescription, "/home/jenkins", labelString, new DockerComputerLauncher());
         this.provisionerFactory = provisionerFactory;
     }
 
@@ -67,12 +67,7 @@ public class DockerSlave extends OneShotSlave {
     }
 
     @Override
-    public ComputerLauncher createRealComputerLauncher() {
-        return getComputer().createComputerLauncher();
-    }
-
-    @Override
-    public Node asNode() {
+    public DockerSlave asNode() {
         return this;
     }
 

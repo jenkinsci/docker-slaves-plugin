@@ -35,15 +35,19 @@ import hudson.model.Run;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import hudson.model.queue.CauseOfBlockage;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.EphemeralNode;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
+import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A slave that is designed to be used only once, for a specific ${@link hudson.model.Run}, and as such has a life cycle
@@ -68,14 +72,13 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
      */
     private transient Queue.Executable executable;
 
+    private final ComputerLauncher realLauncher;
+
     private boolean provisioningFailed = false;
 
-    public OneShotSlave(String name, String nodeDescription, String remoteFS, String labelString) throws Descriptor.FormException, IOException {
-        super(name, nodeDescription, remoteFS, 1, Mode.EXCLUSIVE, labelString, null, RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList());
-        setLauncher(new DeferredComputerLauncher(new Callable<ComputerLauncher>() {
-            @Override
-            public ComputerLauncher call() throws Exception { return createRealComputerLauncher(); }
-        }));
+    public OneShotSlave(String name, String nodeDescription, String remoteFS, String labelString, ComputerLauncher launcher) throws Descriptor.FormException, IOException {
+        super(name, nodeDescription, remoteFS, 1, Mode.EXCLUSIVE, labelString, NOOP_LAUNCHER, RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList());
+        this.realLauncher = launcher;
     }
 
     @Override
@@ -83,7 +86,6 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         return 1;
     }
 
-    public abstract ComputerLauncher createRealComputerLauncher();
 
     /*package*/  boolean hasExecutable() {
         return executable != null;
@@ -119,7 +121,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         }
 
         try {
-            getLauncher().launch(this.getComputer(), listener);
+            realLauncher.launch(this.getComputer(), listener);
 
             if (getComputer().isActuallyOffline()) {
                 provisionFailed(new IllegalStateException("Computer is offline after launch"));
@@ -168,6 +170,13 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
                 final OneShotSlave node = ((OneShotComputer) c).getNode();
                 node.provision(listener);
             }
+        }
+    };
+
+    private static final ComputerLauncher NOOP_LAUNCHER = new ComputerLauncher() {
+        @Override
+        public void launch(SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
+            //noop;
         }
     };
 }
