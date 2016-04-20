@@ -75,14 +75,13 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         String tag = Long.toHexString(System.nanoTime());
 
         final FilePath workspace = procStarter.pwd();
-        FilePath contextRoot = workspace.child(contextPath);
 
-        final FilePath pathToContext = contextRoot.child(contextPath);
+        final FilePath pathToContext = workspace.child(contextPath);
         if (!pathToContext.exists()) {
             throw new IOException(pathToContext.getRemote() + " does not exists.");
         }
 
-        final FilePath pathToDockerfile = contextRoot.child(dockerfile);
+        final FilePath pathToDockerfile = pathToContext.child(dockerfile);
         if (!pathToDockerfile.exists()) {
             throw new IOException( pathToContext.getRemote() + " does not exists.");
         }
