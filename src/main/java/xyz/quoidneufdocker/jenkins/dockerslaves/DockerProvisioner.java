@@ -32,6 +32,7 @@ import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spec.SideContainerDefinition;
 
 import java.io.IOException;
 

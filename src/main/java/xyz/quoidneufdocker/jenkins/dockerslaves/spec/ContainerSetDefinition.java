@@ -25,7 +25,6 @@
 
 package xyz.quoidneufdocker.jenkins.dockerslaves.spec;
 
-import xyz.quoidneufdocker.jenkins.dockerslaves.SideContainerDefinition;
 import hudson.Extension;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;

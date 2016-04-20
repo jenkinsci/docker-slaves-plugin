@@ -27,7 +27,7 @@ import xyz.quoidneufdocker.jenkins.dockerslaves.DockerSlave;
 import xyz.quoidneufdocker.jenkins.dockerslaves.DockerSlaves;
 import xyz.quoidneufdocker.jenkins.dockerslaves.spec.ImageIdContainerDefinition;
 import xyz.quoidneufdocker.jenkins.dockerslaves.spec.ContainerSetDefinition;
-import xyz.quoidneufdocker.jenkins.dockerslaves.SideContainerDefinition;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spec.SideContainerDefinition;
 import com.google.inject.Inject;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
