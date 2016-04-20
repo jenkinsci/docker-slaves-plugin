@@ -33,9 +33,9 @@
         <version>2.7</version>
     </parent>
 
-    <groupId>com.cloudbees.jenkins.plugins</groupId>
+    <groupId>xyz.quoidneufdocker</groupId>
     <artifactId>docker-slaves</artifactId>
-    <version>1.0-beta-4-SNAPSHOT</version>
+    <version>0.5-beta-4-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>Docker Slaves Plugin</name>
