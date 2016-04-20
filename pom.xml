@@ -38,9 +38,9 @@
     <version>1.0-beta-4-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
-    <name>Container Slaves Plugin</name>
-    <description>Launch builds inside containers</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Container+Slaves+Plugin</url>
+    <name>Docker Slaves Plugin</name>
+    <description>Run builds inside Docker containers</description>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Docker+Slaves+Plugin</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -69,14 +69,14 @@
     </scm>
 
     <properties>
-        <jenkins.version>1.642.1</jenkins.version>
+        <jenkins.version>1.642.3</jenkins.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>1.13</version>
+            <version>2.0</version>
             <optional>true</optional>
         </dependency>
         <dependency>
