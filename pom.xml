@@ -35,7 +35,7 @@
 
     <groupId>xyz.quoidneufdocker</groupId>
     <artifactId>docker-slaves</artifactId>
-    <version>0.5-beta-4-SNAPSHOT</version>
+    <version>0.5</version>
     <packaging>hpi</packaging>
 
     <name>Docker Slaves Plugin</name>
@@ -65,7 +65,7 @@
         <connection>scm:git:git://github.com/ndeloof/docker-slaves-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:ndeloof/docker-slaves-plugin.git</developerConnection>
         <url>https://github.com/ndeloof/docker-slaves-plugin</url>
-        <tag>HEAD</tag>
+        <tag>docker-slaves-0.5</tag>
     </scm>
 
     <properties>
