@@ -53,8 +53,11 @@ public abstract class OneShotComputer extends SlaveComputer {
      */
     @Override
     public boolean isOffline() {
-        if (getNode().hasProvisioningFailed()) return true;
-        if (!getNode().hasExecutable()) return false;
+        final OneShotSlave node = getNode();
+        if (node != null) {
+            if (node.hasProvisioningFailed()) return true;
+            if (!node.hasExecutable()) return false;
+        }
 
         return isActuallyOffline();
     }

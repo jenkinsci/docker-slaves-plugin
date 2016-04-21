@@ -138,7 +138,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         }
 
         try {
-            Jenkins.getInstance().removeNode(this);
+            Jenkins.getActiveInstance().removeNode(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -166,7 +166,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         @Override
         public void onStarted(Run run, TaskListener listener) {
             Computer c = Computer.currentComputer();
-            if (c instanceof OneShotComputer) {
+            if (c != null && c instanceof OneShotComputer) {
                 final OneShotSlave node = ((OneShotComputer) c).getNode();
                 node.provision(listener);
             }

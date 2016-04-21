@@ -144,7 +144,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                         run.getParent(),
                         spec));
 
-        Jenkins.getInstance().addNode(node);
+        Jenkins.getActiveInstance().addNode(node);
 
         Timer.get().schedule(new Runnable() {
             @Override

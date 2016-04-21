@@ -58,7 +58,7 @@ public class DockerDriver implements Closeable {
 
     public DockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
-        dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getInstance().getChannel()).materialize();
+        dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
         verbose = true;
     }
 
@@ -193,7 +193,7 @@ public class DockerDriver implements Closeable {
         }
 
         TarInputStream tar = new TarInputStream(new ByteArrayInputStream(out.toByteArray()));
-        TarEntry entry = tar.getNextEntry();
+        tar.getNextEntry();
         tar.copyEntryContents(outputStream);
         tar.close();
     }
