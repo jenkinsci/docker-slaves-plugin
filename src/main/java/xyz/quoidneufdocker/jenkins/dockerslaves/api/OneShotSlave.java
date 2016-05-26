@@ -143,7 +143,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
             e.printStackTrace();
         }
 
-        throw new OneShotExecutorProvisioningException();
+        throw new OneShotExecutorProvisioningException(cause);
     }
 
     /**
