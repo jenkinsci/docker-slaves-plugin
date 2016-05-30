@@ -34,10 +34,9 @@ import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public abstract class OneShotComputer extends SlaveComputer {
-
-    public static final Charset UTF8 = Charset.forName("UTF-8");
 
     private final OneShotSlave slave;
 
@@ -95,7 +94,7 @@ public abstract class OneShotComputer extends SlaveComputer {
      */
     @Override
     public Charset getDefaultCharset() {
-        return UTF8;
+        return StandardCharsets.UTF_8;
     }
 
 
