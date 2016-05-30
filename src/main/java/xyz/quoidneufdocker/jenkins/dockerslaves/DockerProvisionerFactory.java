@@ -31,65 +31,72 @@ import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spi.DockerHostSource;
 
 import java.io.IOException;
 
 public abstract class DockerProvisionerFactory {
+
     protected final DockerServerEndpoint dockerHost;
     protected final String remotingContainerImageName;
     protected final String scmContainerImageName;
+    protected final Job job;
+    protected final ContainerSetDefinition spec;
 
-    public DockerProvisionerFactory(DockerServerEndpoint dockerHost, String remotingContainerImageName, String scmContainerImageName) {
-        this.dockerHost = dockerHost;
+    public DockerProvisionerFactory(DockerServerEndpoint dockerHost, String remotingContainerImageName, String scmContainerImageName, Job job, ContainerSetDefinition spec) {
+        this.dockerHost = (dockerHost != null ? dockerHost : new DockerServerEndpoint(null, null));
         this.remotingContainerImageName = remotingContainerImageName;
         this.scmContainerImageName = scmContainerImageName;
+        this.job = job;
+        this.spec = spec;
     }
+
+    protected void prepareWorkspace(Job job, JobBuildsContainersContext context) {
+
+        // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
+        // could rely on docker volume driver
+        // in the meantime, we just rely on previous build's remoting container as a data volume container
+
+        // reuse previous remoting container to retrieve workspace
+        Run lastBuild = job.getBuilds().getLastBuild();
+        if (lastBuild != null) {
+            JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
+            if (previousContext != null && previousContext.getRemotingContainer() != null) {
+                context.setRemotingContainer(previousContext.getRemotingContainer());
+            }
+        }
+    }
+
 
     public abstract DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException;
 
     public static class StandardJob extends DockerProvisionerFactory {
-        protected final Job job;
 
         public StandardJob(DockerServerEndpoint dockerHost, String remotingContainerImageName, String scmContainerImageName, Job job) {
-            super(dockerHost, remotingContainerImageName, scmContainerImageName);
-            this.job = job;
+            super(dockerHost, remotingContainerImageName, scmContainerImageName, job, (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class));
         }
 
         @Override
         public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
             JobBuildsContainersContext context = new JobBuildsContainersContext();
 
-            // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
-            // could rely on docker volume driver
-            // in the meantime, we just rely on previous build's remoting container as a data volume container
-
-            // reuse previous remoting container to retrieve workspace
-            Run lastBuild = job.getBuilds().getLastBuild();
-            if (lastBuild != null) {
-                JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
-                if (previousContext != null && previousContext.getRemotingContainer() != null) {
-                    context.setRemotingContainer(previousContext.getRemotingContainer());
-                }
-            }
+            prepareWorkspace(job, context);
 
             return new DockerProvisioner(context, slaveListener, new DockerDriver(dockerHost, job), new Launcher.LocalLauncher(slaveListener),
-                    (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class), remotingContainerImageName, scmContainerImageName);
+                    spec, remotingContainerImageName, scmContainerImageName);
         }
     }
 
     public static class PipelineJob extends DockerProvisionerFactory {
-        protected final Job job;
-        protected final ContainerSetDefinition spec;
 
         public PipelineJob(DockerServerEndpoint dockerHost, String remotingContainerImageName, String scmContainerImageName, Job job, ContainerSetDefinition spec) {
-            super(dockerHost, remotingContainerImageName, scmContainerImageName);
-            this.job = job;
-            this.spec = spec;
+            super(dockerHost, remotingContainerImageName, scmContainerImageName, job, spec);
         }
 
         @Override
         public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
-            return new DockerProvisioner(new JobBuildsContainersContext(false), slaveListener, new DockerDriver(dockerHost, job), new Launcher.LocalLauncher(slaveListener),
+            JobBuildsContainersContext context = new JobBuildsContainersContext(false);
+            return new DockerProvisioner(context, slaveListener, new DockerDriver(dockerHost, job), new Launcher.LocalLauncher(slaveListener),
                     spec, remotingContainerImageName, scmContainerImageName);
         }
     }

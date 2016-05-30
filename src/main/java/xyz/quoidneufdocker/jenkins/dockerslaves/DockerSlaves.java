@@ -38,6 +38,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spi.DockerHostSource;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spi.DockerSettings;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -60,7 +62,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
      */
     private final String remotingContainerImageName = System.getProperty("com.cloudbees.jenkins.plugins.containerslaves.DockerSlaves.image", "jenkinsci/slave");
 
-    private DockerServerEndpoint dockerHost;
+    private DockerHostSource dockerHostSource;
 
     public void start() throws IOException {
         load();
@@ -84,12 +86,8 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return StringUtils.isBlank(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
     }
 
-    public DockerServerEndpoint getDockerHost() {
-        if (dockerHost == null) {
-            dockerHost = new DockerServerEndpoint(null, null);
-        }
-
-        return dockerHost;
+    public DockerServerEndpoint getDockerHost(Job job) {
+        return dockerHostSource.getDockerHost(job);
     }
 
     @DataBoundSetter
@@ -102,16 +100,26 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     @DataBoundSetter
-    public void setDockerHost(DockerServerEndpoint dockerHost) {
-        this.dockerHost = dockerHost;
+    public void setDockerHostSource(DockerHostSource dockerHostSource) {
+        this.dockerHostSource = dockerHostSource;
+    }
+
+    public DockerHostSource getDockerHostSource() {
+        return dockerHostSource;
     }
 
     public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) {
-        return new DockerProvisionerFactory.StandardJob(getDockerHost(), getRemotingContainerImageName(), getScmContainerImageName(), job);
+        // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
+
+        final DockerServerEndpoint dockerHost = dockerHostSource.getDockerHost(job);
+
+        return new DockerProvisionerFactory.StandardJob(dockerHost, getRemotingContainerImageName(), getScmContainerImageName(), job);
     }
 
     public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) {
-        return new DockerProvisionerFactory.PipelineJob(getDockerHost(), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
+
+        final DockerServerEndpoint dockerHost = dockerHostSource.getDockerHost(job);
+        return new DockerProvisionerFactory.PipelineJob(dockerHost, getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
     }
 
     public static DockerSlaves get() {
