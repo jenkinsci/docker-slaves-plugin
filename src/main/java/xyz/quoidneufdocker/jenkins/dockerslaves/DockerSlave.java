@@ -25,25 +25,19 @@
 
 package xyz.quoidneufdocker.jenkins.dockerslaves;
 
-import xyz.quoidneufdocker.jenkins.dockerslaves.api.OneShotSlave;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.Action;
-import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
-import hudson.model.Environment;
 import hudson.model.Job;
-import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.model.listeners.SCMListener;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
-import hudson.slaves.ComputerLauncher;
 import hudson.slaves.EphemeralNode;
+import xyz.quoidneufdocker.jenkins.dockerslaves.api.OneShotSlave;
 
 import java.io.IOException;
 
@@ -92,22 +86,19 @@ public class DockerSlave extends OneShotSlave {
     }
 
     /**
-     * This listener get notified as the build is going to start. We use it to remove the temporary unique Label we
-     * created to ensure exclusive executor usage, but which would pollute Jenkins labels set.
+     * This listener get notified as the build is going to start.
      */
     @Extension
-    public static class DockerSlaveRunListener extends RunListener<AbstractBuild> {
+    public static class DockerSlaveRunListener extends RunListener<Run> {
+
         @Override
-        public Environment setUpEnvironment(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException, Run.RunnerAbortedException {
+        public void onStarted(Run run, TaskListener listener) {
             Computer c = Computer.currentComputer();
             if (c instanceof DockerComputer) {
-                build.addAction(((DockerComputer) c).getProvisioner().getContext());
-                Action temporaryLabel = build.getAction(DockerSlaveAssignmentAction.class);
-                build.getActions().remove(temporaryLabel);
+                run.addAction(((DockerComputer) c).getProvisioner().getContext());
+                // TODO remove DockerSlaveAssignmentAction
             }
-            return new Environment() {};
         }
-
     }
 
     /**
