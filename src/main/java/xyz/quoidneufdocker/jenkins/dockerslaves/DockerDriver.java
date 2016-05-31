@@ -67,6 +67,32 @@ public class DockerDriver implements Closeable {
         dockerEnv.close();
     }
 
+    public String createVolume(Launcher launcher, String driver, Set<String> driverOpts) throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("volume", "create");
+
+        if (driver != null) {
+            args.add("--driver", driver);
+            if (driverOpts != null) {
+                for (String opt : driverOpts) {
+                    args.add(opt);
+                }
+            }
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int status = launchDockerCLI(launcher, args)
+                .stdout(out).stderr(launcher.getListener().getLogger()).join();
+
+        final String volume = out.toString("UTF-8").trim();
+
+        if (status != 0) {
+            throw new IOException("Failed to run docker image");
+        }
+
+        return volume;
+    }
+
     public boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(id)) {
             return false;
