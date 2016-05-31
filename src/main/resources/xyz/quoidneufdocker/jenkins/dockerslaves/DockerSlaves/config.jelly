@@ -30,7 +30,7 @@
     <j:set var="instance" value="${it}"/>
     <j:set var="descriptor" value="${it.descriptor}"/>
 
-    <f:property field="dockerHost"/>
+    <f:dropdownDescriptorSelector field="dockerHostSource" title="Docker Host selector"/>
 
     <f:entry title="Default SCM image" field="scmContainerImageName">
       <f:textbox default="buildpack-deps:scm"/>
