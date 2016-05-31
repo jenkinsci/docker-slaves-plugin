@@ -67,7 +67,7 @@ public class DockerDriver implements Closeable {
         dockerEnv.close();
     }
 
-    public String createVolume(Launcher launcher, String driver, Set<String> driverOpts) throws IOException, InterruptedException {
+    public String createVolume(Launcher launcher, String driver, Collection<String> driverOpts) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("volume", "create");
 
