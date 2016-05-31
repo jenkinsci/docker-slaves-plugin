@@ -143,7 +143,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
             e.printStackTrace();
         }
 
-        throw new OneShotExecutorProvisioningException();
+        throw new OneShotExecutorProvisioningException(cause);
     }
 
     /**
@@ -161,7 +161,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
      * Relying on this implementation detail is fragile, but we don't really have a better
      * option yet.
      */
-    @Extension
+    @Extension(ordinal = Double.MAX_VALUE)
     public final static RunListener RUN_LISTENER = new RunListener<Run>() {
         @Override
         public void onStarted(Run run, TaskListener listener) {

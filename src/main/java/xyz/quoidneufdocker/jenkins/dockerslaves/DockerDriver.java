@@ -151,7 +151,7 @@ public class DockerDriver implements Closeable {
 
                 .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
                 .add("--user", "10000:10000")
-                .add("--volumes", workdir+":"+ SLAVE_ROOT)
+                .add("--volume", workdir+":"+ SLAVE_ROOT)
                 .add("--workdir", SLAVE_ROOT)
                 .add(image)
                 .add("java")
@@ -168,7 +168,7 @@ public class DockerDriver implements Closeable {
         String containerId = out.toString("UTF-8").trim();
 
         if (status != 0) {
-            throw new IOException("Failed to run docker image");
+            throw new IOException("Failed to create docker image");
         }
 
         putFileContent(launcher, containerId, SLAVE_ROOT, "slave.jar", new Slave.JnlpJar("slave.jar").readFully());

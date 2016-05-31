@@ -123,6 +123,14 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return Jenkins.getInstance().getDescriptorOrDie(DockerSlaves.class);
     }
 
+    private Object readResolve() {
+        if (this.dockerHostSource == null) {
+            dockerHostSource = new DefaultDockerHostSource(new DockerServerEndpoint(null, null));
+        }
+        return this;
+    }
+
+
     @Extension
     public static class DescriptorImpl extends Descriptor<DockerSlaves> {
 

@@ -97,7 +97,7 @@ public class DockerProvisioner {
     public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener) {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("start")
-                .add("-ia", context.getRemotingContainer().getId());
+                .add("--interactive", "--attach", context.getRemotingContainer().getId());
         driver.prependArgs(args);
         CommandLauncher launcher = new CommandLauncher(args.toString(), driver.dockerEnv.env());
         launcher.launch(computer, listener);
