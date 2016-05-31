@@ -84,19 +84,6 @@ public class DockerComputer extends OneShotComputer {
 
     private static final Logger LOGGER = Logger.getLogger(DockerComputer.class.getName());
 
-    class DockerComputerLauncher extends ComputerLauncher {
-
-        public DockerComputerLauncher() {
-        }
-
-        @Override
-        public void launch(final SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
-            DockerProvisioner provisioner = createProvisioner();
-            provisioner.prepareRemotingContainer();
-            provisioner.launchRemotingContainer(computer, listener);
-        }
-    }
-
     public ComputerLauncher createComputerLauncher() {
         return new DockerComputerLauncher();
     }
