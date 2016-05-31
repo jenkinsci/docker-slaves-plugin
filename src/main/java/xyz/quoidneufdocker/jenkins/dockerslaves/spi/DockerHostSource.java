@@ -5,6 +5,8 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Job;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
+import java.io.IOException;
+
 /**
  * A DockerHostSource is responsible to determine (or provision) the dockerhost to host a build for the specified job.
  * <p>
@@ -20,6 +22,5 @@ public abstract class DockerHostSource extends AbstractDescribableImpl<DockerHos
      * @param job
      * @return
      */
-    public abstract DockerServerEndpoint getDockerHost(Job job);
-
+    public abstract DockerServerEndpoint getDockerHost(Job job) throws IOException, InterruptedException;
 }

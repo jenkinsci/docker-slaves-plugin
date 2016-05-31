@@ -25,7 +25,6 @@
 
 package xyz.quoidneufdocker.jenkins.dockerslaves;
 
-import xyz.quoidneufdocker.jenkins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Extension;
 import hudson.Plugin;
 import hudson.model.Describable;
@@ -38,8 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spec.ContainerSetDefinition;
 import xyz.quoidneufdocker.jenkins.dockerslaves.spi.DockerHostSource;
-import xyz.quoidneufdocker.jenkins.dockerslaves.spi.DockerSettings;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -86,10 +85,6 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return StringUtils.isBlank(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
     }
 
-    public DockerServerEndpoint getDockerHost(Job job) {
-        return dockerHostSource.getDockerHost(job);
-    }
-
     @DataBoundSetter
     public void setDefaultBuildContainerImageName(String defaultBuildContainerImageName) {
         this.defaultBuildContainerImageName = defaultBuildContainerImageName;
@@ -108,7 +103,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return dockerHostSource;
     }
 
-    public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) {
+    public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
         final DockerServerEndpoint dockerHost = dockerHostSource.getDockerHost(job);
@@ -116,7 +111,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return new DockerProvisionerFactory.StandardJob(dockerHost, getRemotingContainerImageName(), getScmContainerImageName(), job);
     }
 
-    public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) {
+    public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
 
         final DockerServerEndpoint dockerHost = dockerHostSource.getDockerHost(job);
         return new DockerProvisionerFactory.PipelineJob(dockerHost, getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
