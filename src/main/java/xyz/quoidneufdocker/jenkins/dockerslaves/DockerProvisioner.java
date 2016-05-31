@@ -35,6 +35,7 @@ import hudson.util.ArgumentListBuilder;
 import xyz.quoidneufdocker.jenkins.dockerslaves.spec.SideContainerDefinition;
 
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * Provision {@link ContainerInstance}s based on ${@link ContainerSetDefinition} to provide a queued task
@@ -48,7 +49,7 @@ public class DockerProvisioner {
 
     protected final DockerDriver driver;
 
-    protected final Launcher localLauncher;
+    protected final Launcher launcher;
 
     protected final ContainerSetDefinition spec;
 
@@ -56,11 +57,11 @@ public class DockerProvisioner {
 
     protected final String scmImage;
 
-    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher localLauncher, ContainerSetDefinition spec, String remotingImage, String scmImage) {
+    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher launcher, ContainerSetDefinition spec, String remotingImage, String scmImage) {
         this.context = context;
         this.slaveListener = slaveListener;
         this.driver = driver;
-        this.localLauncher = localLauncher;
+        this.launcher = launcher;
         this.spec = spec;
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;
@@ -73,11 +74,11 @@ public class DockerProvisioner {
     public void prepareRemotingContainer() throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
         if (context.getRemotingContainer() != null) {
-            if (driver.hasContainer(localLauncher, context.getRemotingContainer().getId())) {
+            if (driver.hasContainer(launcher, context.getRemotingContainer().getId())) {
                 return;
             }
         }
-        final ContainerInstance remotingContainer = driver.createRemotingContainer(localLauncher, remotingImage);
+        final ContainerInstance remotingContainer = driver.createRemotingContainer(launcher, remotingImage, volume);
         context.setRemotingContainer(remotingContainer);
     }
 
@@ -99,13 +100,13 @@ public class DockerProvisioner {
         }
 
         String buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
-        final ContainerInstance buildContainer = driver.createBuildContainer(localLauncher, buildImage, context.getRemotingContainer());
+        final ContainerInstance buildContainer = driver.createBuildContainer(launcher, buildImage, context.getRemotingContainer());
         context.setBuildContainer(buildContainer);
         return buildContainer;
     }
 
     public ContainerInstance launchScmContainer() throws IOException, InterruptedException {
-        final ContainerInstance scmContainer = driver.createBuildContainer(localLauncher, scmImage, context.getRemotingContainer());
+        final ContainerInstance scmContainer = driver.createBuildContainer(launcher, scmImage, context.getRemotingContainer());
         context.setBuildContainer(scmContainer);
         return scmContainer;
     }
@@ -117,7 +118,7 @@ public class DockerProvisioner {
             listener.getLogger().println("Starting " + name + " container");
             ContainerInstance container = new ContainerInstance(image);
             context.getSideContainers().put(name, container);
-            driver.launchSideContainer(localLauncher, container, context.getRemotingContainer());
+            driver.launchSideContainer(launcher, container, context.getRemotingContainer());
         }
     }
 
@@ -136,20 +137,20 @@ public class DockerProvisioner {
             }
         }
 
-        return driver.execInContainer(localLauncher, targetContainer.getId(), procStarter);
+        return driver.execInContainer(launcher, targetContainer.getId(), procStarter);
     }
 
     public void clean() throws IOException, InterruptedException {
         for (ContainerInstance instance : context.getSideContainers().values()) {
-            driver.removeContainer(localLauncher, instance);
+            driver.removeContainer(launcher, instance);
         }
 
         if (context.getBuildContainer() != null) {
-            driver.removeContainer(localLauncher, context.getBuildContainer());
+            driver.removeContainer(launcher, context.getBuildContainer());
         }
 
         if (context.getScmContainer() != null) {
-            driver.removeContainer(localLauncher, context.getScmContainer());
+            driver.removeContainer(launcher, context.getScmContainer());
         }
 
         driver.close();
