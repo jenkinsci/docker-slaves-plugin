@@ -48,11 +48,13 @@ import java.io.IOException;
  */
 public class DockerSlave extends OneShotSlave {
 
+    public static final String SLAVE_ROOT = "/home/jenkins/";
+
     private final DockerProvisionerFactory provisionerFactory;
 
     public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
-        super(name.replaceAll("/", " » "), nodeDescription, "/home/jenkins", labelString, new DockerComputerLauncher());
+        super(name.replaceAll("/", " » "), nodeDescription, SLAVE_ROOT, labelString, new DockerComputerLauncher());
         this.provisionerFactory = provisionerFactory;
     }
 

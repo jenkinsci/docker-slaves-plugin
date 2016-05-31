@@ -34,6 +34,8 @@ import java.util.Map;
 
 public class JobBuildsContainersContext implements BuildBadgeAction {
 
+    protected String workdirVolume;
+
     protected ContainerInstance remotingContainer;
 
     protected ContainerInstance buildContainer;
@@ -57,6 +59,14 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
 
     protected void onScmChekoutCompleted(Run<?, ?> build, TaskListener listener) {
         preScm = false;
+    }
+
+    public String getWorkdirVolume() {
+        return workdirVolume;
+    }
+
+    public void setWorkdirVolume(String workdirVolume) {
+        this.workdirVolume = workdirVolume;
     }
 
     public ContainerInstance getRemotingContainer() {

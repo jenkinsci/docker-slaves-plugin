@@ -78,6 +78,13 @@ public class DockerProvisioner {
                 return;
             }
         }
+
+        String volume = context.getWorkdirVolume();
+        if (!driver.hasVolume(launcher, volume)) {
+            volume = driver.createVolume(launcher, "local", Collections.EMPTY_LIST);
+            context.setWorkdirVolume(volume);
+        }
+
         final ContainerInstance remotingContainer = driver.createRemotingContainer(launcher, remotingImage, volume);
         context.setRemotingContainer(remotingContainer);
     }

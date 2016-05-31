@@ -39,10 +39,17 @@ import org.apache.tools.tar.TarInputStream;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static xyz.quoidneufdocker.jenkins.dockerslaves.DockerSlave.SLAVE_ROOT;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -134,7 +141,7 @@ public class DockerDriver implements Closeable {
         }
     }
 
-    public ContainerInstance createRemotingContainer(Launcher launcher, String image) throws IOException, InterruptedException {
+    public ContainerInstance createRemotingContainer(Launcher launcher, String image, String workdir) throws IOException, InterruptedException {
 
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create", "--interactive")
@@ -142,14 +149,16 @@ public class DockerDriver implements Closeable {
                 // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
                 .add("--log-driver=none")
 
-                .add("--env", "TMPDIR=/home/jenkins/.tmp")
+                .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
                 .add("--user", "10000:10000")
+                .add("--volumes", workdir+":"+ SLAVE_ROOT)
+                .add("--workdir", SLAVE_ROOT)
                 .add(image)
                 .add("java")
 
                 // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
-                .add("-Djava.io.tmpdir=/home/jenkins/.tmp")
-                .add("-jar").add("/home/jenkins/slave.jar");
+                .add("-Djava.io.tmpdir="+ SLAVE_ROOT+".tmp")
+                .add("-jar").add(SLAVE_ROOT+"slave.jar");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -162,7 +171,7 @@ public class DockerDriver implements Closeable {
             throw new IOException("Failed to run docker image");
         }
 
-        putFileContent(launcher, containerId, "/home/jenkins", "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
+        putFileContent(launcher, containerId, SLAVE_ROOT, "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
         return new ContainerInstance(image, containerId);
     }
 
@@ -393,4 +402,5 @@ public class DockerDriver implements Closeable {
                 .cmds(args)
                 .quiet(!verbose);
     }
+
 }
