@@ -25,6 +25,7 @@
 
 package xyz.quoidneufdocker.jenkins.dockerslaves;
 
+import hudson.model.Job;
 import xyz.quoidneufdocker.jenkins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.Proc;
@@ -33,6 +34,7 @@ import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
 import xyz.quoidneufdocker.jenkins.dockerslaves.spec.SideContainerDefinition;
+import xyz.quoidneufdocker.jenkins.dockerslaves.spi.DockerHostSource;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -57,11 +59,14 @@ public class DockerProvisioner {
 
     protected final String scmImage;
 
-    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Launcher launcher, ContainerSetDefinition spec, String remotingImage, String scmImage) {
+    private final DockerHostSource dockerHost;
+
+    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerHostSource dockerHost, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.context = context;
         this.slaveListener = slaveListener;
-        this.driver = driver;
-        this.launcher = launcher;
+        this.dockerHost = dockerHost;
+        this.driver = new DockerDriver(dockerHost.getDockerHost(job), job);
+        this.launcher = new Launcher.LocalLauncher(slaveListener);
         this.spec = spec;
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;

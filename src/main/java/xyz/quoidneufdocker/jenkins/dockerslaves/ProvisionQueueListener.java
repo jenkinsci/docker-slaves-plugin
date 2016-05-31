@@ -81,7 +81,7 @@ public class ProvisionQueueListener extends QueueListener {
         }
     }
 
-    private Node prepareExecutorFor(final AbstractProject job) throws Descriptor.FormException, IOException {
+    private Node prepareExecutorFor(final AbstractProject job) throws Descriptor.FormException, IOException, InterruptedException {
         LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
 
         // Immediately create a slave for this item

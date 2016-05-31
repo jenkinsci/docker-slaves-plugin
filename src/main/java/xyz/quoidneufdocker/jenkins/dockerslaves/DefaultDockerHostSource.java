@@ -28,9 +28,7 @@ public class DefaultDockerHostSource extends DockerHostSource {
 
     @Override
     public DockerServerEndpoint getDockerHost(Job job) throws IOException, InterruptedException {
-
         return dockerServerEndpoint;
-
     }
 
     @Extension
