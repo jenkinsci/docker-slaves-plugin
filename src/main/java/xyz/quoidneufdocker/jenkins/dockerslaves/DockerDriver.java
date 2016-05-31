@@ -93,6 +93,27 @@ public class DockerDriver implements Closeable {
         return volume;
     }
 
+    public boolean hasVolume(Launcher launcher, String name) throws IOException, InterruptedException {
+        if (StringUtils.isEmpty(name)) {
+            return false;
+        }
+
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("volume", "inspect", "-f", "'{{.Name}}'", name);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int status = launchDockerCLI(launcher, args)
+                .stdout(out).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
     public boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(id)) {
             return false;
