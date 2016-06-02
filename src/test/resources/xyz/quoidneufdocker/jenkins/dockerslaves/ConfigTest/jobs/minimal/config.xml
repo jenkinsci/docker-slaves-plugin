@@ -1,9 +1,0 @@
-<project>
-  <properties>
-    <com.cloudbees.jenkins.plugins.dockerslaves.JobBuildsContainersDefinition>
-      <buildHostImage class="xyz.quoidneufdocker.jenkins.dockerslaves.spec.ImageIdContainerDefinition">
-        <image>busybox</image>
-      </buildHostImage>
-    </com.cloudbees.jenkins.plugins.dockerslaves.JobBuildsContainersDefinition>
-  </properties>
-</project>
