@@ -32,6 +32,8 @@ import hudson.model.Descriptor;
 import hudson.model.Items;
 import hudson.model.Job;
 import hudson.slaves.Cloud;
+import it.dockins.dockerslaves.drivers.CliDockerDriverFactory;
+import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -63,6 +65,8 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     private final String remotingContainerImageName = System.getProperty("com.cloudbees.jenkins.plugins.containerslaves.DockerSlaves.image", "jenkinsci/slave");
 
     private DockerHostSource dockerHostSource;
+
+    private DockerDriverFactory dockerDriverFactory;
 
     public void start() throws IOException {
         load();
@@ -104,15 +108,24 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return dockerHostSource;
     }
 
+    @DataBoundSetter
+    public void setDockerDriverFactory(DockerDriverFactory dockerDriverFactory) {
+        this.dockerDriverFactory = dockerDriverFactory;
+    }
+
+    public DockerDriverFactory getDockerDriverFactory() {
+        return dockerDriverFactory;
+    }
+
     public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
-        return new DockerProvisionerFactory.StandardJob(dockerHostSource, getRemotingContainerImageName(), getScmContainerImageName(), job);
+        return new DockerProvisionerFactory.StandardJob(dockerDriverFactory.newDockerDriver(dockerHostSource.getDockerHost(job), job), getRemotingContainerImageName(), getScmContainerImageName(), job);
     }
 
     public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
 
-        return new DockerProvisionerFactory.PipelineJob(dockerHostSource, getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
+        return new DockerProvisionerFactory.PipelineJob(dockerDriverFactory.newDockerDriver(dockerHostSource.getDockerHost(job), job), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
     }
 
     public static DockerSlaves get() {
@@ -128,13 +141,15 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         if (this.dockerHostSource == null) {
             dockerHostSource = new DefaultDockerHostSource(new DockerServerEndpoint(null, null));
         }
+        if (this.dockerDriverFactory == null) {
+            dockerDriverFactory = new CliDockerDriverFactory();
+        }
         return this;
     }
 
     static {
         Items.XSTREAM2.aliasPackage("xyz.quoidneufdocker.jenkins", "it.dockins");
     }
-
 
     @Extension
     public static class DescriptorImpl extends Descriptor<DockerSlaves> {

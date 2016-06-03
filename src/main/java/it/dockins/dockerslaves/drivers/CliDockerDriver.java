@@ -23,14 +23,22 @@
  *
  */
 
-package it.dockins.dockerslaves;
+package it.dockins.dockerslaves.drivers;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.Item;
 import hudson.model.Slave;
+import hudson.model.TaskListener;
 import hudson.org.apache.tools.tar.TarOutputStream;
+import hudson.slaves.CommandLauncher;
+import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
+import it.dockins.dockerslaves.ContainerInstance;
+import it.dockins.dockerslaves.DockerSlave;
+import it.dockins.dockerslaves.ProvisionQueueListener;
+import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +46,9 @@ import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
+import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -53,15 +63,15 @@ import java.util.logging.Logger;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
  */
-public class DockerDriver implements Closeable {
+public class CliDockerDriver implements Closeable, DockerDriver {
 
     private final boolean verbose;
 
     final DockerServerEndpoint dockerHost;
 
-    final KeyMaterial dockerEnv;
+    public final KeyMaterial dockerEnv;
 
-    public DockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
+    public CliDockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
         dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
         verbose = true;
@@ -72,6 +82,7 @@ public class DockerDriver implements Closeable {
         dockerEnv.close();
     }
 
+    @Override
     public String createVolume(Launcher launcher, String driver, Collection<String> driverOpts) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("volume", "create");
@@ -98,6 +109,7 @@ public class DockerDriver implements Closeable {
         return volume;
     }
 
+    @Override
     public boolean hasVolume(Launcher launcher, String name) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(name)) {
             return false;
@@ -119,6 +131,7 @@ public class DockerDriver implements Closeable {
     }
 
 
+    @Override
     public boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(id)) {
             return false;
@@ -139,6 +152,7 @@ public class DockerDriver implements Closeable {
         }
     }
 
+    @Override
     public ContainerInstance createRemotingContainer(Launcher launcher, String image, String workdir) throws IOException, InterruptedException {
 
         ArgumentListBuilder args = new ArgumentListBuilder()
@@ -173,6 +187,17 @@ public class DockerDriver implements Closeable {
         return new ContainerInstance(image, containerId);
     }
 
+    @Override
+    public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener, ContainerInstance remotingContainer) {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("start")
+                .add("--interactive", "--attach", remotingContainer.getId());
+        prependArgs(args);
+        CommandLauncher launcher = new CommandLauncher(args.toString(), dockerEnv.env());
+        launcher.launch(computer, listener);
+    }
+
+    @Override
     public ContainerInstance createBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException {
         ContainerInstance buildContainer = new ContainerInstance(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
@@ -280,6 +305,7 @@ public class DockerDriver implements Closeable {
                 .stderr(launcher.getListener().getLogger()).join();
     }
 
+    @Override
     public Proc execInContainer(Launcher launcher, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("exec", containerId);
@@ -305,6 +331,7 @@ public class DockerDriver implements Closeable {
         return procStarter.start();
     }
 
+    @Override
     public int removeContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("rm", "-f", instance.getId());
@@ -319,6 +346,7 @@ public class DockerDriver implements Closeable {
 
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
 
+    @Override
     public void launchSideContainer(Launcher launcher, ContainerInstance instance, ContainerInstance remotingContainer) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
@@ -342,6 +370,7 @@ public class DockerDriver implements Closeable {
                 .add("start", containerId)).start();
     }
 
+    @Override
     public void pullImage(Launcher launcher, String image) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("pull")
@@ -355,6 +384,7 @@ public class DockerDriver implements Closeable {
         }
     }
 
+    @Override
     public boolean checkImageExists(Launcher launcher, String image) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("inspect")
@@ -365,6 +395,7 @@ public class DockerDriver implements Closeable {
                 .stdout(launcher.getListener().getLogger()).join() == 0;
     }
 
+    @Override
     public int buildDockerfile(Launcher launcher, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException {
         String pullOption = "--pull=";
         if (pull) {
@@ -400,5 +431,4 @@ public class DockerDriver implements Closeable {
                 .cmds(args)
                 .quiet(!verbose);
     }
-
 }

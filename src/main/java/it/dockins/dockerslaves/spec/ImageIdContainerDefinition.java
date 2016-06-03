@@ -25,11 +25,11 @@
 
 package it.dockins.dockerslaves.spec;
 
-import it.dockins.dockerslaves.DockerDriver;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
+import it.dockins.dockerslaves.drivers.DockerDriver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;

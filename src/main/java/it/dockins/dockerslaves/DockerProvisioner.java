@@ -26,6 +26,8 @@
 package it.dockins.dockerslaves;
 
 import hudson.model.Job;
+import it.dockins.dockerslaves.drivers.CliDockerDriver;
+import it.dockins.dockerslaves.drivers.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.Proc;
@@ -59,13 +61,10 @@ public class DockerProvisioner {
 
     protected final String scmImage;
 
-    private final DockerHostSource dockerHost;
-
-    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerHostSource dockerHost, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
+    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.context = context;
         this.slaveListener = slaveListener;
-        this.dockerHost = dockerHost;
-        this.driver = new DockerDriver(dockerHost.getDockerHost(job), job);
+        this.driver = driver;
         this.launcher = new Launcher.LocalLauncher(slaveListener);
         this.spec = spec;
         this.remotingImage = remotingImage;
@@ -95,12 +94,7 @@ public class DockerProvisioner {
     }
 
     public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener) {
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("start")
-                .add("--interactive", "--attach", context.getRemotingContainer().getId());
-        driver.prependArgs(args);
-        CommandLauncher launcher = new CommandLauncher(args.toString(), driver.dockerEnv.env());
-        launcher.launch(computer, listener);
+        driver.launchRemotingContainer(computer, listener, context.getRemotingContainer());
     }
 
     public ContainerInstance launchBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {

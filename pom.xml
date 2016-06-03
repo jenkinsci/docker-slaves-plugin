@@ -69,7 +69,7 @@
     </scm>
 
     <properties>
-        <jenkins.version>1.642.3</jenkins.version>
+        <jenkins.version>1.651.2</jenkins.version>
         <findbugs.failOnError>false</findbugs.failOnError>
     </properties>
 
