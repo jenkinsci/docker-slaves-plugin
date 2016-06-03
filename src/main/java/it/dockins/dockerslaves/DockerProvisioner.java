@@ -26,17 +26,13 @@
 package it.dockins.dockerslaves;
 
 import hudson.model.Job;
-import it.dockins.dockerslaves.drivers.CliDockerDriver;
 import it.dockins.dockerslaves.drivers.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
-import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
-import hudson.util.ArgumentListBuilder;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
-import it.dockins.dockerslaves.spi.DockerHostSource;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -106,13 +102,13 @@ public class DockerProvisioner {
         }
 
         String buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
-        final ContainerInstance buildContainer = driver.createBuildContainer(launcher, buildImage, context.getRemotingContainer());
+        final ContainerInstance buildContainer = driver.createAndLaunchBuildContainer(launcher, buildImage, context.getRemotingContainer());
         context.setBuildContainer(buildContainer);
         return buildContainer;
     }
 
     public ContainerInstance launchScmContainer() throws IOException, InterruptedException {
-        final ContainerInstance scmContainer = driver.createBuildContainer(launcher, scmImage, context.getRemotingContainer());
+        final ContainerInstance scmContainer = driver.createAndLaunchBuildContainer(launcher, scmImage, context.getRemotingContainer());
         context.setBuildContainer(scmContainer);
         return scmContainer;
     }

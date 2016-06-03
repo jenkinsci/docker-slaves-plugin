@@ -21,7 +21,7 @@ public interface DockerDriver extends Closeable {
 
     void launchRemotingContainer(final SlaveComputer computer, TaskListener listener, ContainerInstance remotingContainer);
 
-    ContainerInstance createBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException;
+    ContainerInstance createAndLaunchBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException;
 
     Proc execInContainer(Launcher launcher, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException;
 

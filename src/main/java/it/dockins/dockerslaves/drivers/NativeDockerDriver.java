@@ -25,6 +25,27 @@
 
 package it.dockins.dockerslaves.drivers;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CopyArchiveFromContainerCmd;
+import com.github.dockerjava.api.command.CopyFileFromContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.CreateVolumeCmd;
+import com.github.dockerjava.api.command.CreateVolumeResponse;
+import com.github.dockerjava.api.command.ExecCreateCmd;
+import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.command.InspectContainerCmd;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.command.InspectVolumeCmd;
+import com.github.dockerjava.api.command.InspectVolumeResponse;
+import com.github.dockerjava.api.command.StartContainerCmd;
+import com.github.dockerjava.api.model.LogConfig;
+import com.github.dockerjava.api.model.Volume;
+import com.github.dockerjava.api.model.VolumesFrom;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.netty.DockerCmdExecFactoryImpl;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.Item;
@@ -38,6 +59,7 @@ import it.dockins.dockerslaves.ContainerInstance;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
 import jenkins.model.Jenkins;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.tar.TarEntry;
@@ -49,9 +71,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +84,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
  */
-public class CliDockerDriver implements DockerDriver {
+public class NativeDockerDriver implements DockerDriver {
 
     private final boolean verbose;
 
@@ -67,42 +92,43 @@ public class CliDockerDriver implements DockerDriver {
 
     public final KeyMaterial dockerEnv;
 
-    public CliDockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
+    private final DockerClient client;
+
+    public NativeDockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
         dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
         verbose = true;
+        DockerClientConfig config = new DockerClientConfig.DockerClientConfigBuilder()
+                .withDockerHost(dockerEnv.env().get(DockerClientConfig.DOCKER_HOST, "unix:///var/run/docker.sock"))
+                .withDockerTlsVerify(dockerEnv.env().get(DockerClientConfig.DOCKER_TLS_VERIFY, "false"))
+                .withDockerCertPath(dockerEnv.env().get(DockerClientConfig.DOCKER_CERT_PATH, ""))
+                .withApiVersion("1.22")
+                .withRegistryUsername(dockerEnv.env().get(DockerClientConfig.REGISTRY_USERNAME, ""))
+                .withRegistryPassword(dockerEnv.env().get(DockerClientConfig.REGISTRY_PASSWORD, ""))
+                .withRegistryEmail(dockerEnv.env().get(DockerClientConfig.REGISTRY_EMAIL, ""))
+                .withRegistryUrl(dockerEnv.env().get(DockerClientConfig.REGISTRY_URL, ""))
+                .build();
+        client = DockerClientBuilder.getInstance(config).withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
     }
 
     @Override
     public void close() throws IOException {
         dockerEnv.close();
+        client.close();
     }
 
     @Override
     public String createVolume(Launcher launcher, String driver, Collection<String> driverOpts) throws IOException, InterruptedException {
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("volume", "create");
+        CreateVolumeCmd cmd = client.createVolumeCmd();
 
         if (driver != null) {
-            args.add("--driver", driver);
+            cmd.withDriver(driver);
             if (driverOpts != null) {
-                for (String opt : driverOpts) {
-                    args.add(opt);
-                }
+                //cmd.withDriverOpts(driverOpts);
             }
         }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int status = launchDockerCLI(launcher, args)
-                .stdout(out).stderr(launcher.getListener().getLogger()).join();
-
-        final String volume = out.toString("UTF-8").trim();
-
-        if (status != 0) {
-            throw new IOException("Failed to run docker image");
-        }
-
-        return volume;
+        CreateVolumeResponse response = cmd.exec();
+        return response.getName();
     }
 
     @Override
@@ -111,21 +137,10 @@ public class CliDockerDriver implements DockerDriver {
             return false;
         }
 
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("volume", "inspect", "-f", "'{{.Name}}'", name);
+        InspectVolumeResponse response = client.inspectVolumeCmd(name).exec();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        int status = launchDockerCLI(launcher, args)
-                .stdout(out).stderr(launcher.getListener().getLogger()).join();
-
-        if (status != 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return name.equals(response.getName());
     }
-
 
     @Override
     public boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException {
@@ -133,15 +148,8 @@ public class CliDockerDriver implements DockerDriver {
             return false;
         }
 
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("inspect", "-f", "'{{.Id}}'", id);
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        int status = launchDockerCLI(launcher, args)
-                .stdout(out).stderr(launcher.getListener().getLogger()).join();
-
-        if (status != 0) {
+        InspectContainerResponse response = client.inspectContainerCmd(id).exec();
+        if (response.getState().getStatus().equals("")) {
             return false;
         } else {
             return true;
@@ -151,31 +159,22 @@ public class CliDockerDriver implements DockerDriver {
     @Override
     public ContainerInstance createRemotingContainer(Launcher launcher, String image, String workdir) throws IOException, InterruptedException {
 
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("create", "--interactive")
+        CreateContainerCmd cmd = client.createContainerCmd(image);
 
-                // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
-                .add("--log-driver=none")
+        // --interactive
+        cmd.withStdInOnce(true).withStdinOpen(true).withAttachStdin(true).withAttachStdout(true).withAttachStderr(true);
 
-                .add("--env", "TMPDIR="+ DockerSlave.SLAVE_ROOT+".tmp")
-                .add("--user", "10000:10000")
-                .add("--volume", workdir+":"+ DockerSlave.SLAVE_ROOT)
-                .add("--workdir", DockerSlave.SLAVE_ROOT)
-                .add(image)
-                .add("java")
+        cmd.withLogConfig(new LogConfig().setType(LogConfig.LoggingType.NONE));
+        cmd.withEnv("TMPDIR="+ DockerSlave.SLAVE_ROOT+".tmp");
+        cmd.withUser("10000:10000");
+        //  cmd.withVolumes(new Volume(workdir+":"+ DockerSlave.SLAVE_ROOT));
+        cmd.withWorkingDir(DockerSlave.SLAVE_ROOT);
+        cmd.withCmd("java", "-Djava.io.tmpdir="+ DockerSlave.SLAVE_ROOT+".tmp", "-jar", DockerSlave.SLAVE_ROOT+"slave.jar");
 
-                // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
-                .add("-Djava.io.tmpdir="+ DockerSlave.SLAVE_ROOT+".tmp")
-                .add("-jar").add(DockerSlave.SLAVE_ROOT+"slave.jar");
+        CreateContainerResponse response = cmd.exec();
+        String containerId = response.getId();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        int status = launchDockerCLI(launcher, args)
-                .stdout(out).stderr(launcher.getListener().getLogger()).join();
-
-        String containerId = out.toString("UTF-8").trim();
-
-        if (status != 0) {
+        if (containerId == null) {
             throw new IOException("Failed to create docker image");
         }
 
@@ -196,38 +195,32 @@ public class CliDockerDriver implements DockerDriver {
     @Override
     public ContainerInstance createAndLaunchBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException {
         ContainerInstance buildContainer = new ContainerInstance(image);
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("create")
-                .add("--env", "TMPDIR=/home/jenkins/.tmp")
-                .add("--workdir", "/home/jenkins")
-                .add("--volumes-from", remotingContainer.getId())
-                .add("--net=container:" + remotingContainer.getId())
-                .add("--ipc=container:" + remotingContainer.getId())
-                .add("--user", "10000:10000");
+        CreateContainerCmd cmd = client.createContainerCmd(image);
+        cmd.withEnv("TMPDIR="+ DockerSlave.SLAVE_ROOT+".tmp");
+        cmd.withUser("10000:10000");
+        cmd.withWorkingDir(DockerSlave.SLAVE_ROOT);
 
-        args.add(buildContainer.getImageName());
+        cmd.withVolumesFrom(new VolumesFrom(remotingContainer.getId()));
+        cmd.withNetworkMode("container:" + remotingContainer.getId());
+        // not implemented in docker-java
+        // add("--ipc=container:" + remotingContainer.getId())
 
-        args.add("/trampoline", "wait");
+        cmd.withCmd("/trampoline", "wait");
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int status = launchDockerCLI(launcher, args)
-                .stdout(out).stderr(launcher.getListener().getLogger()).join();
+        CreateContainerResponse response = cmd.exec();
+        String containerId = response.getId();
 
-        final String containerId = out.toString("UTF-8").trim();
-        buildContainer.setId(containerId);
-
-        if (status != 0) {
-            throw new IOException("Failed to run docker image");
+        if (containerId == null) {
+            throw new IOException("Failed to create docker image");
         }
+        buildContainer.setId(containerId);
 
         injectJenkinsUnixGroup(launcher, containerId);
         injectJenkinsUnixUser(launcher, containerId);
         injectTrampoline(launcher, containerId);
 
-        status = launchDockerCLI(launcher, new ArgumentListBuilder()
-                .add("start", containerId)).stdout(out).stderr(launcher.getListener().getLogger()).join();
-
-        if (status != 0) {
+        client.startContainerCmd(containerId).exec();
+        if (!client.inspectContainerCmd(containerId).exec().getState().getRunning()) {
             throw new IOException("Failed to run docker image");
         }
 
@@ -255,22 +248,12 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     protected void getFileContent(Launcher launcher, String containerId, String filename, OutputStream outputStream) throws IOException, InterruptedException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("cp", containerId + ":" + filename, "-");
-
-        int status = launchDockerCLI(launcher, args)
-                .stdout(out).stderr(launcher.getListener().getLogger()).join();
-
-        if (status != 0) {
-            throw new IOException("Failed to get file");
+        try (InputStream stream = client.copyArchiveFromContainerCmd(containerId, filename).exec()) {
+            TarInputStream tar = new TarInputStream(stream);
+            tar.getNextEntry();
+            tar.copyEntryContents(outputStream);
+            tar.close();
         }
-
-        TarInputStream tar = new TarInputStream(new ByteArrayInputStream(out.toByteArray()));
-        tar.getNextEntry();
-        tar.copyEntryContents(outputStream);
-        tar.close();
     }
 
     protected int putFileContent(Launcher launcher, String containerId, String path, String filename, byte[] content) throws IOException, InterruptedException {
@@ -292,13 +275,10 @@ public class CliDockerDriver implements DockerDriver {
         tar.write(content);
         tar.closeEntry();
         tar.close();
+        ByteArrayInputStream is = new ByteArrayInputStream(out.toByteArray());
 
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("cp", "-", containerId + ":" + path);
-
-        return launchDockerCLI(launcher, args)
-                .stdin(new ByteArrayInputStream(out.toByteArray()))
-                .stderr(launcher.getListener().getLogger()).join();
+        client.copyArchiveToContainerCmd(containerId).withTarInputStream(is).withRemotePath(path).exec();
+        return 0;
     }
 
     @Override
@@ -382,13 +362,7 @@ public class CliDockerDriver implements DockerDriver {
 
     @Override
     public boolean checkImageExists(Launcher launcher, String image) throws IOException, InterruptedException {
-        ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("inspect")
-                .add("-f", "'{{.Id}}'")
-                .add(image);
-
-        return launchDockerCLI(launcher, args)
-                .stdout(launcher.getListener().getLogger()).join() == 0;
+        return client.inspectImageCmd(image).exec().getId() != null;
     }
 
     @Override
