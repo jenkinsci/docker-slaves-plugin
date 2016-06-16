@@ -68,6 +68,25 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
 
     private DockerDriverFactory dockerDriverFactory;
 
+    public DockerSlaves() {
+        init();
+    }
+
+
+    private Object readResolve() {
+        init();
+        return this;
+    }
+
+    private void init() {
+        if (this.dockerHostSource == null) {
+            dockerHostSource = new DefaultDockerHostSource(new DockerServerEndpoint(null, null));
+        }
+        if (this.dockerDriverFactory == null) {
+            dockerDriverFactory = new CliDockerDriverFactory();
+        }
+    }
+
     public void start() throws IOException {
         load();
     }
@@ -137,15 +156,6 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return Jenkins.getInstance().getDescriptorOrDie(DockerSlaves.class);
     }
 
-    private Object readResolve() {
-        if (this.dockerHostSource == null) {
-            dockerHostSource = new DefaultDockerHostSource(new DockerServerEndpoint(null, null));
-        }
-        if (this.dockerDriverFactory == null) {
-            dockerDriverFactory = new CliDockerDriverFactory();
-        }
-        return this;
-    }
 
     static {
         Items.XSTREAM2.aliasPackage("xyz.quoidneufdocker.jenkins", "it.dockins");
