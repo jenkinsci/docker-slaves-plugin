@@ -74,7 +74,7 @@ import static com.github.dockerjava.core.DockerClientConfig.*;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
  */
-public class NativeDockerDriver implements DockerDriver {
+public class DockerJavaDockerDriver implements DockerDriver {
 
     private final boolean verbose;
 
@@ -82,7 +82,7 @@ public class NativeDockerDriver implements DockerDriver {
 
     private final DockerClient client;
 
-    public NativeDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
+    public DockerJavaDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
         verbose = true;
         final EnvVars env = dockerHost.getEnvironment();

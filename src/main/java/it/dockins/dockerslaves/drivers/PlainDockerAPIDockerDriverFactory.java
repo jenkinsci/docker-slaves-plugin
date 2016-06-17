@@ -56,7 +56,7 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
             }
 
             DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException {
-                return new NativeDockerDriver(dockerHost);
+                return new DockerJavaDockerDriver(dockerHost);
             }
         },
         CLI {
