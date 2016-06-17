@@ -32,6 +32,7 @@ import com.github.dockerjava.api.command.CreateVolumeCmd;
 import com.github.dockerjava.api.command.CreateVolumeResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.command.InspectVolumeResponse;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.LogConfig;
 import com.github.dockerjava.api.model.VolumesFrom;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -124,9 +125,12 @@ public class NativeDockerDriver implements DockerDriver {
             return false;
         }
 
-        InspectVolumeResponse response = client.inspectVolumeCmd(name).exec();
-
-        return name.equals(response.getName());
+        try {
+            client.inspectVolumeCmd(name).exec();
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
     }
 
     @Override
