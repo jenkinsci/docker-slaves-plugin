@@ -185,7 +185,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add("start")
                 .add("--interactive", "--attach", remotingContainer.getId());
         prependArgs(args);
-        CommandLauncher launcher = new CommandLauncher(args.toString(), dockerEnv.env());
+        CommandLauncher launcher = new CommandLauncher(args.toString(), dockerHost.getEnvironment());
         launcher.launch(computer, listener);
     }
 
