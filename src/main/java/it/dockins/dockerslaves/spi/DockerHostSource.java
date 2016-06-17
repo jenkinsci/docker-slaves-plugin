@@ -3,7 +3,6 @@ package it.dockins.dockerslaves.spi;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Job;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.IOException;
 
@@ -22,5 +21,5 @@ public abstract class DockerHostSource extends AbstractDescribableImpl<DockerHos
      * @param job
      * @return
      */
-    public abstract DockerServerEndpoint getDockerHost(Job job) throws IOException, InterruptedException;
+    public abstract DockerHostConfig getDockerHost(Job job) throws IOException, InterruptedException;
 }

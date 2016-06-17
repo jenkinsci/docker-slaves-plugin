@@ -27,7 +27,6 @@ package it.dockins.dockerslaves.drivers;
 
 import hudson.Launcher;
 import hudson.Proc;
-import hudson.model.Item;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.org.apache.tools.tar.TarOutputStream;
@@ -37,6 +36,7 @@ import hudson.util.ArgumentListBuilder;
 import it.dockins.dockerslaves.ContainerInstance;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
+import it.dockins.dockerslaves.spi.DockerHostConfig;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -47,7 +47,6 @@ import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
@@ -63,19 +62,16 @@ public class CliDockerDriver implements DockerDriver {
 
     private final boolean verbose;
 
-    final DockerServerEndpoint dockerHost;
+    final DockerHostConfig dockerHost;
 
-    public final KeyMaterial dockerEnv;
-
-    public CliDockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
+    public CliDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
-        dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
         verbose = true;
     }
 
     @Override
     public void close() throws IOException {
-        dockerEnv.close();
+        dockerHost.close();
     }
 
     @Override
@@ -410,8 +406,9 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     public void prependArgs(ArgumentListBuilder args){
-        if (dockerHost.getUri() != null) {
-            args.prepend("-H", dockerHost.getUri());
+        final DockerServerEndpoint endpoint = dockerHost.getEndpoint();
+        if (endpoint.getUri() != null) {
+            args.prepend("-H", endpoint.getUri());
         } else {
             LOGGER.log(Level.FINE, "no specified docker host");
         }
@@ -423,7 +420,7 @@ public class CliDockerDriver implements DockerDriver {
         prependArgs(args);
 
         return launcher.launch()
-                .envs(dockerEnv.env())
+                .envs(dockerHost.getEnvironment())
                 .cmds(args)
                 .quiet(!verbose);
     }

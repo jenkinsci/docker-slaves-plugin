@@ -2,9 +2,8 @@ package it.dockins.dockerslaves.drivers;
 
 import com.github.dockerjava.netty.DockerCmdExecFactoryImpl;
 import hudson.Extension;
-import hudson.model.Item;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
+import it.dockins.dockerslaves.spi.DockerHostConfig;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -17,8 +16,8 @@ public class NativeDockerDriverFactory extends DockerDriverFactory {
     }
 
     @Override
-    public DockerDriver newDockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
-        return new NativeDockerDriver(dockerHost, context);
+    public DockerDriver newDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
+        return new NativeDockerDriver(dockerHost);
     }
 
     @Extension(optional = true)

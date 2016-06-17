@@ -26,29 +26,20 @@
 package it.dockins.dockerslaves.drivers;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CopyArchiveFromContainerCmd;
-import com.github.dockerjava.api.command.CopyFileFromContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.CreateVolumeCmd;
 import com.github.dockerjava.api.command.CreateVolumeResponse;
-import com.github.dockerjava.api.command.ExecCreateCmd;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.command.InspectVolumeCmd;
 import com.github.dockerjava.api.command.InspectVolumeResponse;
-import com.github.dockerjava.api.command.StartContainerCmd;
 import com.github.dockerjava.api.model.LogConfig;
-import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.api.model.VolumesFrom;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
-import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.netty.DockerCmdExecFactoryImpl;
+import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.Proc;
-import hudson.model.Item;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.org.apache.tools.tar.TarOutputStream;
@@ -58,25 +49,20 @@ import hudson.util.ArgumentListBuilder;
 import it.dockins.dockerslaves.ContainerInstance;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
-import jenkins.model.Jenkins;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import it.dockins.dockerslaves.spi.DockerHostConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
-import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,32 +76,30 @@ public class NativeDockerDriver implements DockerDriver {
 
     private final boolean verbose;
 
-    final DockerServerEndpoint dockerHost;
-
-    public final KeyMaterial dockerEnv;
+    final DockerHostConfig dockerHost;
 
     private final DockerClient client;
 
-    public NativeDockerDriver(DockerServerEndpoint dockerHost, Item context) throws IOException, InterruptedException {
+    public NativeDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
-        dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
         verbose = true;
+        final EnvVars env = dockerHost.getEnvironment();
         DockerClientConfig config = new DockerClientConfigBuilder()
-                .withDockerHost(dockerEnv.env().get(DOCKER_HOST, "unix:///var/run/docker.sock"))
-                .withDockerTlsVerify(dockerEnv.env().get(DOCKER_TLS_VERIFY, "false"))
-                .withDockerCertPath(dockerEnv.env().get(DOCKER_CERT_PATH, ""))
+                .withDockerHost(env.get(DOCKER_HOST, "unix:///var/run/docker.sock"))
+                .withDockerTlsVerify(env.get(DOCKER_TLS_VERIFY, "false"))
+                .withDockerCertPath(env.get(DOCKER_CERT_PATH, ""))
                 .withApiVersion("1.22")
-                .withRegistryUsername(dockerEnv.env().get(REGISTRY_USERNAME, ""))
-                .withRegistryPassword(dockerEnv.env().get(REGISTRY_PASSWORD, ""))
-                .withRegistryEmail(dockerEnv.env().get(REGISTRY_EMAIL, ""))
-                .withRegistryUrl(dockerEnv.env().get(REGISTRY_URL, ""))
+                .withRegistryUsername(env.get(REGISTRY_USERNAME, ""))
+                .withRegistryPassword(env.get(REGISTRY_PASSWORD, ""))
+                .withRegistryEmail(env.get(REGISTRY_EMAIL, ""))
+                .withRegistryUrl(env.get(REGISTRY_URL, ""))
                 .build();
         client = DockerClientBuilder.getInstance(config).withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
     }
 
     @Override
     public void close() throws IOException {
-        dockerEnv.close();
+        dockerHost.close();
         client.close();
     }
 
@@ -190,7 +174,7 @@ public class NativeDockerDriver implements DockerDriver {
                 .add("start")
                 .add("--interactive", "--attach", remotingContainer.getId());
         prependArgs(args);
-        CommandLauncher launcher = new CommandLauncher(args.toString(), dockerEnv.env());
+        CommandLauncher launcher = new CommandLauncher(args.toString(), dockerHost.getEnvironment());
         launcher.launch(computer, listener);
     }
 
@@ -386,8 +370,9 @@ public class NativeDockerDriver implements DockerDriver {
     }
 
     public void prependArgs(ArgumentListBuilder args){
-        if (dockerHost.getUri() != null) {
-            args.prepend("-H", dockerHost.getUri());
+        final DockerServerEndpoint endpoint = dockerHost.getEndpoint();
+        if (endpoint.getUri() != null) {
+            args.prepend("-H", endpoint.getUri());
         } else {
             LOGGER.log(Level.FINE, "no specified docker host");
         }
@@ -399,7 +384,7 @@ public class NativeDockerDriver implements DockerDriver {
         prependArgs(args);
 
         return launcher.launch()
-                .envs(dockerEnv.env())
+                .envs(dockerHost.getEnvironment())
                 .cmds(args)
                 .quiet(!verbose);
     }

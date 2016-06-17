@@ -2,6 +2,8 @@ package it.dockins.dockerslaves;
 
 import hudson.Extension;
 import hudson.model.Job;
+import it.dockins.dockerslaves.spi.DockerHostConfig;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
 import it.dockins.dockerslaves.spi.DockerHostSource;
@@ -27,8 +29,8 @@ public class DefaultDockerHostSource extends DockerHostSource {
     }
 
     @Override
-    public DockerServerEndpoint getDockerHost(Job job) throws IOException, InterruptedException {
-        return dockerServerEndpoint;
+    public DockerHostConfig getDockerHost(Job job) throws IOException, InterruptedException {
+        return new DockerHostConfig(dockerServerEndpoint, job);
     }
 
     @Extension
