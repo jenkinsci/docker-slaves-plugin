@@ -80,6 +80,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.github.dockerjava.core.DockerClientConfig.*;
+
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
@@ -98,15 +100,15 @@ public class NativeDockerDriver implements DockerDriver {
         this.dockerHost = dockerHost;
         dockerEnv = dockerHost.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
         verbose = true;
-        DockerClientConfig config = new DockerClientConfig.DockerClientConfigBuilder()
-                .withDockerHost(dockerEnv.env().get(DockerClientConfig.DOCKER_HOST, "unix:///var/run/docker.sock"))
-                .withDockerTlsVerify(dockerEnv.env().get(DockerClientConfig.DOCKER_TLS_VERIFY, "false"))
-                .withDockerCertPath(dockerEnv.env().get(DockerClientConfig.DOCKER_CERT_PATH, ""))
+        DockerClientConfig config = new DockerClientConfigBuilder()
+                .withDockerHost(dockerEnv.env().get(DOCKER_HOST, "unix:///var/run/docker.sock"))
+                .withDockerTlsVerify(dockerEnv.env().get(DOCKER_TLS_VERIFY, "false"))
+                .withDockerCertPath(dockerEnv.env().get(DOCKER_CERT_PATH, ""))
                 .withApiVersion("1.22")
-                .withRegistryUsername(dockerEnv.env().get(DockerClientConfig.REGISTRY_USERNAME, ""))
-                .withRegistryPassword(dockerEnv.env().get(DockerClientConfig.REGISTRY_PASSWORD, ""))
-                .withRegistryEmail(dockerEnv.env().get(DockerClientConfig.REGISTRY_EMAIL, ""))
-                .withRegistryUrl(dockerEnv.env().get(DockerClientConfig.REGISTRY_URL, ""))
+                .withRegistryUsername(dockerEnv.env().get(REGISTRY_USERNAME, ""))
+                .withRegistryPassword(dockerEnv.env().get(REGISTRY_PASSWORD, ""))
+                .withRegistryEmail(dockerEnv.env().get(REGISTRY_EMAIL, ""))
+                .withRegistryUrl(dockerEnv.env().get(REGISTRY_URL, ""))
                 .build();
         client = DockerClientBuilder.getInstance(config).withDockerCmdExecFactory(new DockerCmdExecFactoryImpl()).build();
     }
