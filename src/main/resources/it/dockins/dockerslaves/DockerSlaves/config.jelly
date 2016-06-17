@@ -30,7 +30,7 @@
     <j:set var="instance" value="${it}"/>
     <j:set var="descriptor" value="${it.descriptor}"/>
 
-    <f:dropdownDescriptorSelector field="dockerHostSource" title="Docker Host selector"/>
+    <f:dropdownDescriptorSelector field="dockerDriverFactory" title="Docker API to use"/>
 
     <f:entry title="Default SCM image" field="scmContainerImageName">
       <f:textbox default="buildpack-deps:scm"/>
@@ -39,8 +39,6 @@
     <f:entry title="Default build image" field="defaultBuildContainerImageName">
       <f:textbox default="ubuntu:latest"/>
     </f:entry>
-
-    <f:dropdownDescriptorSelector field="dockerDriverFactory" title="Driver"/>
 
   </f:section>
 

@@ -32,7 +32,7 @@ import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import it.dockins.dockerslaves.drivers.DockerDriver;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FileUtils;
 import org.kohsuke.stapler.DataBoundConstructor;

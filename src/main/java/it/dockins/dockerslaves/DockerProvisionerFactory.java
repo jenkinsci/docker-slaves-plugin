@@ -25,12 +25,11 @@
 
 package it.dockins.dockerslaves;
 
-import it.dockins.dockerslaves.drivers.DockerDriver;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import it.dockins.dockerslaves.spi.DockerHostSource;
 
 import java.io.IOException;
 

@@ -32,16 +32,14 @@ import hudson.model.Descriptor;
 import hudson.model.Items;
 import hudson.model.Job;
 import hudson.slaves.Cloud;
-import it.dockins.dockerslaves.drivers.CliDockerDriverFactory;
+import it.dockins.dockerslaves.drivers.PlainDockerAPIDockerDriverFactory;
+import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
-import it.dockins.dockerslaves.spec.ContainerSetDefinition;
-import it.dockins.dockerslaves.spi.DockerHostSource;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -64,8 +62,6 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
      */
     private final String remotingContainerImageName = System.getProperty("com.cloudbees.jenkins.plugins.containerslaves.DockerSlaves.image", "jenkinsci/slave");
 
-    private DockerHostSource dockerHostSource;
-
     private DockerDriverFactory dockerDriverFactory;
 
     public DockerSlaves() {
@@ -79,11 +75,8 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     private void init() {
-        if (this.dockerHostSource == null) {
-            dockerHostSource = new DefaultDockerHostSource(new DockerServerEndpoint(null, null));
-        }
         if (this.dockerDriverFactory == null) {
-            dockerDriverFactory = new CliDockerDriverFactory();
+            dockerDriverFactory = new PlainDockerAPIDockerDriverFactory();
         }
     }
 
@@ -119,15 +112,6 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     @DataBoundSetter
-    public void setDockerHostSource(DockerHostSource dockerHostSource) {
-        this.dockerHostSource = dockerHostSource;
-    }
-
-    public DockerHostSource getDockerHostSource() {
-        return dockerHostSource;
-    }
-
-    @DataBoundSetter
     public void setDockerDriverFactory(DockerDriverFactory dockerDriverFactory) {
         this.dockerDriverFactory = dockerDriverFactory;
     }
@@ -139,12 +123,12 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
-        return new DockerProvisionerFactory.StandardJob(dockerDriverFactory.newDockerDriver(dockerHostSource.getDockerHost(job)), getRemotingContainerImageName(), getScmContainerImageName(), job);
+        return new DockerProvisionerFactory.StandardJob(dockerDriverFactory.forJob(job), getRemotingContainerImageName(), getScmContainerImageName(), job);
     }
 
     public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
 
-        return new DockerProvisionerFactory.PipelineJob(dockerDriverFactory.newDockerDriver(dockerHostSource.getDockerHost(job)), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
+        return new DockerProvisionerFactory.PipelineJob(dockerDriverFactory.forJob(job), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
     }
 
     public static DockerSlaves get() {

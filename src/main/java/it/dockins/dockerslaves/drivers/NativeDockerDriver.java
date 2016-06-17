@@ -49,6 +49,7 @@ import hudson.util.ArgumentListBuilder;
 import it.dockins.dockerslaves.ContainerInstance;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;

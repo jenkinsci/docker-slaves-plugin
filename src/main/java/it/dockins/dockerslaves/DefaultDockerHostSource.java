@@ -19,6 +19,10 @@ public class DefaultDockerHostSource extends DockerHostSource {
 
     private final DockerServerEndpoint dockerServerEndpoint;
 
+    public DefaultDockerHostSource() {
+        this(new DockerServerEndpoint(null, null));
+    }
+
     @DataBoundConstructor
     public DefaultDockerHostSource(DockerServerEndpoint dockerServerEndpoint) {
         this.dockerServerEndpoint = dockerServerEndpoint;
@@ -39,7 +43,7 @@ public class DefaultDockerHostSource extends DockerHostSource {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Docker daemon / swarm";
+            return "Standalone Docker daemon / Docker Swarm cluster";
         }
     }
 }

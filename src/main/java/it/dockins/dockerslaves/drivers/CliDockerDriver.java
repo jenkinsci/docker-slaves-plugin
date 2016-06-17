@@ -36,14 +36,13 @@ import hudson.util.ArgumentListBuilder;
 import it.dockins.dockerslaves.ContainerInstance;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
-import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
-import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

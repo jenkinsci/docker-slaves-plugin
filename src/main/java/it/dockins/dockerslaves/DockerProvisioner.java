@@ -26,7 +26,7 @@
 package it.dockins.dockerslaves;
 
 import hudson.model.Job;
-import it.dockins.dockerslaves.drivers.DockerDriver;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.Proc;

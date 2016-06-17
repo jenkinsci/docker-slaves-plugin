@@ -29,7 +29,7 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
-import it.dockins.dockerslaves.drivers.DockerDriver;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;

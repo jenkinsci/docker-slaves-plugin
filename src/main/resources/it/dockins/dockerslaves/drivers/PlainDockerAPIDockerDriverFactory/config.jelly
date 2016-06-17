@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
   ~
@@ -22,5 +23,11 @@
   ~  THE SOFTWARE.
   ~
   -->
-Your DockerHOst URL, can be <code>unix://var/run/docker.sock</code> for a local docker daemon if master run on Linux,
-or <code>https://IP:2376</code> to access a remote DockerHost or Docker swarm cluster.
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:dropdownDescriptorSelector field="dockerHostSource" title="Select Docker Host using"/>
+
+  <f:entry field="client" title="Docker API Client">
+    <f:select default="CLI"/>
+  </f:entry>
+</j:jelly>

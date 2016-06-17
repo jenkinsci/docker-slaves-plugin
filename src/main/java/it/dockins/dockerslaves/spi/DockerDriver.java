@@ -1,4 +1,4 @@
-package it.dockins.dockerslaves.drivers;
+package it.dockins.dockerslaves.spi;
 
 import hudson.Launcher;
 import hudson.Proc;
@@ -10,7 +10,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 
+/**
+ * Manage Docker resources creation and access so docker-slaves can run a build.
+ * <p>
+ * Implementation is responsible to adapt docker infrastructure APIs
+ */
 public interface DockerDriver extends Closeable {
+
     String createVolume(Launcher launcher, String driver, Collection<String> driverOpts) throws IOException, InterruptedException;
 
     boolean hasVolume(Launcher launcher, String name) throws IOException, InterruptedException;
