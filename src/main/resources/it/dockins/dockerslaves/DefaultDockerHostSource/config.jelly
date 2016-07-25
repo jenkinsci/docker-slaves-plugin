@@ -28,4 +28,12 @@
 
    <f:property field="dockerServerEndpoint"/>
 
+   <f:entry title="Hyper Access_Key" field="hyperAccessKey">
+     <f:textbox />
+   </f:entry>
+
+   <f:entry title="Hyper Secret_Key" field="hyperSecretKey">
+     <f:textbox />
+   </f:entry>
+
 </j:jelly>

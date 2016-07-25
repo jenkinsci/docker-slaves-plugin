@@ -24,16 +24,30 @@ public class DockerHostConfig implements Closeable {
     /** Docker Host's daemon endpoint */
     private final DockerServerEndpoint endpoint;
 
+    /**Hyper's ACCESS_KEY and SECRET_KEY*/
+    public final String hyperAccessKey;
+    public final String hyperSecretKey;
+
     /** Docker API access keys  */
     private final KeyMaterial keys;
 
-    public DockerHostConfig(DockerServerEndpoint endpoint, Item context) throws IOException, InterruptedException {
+    public DockerHostConfig(DockerServerEndpoint endpoint, String hyperAccessKey, String hyperSecretKey, Item context) throws IOException, InterruptedException {
         this.endpoint = endpoint;
+        this.hyperAccessKey = hyperAccessKey;
+        this.hyperSecretKey = hyperSecretKey;
         keys = endpoint.newKeyMaterialFactory(context, Jenkins.getActiveInstance().getChannel()).materialize();
     }
 
     public DockerServerEndpoint getEndpoint() {
         return endpoint;
+    }
+
+    public String getHyperAccessKey() {
+        return hyperAccessKey;
+    }
+
+    public String getHyperSecretKey() {
+        return hyperSecretKey;
     }
 
     public EnvVars getEnvironment() {
