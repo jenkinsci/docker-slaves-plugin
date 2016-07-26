@@ -97,7 +97,7 @@ public class CliHyperDriver implements DockerDriver {
         final String volume = out.toString("UTF-8").trim();
 
         if (status != 0) {
-            throw new IOException("Failed to run docker image");
+            throw new IOException("Failed to create volume");
         }
 
         return volume;
@@ -175,7 +175,7 @@ public class CliHyperDriver implements DockerDriver {
         String containerId = out.toString("UTF-8").trim();
 
         if (status != 0) {
-            throw new IOException("Failed to create docker image");
+            throw new IOException("Failed to create remoting container");
         }
 
         putFileContent(launcher, containerId, DockerSlave.SLAVE_ROOT, "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
