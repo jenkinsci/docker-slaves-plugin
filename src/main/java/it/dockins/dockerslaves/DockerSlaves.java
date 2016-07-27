@@ -32,6 +32,7 @@ import hudson.model.Descriptor;
 import hudson.model.Items;
 import hudson.model.Job;
 import hudson.slaves.Cloud;
+import hudson.util.FormValidation;
 import it.dockins.dockerslaves.drivers.PlainDockerAPIDockerDriverFactory;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
@@ -42,7 +43,12 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * {@link Cloud} implementation designed to launch a set of containers (aka "pod") to establish a Jenkins executor.
@@ -151,6 +157,53 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         @Override
         public String getDisplayName() {
             return "Docker Slaves";
+        }
+
+        //download Hypercli
+        public FormValidation doDownloadHypercli() throws IOException, ServletException {
+            try {
+                String urlPath = "https://hyper-install.s3.amazonaws.com/hyper";
+                String hyperCliPath;
+                URL url = new URL(urlPath);
+                URLConnection connection = url.openConnection();
+                InputStream in = connection.getInputStream();
+
+                String jenkinsHome = System.getenv("HUDSON_HOME");
+
+                if (jenkinsHome == null) {
+                    hyperCliPath = System.getenv("HOME") + "/hyper";
+                } else {
+                    File hyperPath = new File(jenkinsHome +"/bin");
+                    try {
+                        if (!hyperPath.exists()) {
+                            hyperPath.mkdir();
+                        }
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
+                    hyperCliPath = jenkinsHome + "/bin/hyper";
+                }
+
+                FileOutputStream os = new FileOutputStream(hyperCliPath);
+                byte[] buffer = new byte[4 * 1024];
+                int read;
+                while ((read = in.read(buffer)) > 0) {
+                    os.write(buffer, 0, read);
+                }
+                os.close();
+                in.close();
+
+                try {
+                    String command = "chmod +x " + hyperCliPath;
+                    Runtime runtime = Runtime.getRuntime();
+                    runtime.exec(command);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return FormValidation.ok("Hypercli downloaded!");
+            } catch (Exception e) {
+                return FormValidation.error("Downloading Hypercli error : "+e.getMessage());
+            }
         }
     }
 }
