@@ -402,8 +402,18 @@ public class CliHyperDriver implements DockerDriver {
                 .quiet(!verbose);
     }
 
+    public void prependHyperArgs(ArgumentListBuilder args) {
+        String hyperCliPath = System.getenv("HOME") + "/hyper";
+
+        if (System.getenv("HUDSON_HOME") != null)  {
+            hyperCliPath = System.getenv("HUDSON_HOME") + "/bin/hyper";
+        }
+
+        args.prepend(hyperCliPath);
+    }
+
     private Launcher.ProcStarter launchHyperCLI(Launcher launcher, ArgumentListBuilder args) {
-        args.prepend("hyper");
+        prependHyperArgs(args);
 
         return launcher.launch()
                 .cmds(args)
