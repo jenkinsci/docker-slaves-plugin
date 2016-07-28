@@ -336,7 +336,7 @@ public class CliHyperDriver implements DockerDriver {
                 .add(image);
         int status = 0;
 
-        if (image == "yao/jenkins-slave") {
+        if (image == hyperJenkinsImage) {
             status =  launchDockerCLI(launcher, args)
                 .stdout(launcher.getListener().getLogger()).join();
         } else {
@@ -355,7 +355,7 @@ public class CliHyperDriver implements DockerDriver {
                 .add("inspect")
                 .add("-f", "'{{.Id}}'")
                 .add(image);
-        if (image == "yao/jenkins-slave") {
+        if (image == hyperJenkinsImage) {
             return launchDockerCLI(launcher, args)
                     .stdout(launcher.getListener().getLogger()).join() == 0;
         } else {
