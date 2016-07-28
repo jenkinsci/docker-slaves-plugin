@@ -67,6 +67,15 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
             DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException {
                 return new CliDockerDriver(dockerHost);
             }
+        },
+        HYPER_CLI {
+             String getDisplayName() {
+                return "Hyper CLI";
+            }
+
+            DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException {
+                return new CliHyperDriver(dockerHost);
+            }           
         };
 
         abstract String getDisplayName();
