@@ -33,7 +33,7 @@
    </f:entry>
 
    <f:entry title="Hyper Secret_Key" field="hyperSecretKey">
-     <f:textbox />
+     <f:password />
    </f:entry>
 
 </j:jelly>

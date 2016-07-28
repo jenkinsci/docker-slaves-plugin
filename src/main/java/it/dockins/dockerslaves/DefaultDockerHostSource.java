@@ -39,6 +39,10 @@ public class DefaultDockerHostSource extends DockerHostSource {
     }
 
     private void SaveConfig(String hyperAccessKey, String hyperSecretKey) {
+        if (hyperAccessKey == null || hyperSecretKey == null) {
+            return;
+        }
+
         String jsonStr = "{\"clouds\": {" +
                 "\"tcp://us-west-1.hyper.sh:443\": {" +
                 "\"accesskey\": " + "\"" + hyperAccessKey + "\"," +
