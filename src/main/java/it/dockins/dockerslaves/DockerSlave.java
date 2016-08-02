@@ -34,6 +34,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.model.listeners.SCMListener;
+import hudson.remoting.Channel;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
 import hudson.slaves.EphemeralNode;
@@ -84,7 +85,9 @@ public class DockerSlave extends OneShotSlave {
         }
 
         super.createLauncher(listener);
-        return new DockerLauncher(listener, c.getChannel(), c.isUnix(), c.getProvisioner()).decorateFor(this);
+        final Channel channel = c.getChannel();
+        if (channel == null) throw new IllegalStateException("Can't create a Launcher: channel not connected");
+        return new DockerLauncher(listener, channel, c.isUnix(), c.getProvisioner()).decorateFor(this);
     }
 
     /**

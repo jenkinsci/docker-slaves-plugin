@@ -48,10 +48,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.nio.charset.StandardCharsets.*;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -232,14 +235,14 @@ public class CliDockerDriver implements DockerDriver {
     protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/group", out);
-        out.write("jenkins:x:10000:\n".getBytes());
+        out.write("jenkins:x:10000:\n".getBytes(UTF_8));
         putFileContent(launcher, containerId, "/etc", "group", out.toByteArray());
     }
 
     protected void injectJenkinsUnixUser(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/passwd", out);
-        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes());
+        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes(UTF_8));
         putFileContent(launcher, containerId, "/etc", "passwd", out.toByteArray());
     }
 
