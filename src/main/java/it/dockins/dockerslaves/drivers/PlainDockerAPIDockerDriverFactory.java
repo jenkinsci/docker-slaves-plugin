@@ -50,15 +50,6 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
     }
 
     public enum CLIENT {
-        DOCKER_JAVA {
-            String getDisplayName() {
-                return "Docker Java client";
-            }
-
-            DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException {
-                return new DockerJavaDockerDriver(dockerHost);
-            }
-        },
         CLI {
             String getDisplayName() {
                 return "Docker CLI (require docker executable on PATH)";
