@@ -97,7 +97,7 @@ public class CliDockerDriver implements DockerDriver {
         final String volume = out.toString("UTF-8").trim();
 
         if (status != 0) {
-            throw new IOException("Failed to run docker image");
+            throw new IOException("Failed to create docker volume");
         }
 
         return volume;
