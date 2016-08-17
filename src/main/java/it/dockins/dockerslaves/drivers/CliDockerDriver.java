@@ -48,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -405,6 +404,24 @@ public class CliDockerDriver implements DockerDriver {
 
         return launchDockerCLI(launcher, args)
                 .stdout(launcher.getListener().getLogger()).join();
+    }
+
+    @Override
+    public String serverVersion(Launcher launcher) throws IOException, InterruptedException {
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("version", "-f", "{{.Server.Version}}");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int status = launchDockerCLI(launcher, args)
+                .stdout(out).stderr(launcher.getListener().getLogger()).join();
+
+        final String version = out.toString("UTF-8").trim();
+
+        if (status != 0) {
+            throw new IOException("Failed to connect to docker API");
+        }
+
+        return version;
     }
 
     public void prependArgs(ArgumentListBuilder args){

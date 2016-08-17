@@ -65,6 +65,9 @@ public class DockerProvisioner {
         this.spec = spec;
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;
+
+        // Sanity check
+        driver.serverVersion(launcher);
     }
 
     public JobBuildsContainersContext getContext() {

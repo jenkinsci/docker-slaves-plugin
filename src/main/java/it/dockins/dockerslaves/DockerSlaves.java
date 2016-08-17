@@ -34,6 +34,7 @@ import hudson.model.Job;
 import hudson.slaves.Cloud;
 import it.dockins.dockerslaves.drivers.PlainDockerAPIDockerDriverFactory;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
+import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -123,12 +124,14 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
-        return new DockerProvisionerFactory.StandardJob(dockerDriverFactory.forJob(job), getRemotingContainerImageName(), getScmContainerImageName(), job);
+        final DockerDriver driver = dockerDriverFactory.forJob(job);
+        return new DockerProvisionerFactory.StandardJob(driver, getRemotingContainerImageName(), getScmContainerImageName(), job);
     }
 
     public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
 
-        return new DockerProvisionerFactory.PipelineJob(dockerDriverFactory.forJob(job), getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
+        final DockerDriver driver = dockerDriverFactory.forJob(job);
+        return new DockerProvisionerFactory.PipelineJob(driver, getRemotingContainerImageName(), getScmContainerImageName(), job, spec);
     }
 
     public static DockerSlaves get() {

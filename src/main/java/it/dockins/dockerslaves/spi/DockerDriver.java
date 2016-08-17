@@ -39,5 +39,7 @@ public interface DockerDriver extends Closeable {
 
     boolean checkImageExists(Launcher launcher, String image) throws IOException, InterruptedException;
 
-    int buildDockerfile(Launcher launcher, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException;
+    int buildDockerfile(Launcher launcher, String dockerfilePath, String tag, boolean pull) throws IOException, InterruptedException;
+
+    String serverVersion(Launcher launcher) throws IOException, InterruptedException;
 }
