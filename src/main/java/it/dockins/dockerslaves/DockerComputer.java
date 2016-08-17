@@ -25,8 +25,10 @@
 
 package it.dockins.dockerslaves;
 
-import it.dockins.dockerslaves.api.OneShotComputer;
+import hudson.model.Executor;
+import hudson.model.TaskListener;
 import hudson.slaves.ComputerLauncher;
+import org.jenkinsci.plugins.oneshot.OneShotComputer;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -57,23 +59,22 @@ public class DockerComputer extends OneShotComputer {
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
      *
      */
-    public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
-        provisioner = provisionerFactory.createProvisioner(getListener());
+    public DockerProvisioner createProvisioner(TaskListener listener) throws IOException, InterruptedException {
+        provisioner = provisionerFactory.createProvisioner(listener);
         return provisioner;
     }
 
     @Override
-    protected void terminate() {
+    protected void removeExecutor(Executor e) {
+        super.removeExecutor(e);
         LOGGER.info("Stopping Docker Slave after build completion");
-        setAcceptingTasks(false);
         try {
             provisioner.clean();
-        } catch (InterruptedException e) {
-            e.printStackTrace(); //FIXME
-        } catch (IOException e) {
-            e.printStackTrace(); //FIXME
+        } catch (InterruptedException ex) {
+            ex.printStackTrace(); //FIXME
+        } catch (IOException ex) {
+            ex.printStackTrace(); //FIXME
         }
-        super.terminate();
     }
 
     public DockerProvisioner getProvisioner() {

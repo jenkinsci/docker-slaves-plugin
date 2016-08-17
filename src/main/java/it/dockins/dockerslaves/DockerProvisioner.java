@@ -74,7 +74,7 @@ public class DockerProvisioner {
         return context;
     }
 
-    public void prepareRemotingContainer() throws IOException, InterruptedException {
+    public void prepareRemotingContainer(TaskListener listener) throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
         if (context.getRemotingContainer() != null) {
             if (driver.hasContainer(launcher, context.getRemotingContainer().getId())) {

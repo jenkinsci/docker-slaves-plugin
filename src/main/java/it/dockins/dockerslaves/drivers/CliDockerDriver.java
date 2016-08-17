@@ -35,7 +35,6 @@ import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
 import it.dockins.dockerslaves.ContainerInstance;
 import it.dockins.dockerslaves.DockerSlave;
-import it.dockins.dockerslaves.ProvisionQueueListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
 import org.apache.commons.io.IOUtils;
@@ -337,7 +336,7 @@ public class CliDockerDriver implements DockerDriver {
         return status;
     }
 
-    private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CliDockerDriver.class.getName());
 
     @Override
     public void launchSideContainer(Launcher launcher, ContainerInstance instance, ContainerInstance remotingContainer) throws IOException, InterruptedException {

@@ -38,9 +38,10 @@ import hudson.remoting.Channel;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
 import hudson.slaves.EphemeralNode;
-import it.dockins.dockerslaves.api.OneShotSlave;
+import org.jenkinsci.plugins.oneshot.OneShotSlave;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * An ${@link EphemeralNode} using docker containers to host the build processes.
@@ -53,9 +54,8 @@ public class DockerSlave extends OneShotSlave {
 
     private final DockerProvisionerFactory provisionerFactory;
 
-    public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
-        // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
-        super(name.replaceAll("/", " » "), nodeDescription, SLAVE_ROOT, labelString, new DockerComputerLauncher());
+    public DockerSlave(String nodeDescription, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
+        super(nodeDescription, SLAVE_ROOT, new DockerComputerLauncher(), StandardCharsets.UTF_8);
         this.provisionerFactory = provisionerFactory;
     }
 
