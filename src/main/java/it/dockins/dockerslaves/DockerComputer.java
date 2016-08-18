@@ -25,6 +25,7 @@
 
 package it.dockins.dockerslaves;
 
+import hudson.model.TaskListener;
 import it.dockins.dockerslaves.api.OneShotComputer;
 import hudson.slaves.ComputerLauncher;
 
@@ -57,8 +58,8 @@ public class DockerComputer extends OneShotComputer {
      * Create a container provisioner to setup this Jenkins "computer" (aka executor)
      *
      */
-    public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
-        provisioner = provisionerFactory.createProvisioner(getListener());
+    public DockerProvisioner createProvisioner(TaskListener listener) throws IOException, InterruptedException {
+        provisioner = provisionerFactory.createProvisioner(listener);
         return provisioner;
     }
 
