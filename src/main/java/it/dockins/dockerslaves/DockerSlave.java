@@ -101,7 +101,6 @@ public class DockerSlave extends OneShotSlave {
             Computer c = Computer.currentComputer();
             if (c instanceof DockerComputer) {
                 run.addAction(((DockerComputer) c).getProvisioner().getContext());
-                // TODO remove DockerSlaveAssignmentAction
             }
         }
     }

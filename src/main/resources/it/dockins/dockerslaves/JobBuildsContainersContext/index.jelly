@@ -27,8 +27,11 @@
     <l:layout title="Containers" norefresh="true">
     <l:main-panel>
 
-    <h1><l:icon src="${app.rootUrl}/plugin/docker-slaves/images/48x48/docker-logo.png"/> Containers used for this build</h1>
+    <h1><l:icon src="${app.rootUrl}/plugin/docker-slaves/images/48x48/docker-logo.png"/> resources used by this build</h1>
 
+      <!-- TODO include infos from DockerHostSource -->
+
+      <h2>Containers</h2>
       <ul>
         <li>jenkins agent : ${it.remotingContainer.id} (${it.remotingContainer.imageName})</li>
         <li>main build container : ${it.buildContainer.id} (${it.buildContainer.imageName})</li>
@@ -37,6 +40,10 @@
         </j:forEach>
       </ul>
 
+      <h2>Volumes</h2>
+      <ul>
+        <li>workspace : ${it.workdirVolume}</li>
+      </ul>
 
 
 

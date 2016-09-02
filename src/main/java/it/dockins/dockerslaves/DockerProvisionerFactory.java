@@ -52,15 +52,12 @@ public abstract class DockerProvisionerFactory {
     protected void prepareWorkspace(Job job, JobBuildsContainersContext context) {
 
         // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
-        // could rely on docker volume driver
-        // in the meantime, we just rely on previous build's remoting container as a data volume container
 
-        // reuse previous remoting container to retrieve workspace
-        Run lastBuild = job.getBuilds().getLastBuild();
+        Run lastBuild = job.getLastCompletedBuild();
         if (lastBuild != null) {
             JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
-            if (previousContext != null && previousContext.getRemotingContainer() != null) {
-                context.setRemotingContainer(previousContext.getRemotingContainer());
+            if (previousContext != null && previousContext.getWorkdirVolume() != null) {
+                context.setWorkdirVolume(previousContext.getWorkdirVolume());
             }
         }
     }
