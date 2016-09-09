@@ -35,7 +35,6 @@ import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
 
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * Provision {@link Container}s based on ${@link ContainerSetDefinition} to provide a queued task
@@ -80,7 +79,7 @@ public class DockerProvisioner {
 
         String volume = context.getWorkdirVolume();
         if (!driver.hasVolume(launcher, volume)) {
-            volume = driver.createVolume(launcher, "local", Collections.EMPTY_LIST);
+            volume = driver.createVolume(launcher);
             context.setWorkdirVolume(volume);
         }
 

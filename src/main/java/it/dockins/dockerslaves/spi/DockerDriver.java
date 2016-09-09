@@ -8,7 +8,6 @@ import it.dockins.dockerslaves.Container;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collection;
 
 /**
  * Manage Docker resources creation and access so docker-slaves can run a build.
@@ -17,9 +16,9 @@ import java.util.Collection;
  */
 public interface DockerDriver extends Closeable {
 
-    String createVolume(Launcher launcher, String driver, Collection<String> driverOpts) throws IOException, InterruptedException;
-
     boolean hasVolume(Launcher launcher, String name) throws IOException, InterruptedException;
+
+    String createVolume(Launcher launcher) throws IOException, InterruptedException;
 
     boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException;
 

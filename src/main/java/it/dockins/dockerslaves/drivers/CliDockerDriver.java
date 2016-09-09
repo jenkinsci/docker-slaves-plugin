@@ -48,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,18 +79,9 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public String createVolume(Launcher launcher, String driver, Collection<String> driverOpts) throws IOException, InterruptedException {
+    public String createVolume(Launcher launcher) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("volume", "create");
-
-        if (driver != null) {
-            args.add("--driver", driver);
-            if (driverOpts != null) {
-                for (String opt : driverOpts) {
-                    args.add(opt);
-                }
-            }
-        }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int status = launchDockerCLI(launcher, args)
