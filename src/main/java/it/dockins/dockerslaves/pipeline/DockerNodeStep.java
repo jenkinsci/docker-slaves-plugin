@@ -34,6 +34,7 @@ import hudson.model.Executor;
 import hudson.model.Node;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.support.steps.ExecutorStep;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -53,7 +54,8 @@ import java.util.Set;
  * </pre>
  */
 
-public class DockerNodeStep extends AbstractStepImpl {
+public class DockerNodeStep extends ExecutorStep {
+
     private List<String> sideContainers;
 
     @CheckForNull
@@ -61,6 +63,7 @@ public class DockerNodeStep extends AbstractStepImpl {
 
     @DataBoundConstructor
     public DockerNodeStep(String image) {
+        super("docker_" + Long.toHexString(System.nanoTime()));
         this.image = Util.fixEmptyAndTrim(image);
     }
 
