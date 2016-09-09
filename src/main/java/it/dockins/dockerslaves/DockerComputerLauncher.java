@@ -54,7 +54,6 @@ public class DockerComputerLauncher extends ComputerLauncher {
     public void launch(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println("Start Docker container to host the build");
         DockerProvisioner provisioner = computer.createProvisioner(listener);
-        provisioner.prepareRemotingContainer(listener);
         provisioner.launchRemotingContainer(computer, listener);
     }
 }

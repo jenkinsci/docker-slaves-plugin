@@ -36,26 +36,22 @@ import java.io.IOException;
 public abstract class DockerProvisionerFactory {
 
     protected final DockerDriver driver;
-    protected final String remotingContainerImageName;
-    protected final String scmContainerImageName;
     protected final Job job;
     protected final ContainerSetDefinition spec;
 
-    public DockerProvisionerFactory(DockerDriver driver, String remotingContainerImageName, String scmContainerImageName, Job job, ContainerSetDefinition spec) {
+    public DockerProvisionerFactory(DockerDriver driver, Job job, ContainerSetDefinition spec) {
         this.driver = driver;
-        this.remotingContainerImageName = remotingContainerImageName;
-        this.scmContainerImageName = scmContainerImageName;
         this.job = job;
         this.spec = spec;
     }
 
-    protected void prepareWorkspace(Job job, JobBuildsContainersContext context) {
+    protected void prepareWorkspace(Job job, ContainersContext context) {
 
         // TODO define a configurable volume strategy to retrieve a (maybe persistent) workspace
 
         Run lastBuild = job.getLastCompletedBuild();
         if (lastBuild != null) {
-            JobBuildsContainersContext previousContext = (JobBuildsContainersContext) lastBuild.getAction(JobBuildsContainersContext.class);
+            ContainersContext previousContext = (ContainersContext) lastBuild.getAction(ContainersContext.class);
             if (previousContext != null && previousContext.getWorkdirVolume() != null) {
                 context.setWorkdirVolume(previousContext.getWorkdirVolume());
             }
@@ -67,32 +63,30 @@ public abstract class DockerProvisionerFactory {
 
     public static class StandardJob extends DockerProvisionerFactory {
 
-        public StandardJob(DockerDriver driver, String remotingContainerImageName, String scmContainerImageName, Job job) {
-            super(driver, remotingContainerImageName, scmContainerImageName, job, (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class));
+        public StandardJob(DockerDriver driver, Job job) {
+            super(driver, job, (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class));
         }
 
         @Override
         public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
-            JobBuildsContainersContext context = new JobBuildsContainersContext();
+            ContainersContext context = new ContainersContext();
 
             prepareWorkspace(job, context);
 
-            return new DockerProvisioner(context, slaveListener, driver, job,
-                    spec, remotingContainerImageName, scmContainerImageName);
+            return new DockerProvisioner(context, slaveListener, driver, job, spec);
         }
     }
 
     public static class PipelineJob extends DockerProvisionerFactory {
 
-        public PipelineJob(DockerDriver driver, String remotingContainerImageName, String scmContainerImageName, Job job, ContainerSetDefinition spec) {
-            super(driver, remotingContainerImageName, scmContainerImageName, job, spec);
+        public PipelineJob(DockerDriver driver, Job job, ContainerSetDefinition spec) {
+            super(driver, job, spec);
         }
 
         @Override
         public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
-            JobBuildsContainersContext context = new JobBuildsContainersContext(false);
-            return new DockerProvisioner(context, slaveListener, driver, job,
-                    spec, remotingContainerImageName, scmContainerImageName);
+            ContainersContext context = new ContainersContext(false);
+            return new DockerProvisioner(context, slaveListener, driver, job, spec);
         }
     }
 }

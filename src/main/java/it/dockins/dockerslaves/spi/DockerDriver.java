@@ -4,7 +4,7 @@ import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
 import hudson.slaves.SlaveComputer;
-import it.dockins.dockerslaves.ContainerInstance;
+import it.dockins.dockerslaves.Container;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -23,17 +23,17 @@ public interface DockerDriver extends Closeable {
 
     boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException;
 
-    ContainerInstance createRemotingContainer(Launcher launcher, String image, String workdir) throws IOException, InterruptedException;
+    Container launchRemotingContainer(Launcher launcher, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException;
 
-    void launchRemotingContainer(final SlaveComputer computer, TaskListener listener, ContainerInstance remotingContainer);
+    Container launchScmContainer(Launcher launcher, Container remotingContainer) throws IOException, InterruptedException;
 
-    ContainerInstance createAndLaunchBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException;
+    Container launchBuildContainer(Launcher launcher, String image, Container remotingContainer) throws IOException, InterruptedException;
 
     Proc execInContainer(Launcher launcher, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException;
 
-    int removeContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException;
+    int removeContainer(Launcher launcher, Container instance) throws IOException, InterruptedException;
 
-    void launchSideContainer(Launcher launcher, ContainerInstance instance, ContainerInstance remotingContainer) throws IOException, InterruptedException;
+    void launchSideContainer(Launcher launcher, Container instance, Container remotingContainer) throws IOException, InterruptedException;
 
     void pullImage(Launcher launcher, String image) throws IOException, InterruptedException;
 
@@ -41,5 +41,8 @@ public interface DockerDriver extends Closeable {
 
     int buildDockerfile(Launcher launcher, String dockerfilePath, String tag, boolean pull) throws IOException, InterruptedException;
 
+    /**
+     * Return server version string, used actually to check connectivity with backend
+     */
     String serverVersion(Launcher launcher) throws IOException, InterruptedException;
 }

@@ -32,28 +32,28 @@ import hudson.model.TaskListener;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JobBuildsContainersContext implements BuildBadgeAction {
+public class ContainersContext implements BuildBadgeAction {
 
     protected String workdirVolume;
 
-    protected ContainerInstance remotingContainer;
+    protected Container remotingContainer;
 
-    protected ContainerInstance buildContainer;
+    protected Container buildContainer;
 
-    protected ContainerInstance scmContainer;
+    protected Container scmContainer;
 
-    protected Map<String, ContainerInstance> sideContainers = new HashMap<String, ContainerInstance>();
+    protected Map<String, Container> sideContainers = new HashMap<String, Container>();
 
     /**
      * Flag to indicate the SCM checkout build phase is running.
      */
     private transient boolean preScm;
 
-    public JobBuildsContainersContext() {
+    public ContainersContext() {
         preScm = true;
     }
 
-    public JobBuildsContainersContext(boolean preScm) {
+    public ContainersContext(boolean preScm) {
         this.preScm = preScm;
     }
 
@@ -69,11 +69,11 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         this.workdirVolume = workdirVolume;
     }
 
-    public ContainerInstance getRemotingContainer() {
+    public Container getRemotingContainer() {
         return remotingContainer;
     }
 
-    public ContainerInstance getBuildContainer() {
+    public Container getBuildContainer() {
         return buildContainer;
     }
 
@@ -81,23 +81,23 @@ public class JobBuildsContainersContext implements BuildBadgeAction {
         return preScm;
     }
 
-    public void setRemotingContainer(ContainerInstance remotingContainer) {
+    public void setRemotingContainer(Container remotingContainer) {
         this.remotingContainer = remotingContainer;
     }
 
-    public void setBuildContainer(ContainerInstance buildContainer) {
+    public void setBuildContainer(Container buildContainer) {
         this.buildContainer = buildContainer;
     }
 
-    public ContainerInstance getScmContainer() {
+    public Container getScmContainer() {
         return scmContainer;
     }
 
-    public void setScmContainer(ContainerInstance scmContainer) {
+    public void setScmContainer(Container scmContainer) {
         this.scmContainer = scmContainer;
     }
 
-    public Map<String, ContainerInstance> getSideContainers() {
+    public Map<String, Container> getSideContainers() {
         return sideContainers;
     }
 

@@ -1,14 +1,14 @@
 package it.dockins.dockerslaves;
 
-public class ContainerInstance {
+public class Container {
     final String imageName;
     String id;
 
-    public ContainerInstance(String imageName) {
+    public Container(String imageName) {
         this.imageName = imageName;
     }
 
-    public ContainerInstance(String image, String id) {
+    public Container(String image, String id) {
         this(image);
         this.id = id;
     }

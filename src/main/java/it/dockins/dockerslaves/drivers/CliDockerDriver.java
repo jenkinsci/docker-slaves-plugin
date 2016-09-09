@@ -33,7 +33,7 @@ import hudson.org.apache.tools.tar.TarOutputStream;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
-import it.dockins.dockerslaves.ContainerInstance;
+import it.dockins.dockerslaves.Container;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
@@ -64,10 +64,14 @@ public class CliDockerDriver implements DockerDriver {
     private final boolean verbose;
 
     final DockerHostConfig dockerHost;
+    private String remotingImage;
+    private String scmImage;
 
-    public CliDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
+    public CliDockerDriver(DockerHostConfig dockerHost, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
-        verbose = true;
+        this.remotingImage = remotingImage;
+        this.scmImage = scmImage;
+        verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");
     }
 
     @Override
@@ -146,8 +150,9 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public ContainerInstance createRemotingContainer(Launcher launcher, String image, String workdir) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(Launcher launcher, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
 
+        // Create a container for remoting
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create", "--interactive")
 
@@ -158,7 +163,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add("--user", "10000:10000")
                 .add("--volume", workdir+":"+ DockerSlave.SLAVE_ROOT)
                 .add("--workdir", DockerSlave.SLAVE_ROOT)
-                .add(image)
+                .add(remotingImage)
                 .add("java")
 
                 // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
@@ -176,23 +181,27 @@ public class CliDockerDriver implements DockerDriver {
             throw new IOException("Failed to create docker image");
         }
 
+        // Inject current slave.jar to ensure adequate version running
         putFileContent(launcher, containerId, DockerSlave.SLAVE_ROOT, "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
-        return new ContainerInstance(image, containerId);
-    }
+        Container remotingContainer = new Container(scmImage, containerId);
 
-    @Override
-    public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener, ContainerInstance remotingContainer) {
-        ArgumentListBuilder args = new ArgumentListBuilder()
+        // Run container in interactive mode to establish channel over stdin/stdout
+        args = new ArgumentListBuilder()
                 .add("start")
                 .add("--interactive", "--attach", remotingContainer.getId());
         prependArgs(args);
-        CommandLauncher launcher = new CommandLauncher(args.toString(), dockerHost.getEnvironment());
-        launcher.launch(computer, listener);
+        new CommandLauncher(args.toString(), dockerHost.getEnvironment()).launch(computer, listener);
+        return remotingContainer;
     }
 
     @Override
-    public ContainerInstance createAndLaunchBuildContainer(Launcher launcher, String image, ContainerInstance remotingContainer) throws IOException, InterruptedException {
-        ContainerInstance buildContainer = new ContainerInstance(image);
+    public Container launchScmContainer(Launcher launcher, Container remotingContainer) throws IOException, InterruptedException {
+        return launchBuildContainer(launcher, scmImage, remotingContainer);
+    }
+
+    @Override
+    public Container launchBuildContainer(Launcher launcher, String image, Container remotingContainer) throws IOException, InterruptedException {
+        Container buildContainer = new Container(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--env", "TMPDIR=/home/jenkins/.tmp")
@@ -325,7 +334,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public int removeContainer(Launcher launcher, ContainerInstance instance) throws IOException, InterruptedException {
+    public int removeContainer(Launcher launcher, Container instance) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("rm", "-f", instance.getId());
 
@@ -340,7 +349,7 @@ public class CliDockerDriver implements DockerDriver {
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
 
     @Override
-    public void launchSideContainer(Launcher launcher, ContainerInstance instance, ContainerInstance remotingContainer) throws IOException, InterruptedException {
+    public void launchSideContainer(Launcher launcher, Container instance, Container remotingContainer) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--volumes-from", remotingContainer.getId())

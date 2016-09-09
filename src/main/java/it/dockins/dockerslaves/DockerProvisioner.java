@@ -38,12 +38,12 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * Provision {@link ContainerInstance}s based on ${@link ContainerSetDefinition} to provide a queued task
+ * Provision {@link Container}s based on ${@link ContainerSetDefinition} to provide a queued task
  * an executor.
  */
 public class DockerProvisioner {
 
-    protected final JobBuildsContainersContext context;
+    protected final ContainersContext context;
 
     protected final TaskListener slaveListener;
 
@@ -53,32 +53,28 @@ public class DockerProvisioner {
 
     protected final ContainerSetDefinition spec;
 
-    protected final String remotingImage;
 
-    protected final String scmImage;
-
-    public DockerProvisioner(JobBuildsContainersContext context, TaskListener slaveListener, DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
+    public DockerProvisioner(ContainersContext context, TaskListener slaveListener, DockerDriver driver, Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
         this.context = context;
         this.slaveListener = slaveListener;
         this.driver = driver;
         this.launcher = new Launcher.LocalLauncher(slaveListener);
         this.spec = spec;
-        this.remotingImage = remotingImage;
-        this.scmImage = scmImage;
 
         // Sanity check
         driver.serverVersion(launcher);
     }
 
-    public JobBuildsContainersContext getContext() {
+    public ContainersContext getContext() {
         return context;
     }
 
-    public void prepareRemotingContainer(TaskListener listener) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(final SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
-        if (context.getRemotingContainer() != null) {
-            if (driver.hasContainer(launcher, context.getRemotingContainer().getId())) {
-                return;
+        final Container existing = context.getRemotingContainer();
+        if (existing != null) {
+            if (driver.hasContainer(launcher, existing.getId())) {
+                return existing;
             }
         }
 
@@ -88,15 +84,12 @@ public class DockerProvisioner {
             context.setWorkdirVolume(volume);
         }
 
-        final ContainerInstance remotingContainer = driver.createRemotingContainer(launcher, remotingImage, volume);
+        final Container remotingContainer = driver.launchRemotingContainer(launcher, volume, computer, listener);
         context.setRemotingContainer(remotingContainer);
+        return remotingContainer;
     }
 
-    public void launchRemotingContainer(final SlaveComputer computer, TaskListener listener) {
-        driver.launchRemotingContainer(computer, listener, context.getRemotingContainer());
-    }
-
-    public ContainerInstance launchBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
+    public Container launchBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
         if (spec.getSideContainers().size() > 0 && context.getSideContainers().size() == 0) {
             // In a ideal world we would run side containers when DockerSlave.DockerSlaveSCMListener detect scm checkout completed
             // but then we don't have a ProcStarter reference. So do it first time a command is ran during the build
@@ -105,13 +98,13 @@ public class DockerProvisioner {
         }
 
         String buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
-        final ContainerInstance buildContainer = driver.createAndLaunchBuildContainer(launcher, buildImage, context.getRemotingContainer());
+        final Container buildContainer = driver.launchBuildContainer(launcher, buildImage, context.getRemotingContainer());
         context.setBuildContainer(buildContainer);
         return buildContainer;
     }
 
-    public ContainerInstance launchScmContainer() throws IOException, InterruptedException {
-        final ContainerInstance scmContainer = driver.createAndLaunchBuildContainer(launcher, scmImage, context.getRemotingContainer());
+    public Container launchScmContainer() throws IOException, InterruptedException {
+        final Container scmContainer = driver.launchScmContainer(launcher, context.getRemotingContainer());
         context.setBuildContainer(scmContainer);
         return scmContainer;
     }
@@ -121,14 +114,14 @@ public class DockerProvisioner {
             final String name = definition.getName();
             final String image = definition.getSpec().getImage(driver, starter, listener);
             listener.getLogger().println("Starting " + name + " container");
-            ContainerInstance container = new ContainerInstance(image);
+            Container container = new Container(image);
             context.getSideContainers().put(name, container);
             driver.launchSideContainer(launcher, container, context.getRemotingContainer());
         }
     }
 
     public Proc launchBuildProcess(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
-        ContainerInstance targetContainer = null;
+        Container targetContainer = null;
 
         if (context.isPreScm()) {
             targetContainer = context.getScmContainer();
@@ -146,7 +139,7 @@ public class DockerProvisioner {
     }
 
     public void clean() throws IOException, InterruptedException {
-        for (ContainerInstance instance : context.getSideContainers().values()) {
+        for (Container instance : context.getSideContainers().values()) {
             driver.removeContainer(launcher, instance);
         }
 

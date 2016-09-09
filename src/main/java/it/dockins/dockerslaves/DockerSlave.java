@@ -113,7 +113,7 @@ public class DockerSlave extends OneShotSlave {
     public static class DockerSlaveSCMListener extends SCMListener {
         @Override
         public void onChangeLogParsed(Run<?, ?> build, SCM scm, TaskListener listener, ChangeLogSet<?> changelog) throws Exception {
-            final JobBuildsContainersContext action = build.getAction(JobBuildsContainersContext.class);
+            final ContainersContext action = build.getAction(ContainersContext.class);
             if (action != null) {
                 action.onScmChekoutCompleted(build, listener);
             }
