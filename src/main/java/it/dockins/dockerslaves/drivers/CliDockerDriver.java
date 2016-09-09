@@ -393,8 +393,10 @@ public class CliDockerDriver implements DockerDriver {
                 .add("-f", "'{{.Id}}'")
                 .add(image);
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
         return launchDockerCLI(launcher, args)
-                .stdout(launcher.getListener().getLogger()).join() == 0;
+                .stdout(out).stderr(launcher.getListener().getLogger()).join() == 0;
     }
 
     @Override
