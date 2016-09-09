@@ -35,7 +35,6 @@ import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
 
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * Provision {@link Container}s based on ${@link ContainerSetDefinition} to provide a queued task
@@ -78,11 +77,8 @@ public class DockerProvisioner {
             }
         }
 
-        String volume = context.getWorkdirVolume();
-        if (!driver.hasVolume(launcher, volume)) {
-            volume = driver.createVolume(launcher, "local", Collections.EMPTY_LIST);
-            context.setWorkdirVolume(volume);
-        }
+        String volume = driver.createVolume(launcher);
+        context.setWorkdirVolume(volume); // TODO define API to customize volume driver and offer snapshoting features
 
         final Container remotingContainer = driver.launchRemotingContainer(launcher, volume, computer, listener);
         context.setRemotingContainer(remotingContainer);
@@ -150,6 +146,9 @@ public class DockerProvisioner {
         if (context.getScmContainer() != null) {
             driver.removeContainer(launcher, context.getScmContainer());
         }
+
+        // TODO introduce option to keep workspace volume for post-build browsing. Maybe only on build failure ?
+        driver.removeVolume(launcher, context.getWorkdirVolume());
 
         driver.close();
     }
