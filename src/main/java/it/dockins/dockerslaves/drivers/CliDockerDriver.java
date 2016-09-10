@@ -75,11 +75,12 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public String createVolume(Launcher launcher) throws IOException, InterruptedException {
+    public String createVolume(TaskListener listener) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("volume", "create");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -93,7 +94,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public boolean hasVolume(Launcher launcher, String name) throws IOException, InterruptedException {
+    public boolean hasVolume(TaskListener listener, String name) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(name)) {
             return false;
         }
@@ -102,7 +103,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add("volume", "inspect", "-f", "'{{.Name}}'", name);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -115,7 +116,7 @@ public class CliDockerDriver implements DockerDriver {
 
 
     @Override
-    public boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException {
+    public boolean hasContainer(TaskListener listener, String id) throws IOException, InterruptedException {
         if (StringUtils.isEmpty(id)) {
             return false;
         }
@@ -124,7 +125,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add("inspect", "-f", "'{{.Id}}'", id);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -136,7 +137,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Container launchRemotingContainer(Launcher launcher, String dockerImage, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(TaskListener listener, String dockerImage, String workdir, SlaveComputer computer) throws IOException, InterruptedException {
 
         // Create a container for remoting
         ArgumentListBuilder args = new ArgumentListBuilder()
@@ -157,7 +158,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add("-jar").add(DockerSlave.SLAVE_ROOT+"slave.jar");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -181,7 +182,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Container launchBuildContainer(Launcher launcher, String image, Container remotingContainer) throws IOException, InterruptedException {
+    public Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer) throws IOException, InterruptedException {
         Container buildContainer = new Container(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
@@ -197,6 +198,7 @@ public class CliDockerDriver implements DockerDriver {
         args.add("/trampoline", "wait");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -242,11 +244,10 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     protected void getFileContent(Launcher launcher, String containerId, String filename, OutputStream outputStream) throws IOException, InterruptedException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("cp", containerId + ":" + filename, "-");
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -289,7 +290,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Proc execInContainer(Launcher launcher, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException {
+    public Proc execInContainer(TaskListener listener, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("exec", containerId);
 
@@ -305,6 +306,7 @@ public class CliDockerDriver implements DockerDriver {
             args.add(originalCmds.get(i), masked);
         }
 
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         Launcher.ProcStarter procStarter = launchDockerCLI(launcher, args);
 
         if (starter.stdout() != null) {
@@ -315,12 +317,12 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public int removeContainer(Launcher launcher, Container instance) throws IOException, InterruptedException {
+    public int removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("rm", "-f", instance.getId());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -330,7 +332,7 @@ public class CliDockerDriver implements DockerDriver {
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
 
     @Override
-    public void launchSideContainer(Launcher launcher, Container instance, Container remotingContainer) throws IOException, InterruptedException {
+    public void launchSideContainer(TaskListener listener, Container instance, Container remotingContainer) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--volumes-from", remotingContainer.getId())
@@ -339,6 +341,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add(instance.getImageName());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
@@ -354,11 +357,12 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public void pullImage(Launcher launcher, String image) throws IOException, InterruptedException {
+    public void pullImage(TaskListener listener, String image) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("pull")
                 .add(image);
 
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status =  launchDockerCLI(launcher, args)
                 .stdout(launcher.getListener().getLogger()).join();
 
@@ -368,20 +372,20 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public boolean checkImageExists(Launcher launcher, String image) throws IOException, InterruptedException {
+    public boolean checkImageExists(TaskListener listener, String image) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("inspect")
                 .add("-f", "'{{.Id}}'")
                 .add(image);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         return launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join() == 0;
     }
 
     @Override
-    public int buildDockerfile(Launcher launcher, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException {
+    public int buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException {
         String pullOption = "--pull=";
         if (pull) {
             pullOption += "true";
@@ -394,16 +398,18 @@ public class CliDockerDriver implements DockerDriver {
                 .add("-t", tag)
                 .add(dockerfilePath);
 
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         return launchDockerCLI(launcher, args)
                 .stdout(launcher.getListener().getLogger()).join();
     }
 
     @Override
-    public String serverVersion(Launcher launcher) throws IOException, InterruptedException {
+    public String serverVersion(TaskListener listener) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("version", "-f", "{{.Server.Version}}");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Launcher launcher = new Launcher.LocalLauncher(listener);
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 

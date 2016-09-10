@@ -68,7 +68,7 @@ public class DockerComputer extends OneShotComputer {
         LOGGER.info("Stopping Docker Slave after build completion");
         setAcceptingTasks(false);
         try {
-            provisioner.clean();
+            provisioner.clean(getListener());
         } catch (InterruptedException e) {
             e.printStackTrace(); //FIXME
         } catch (IOException e) {
