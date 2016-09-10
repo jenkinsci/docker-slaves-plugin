@@ -124,14 +124,14 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
-        final DockerDriver driver = dockerDriverFactory.forJob(job, getRemotingContainerImageName(), getScmContainerImageName());
-        return new DockerProvisionerFactory.StandardJob(driver, job);
+        final DockerDriver driver = dockerDriverFactory.forJob(job);
+        return new DockerProvisionerFactory.StandardJob(driver, job, getRemotingContainerImageName(), getScmContainerImageName());
     }
 
     public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
 
-        final DockerDriver driver = dockerDriverFactory.forJob(job, getRemotingContainerImageName(), getScmContainerImageName());
-        return new DockerProvisionerFactory.PipelineJob(driver, job, spec);
+        final DockerDriver driver = dockerDriverFactory.forJob(job);
+        return new DockerProvisionerFactory.PipelineJob(driver, job, spec, getRemotingContainerImageName(), getScmContainerImageName());
     }
 
     public static DockerSlaves get() {

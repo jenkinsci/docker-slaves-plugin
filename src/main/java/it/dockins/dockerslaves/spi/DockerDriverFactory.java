@@ -8,6 +8,6 @@ import java.io.IOException;
 
 public abstract class DockerDriverFactory extends AbstractDescribableImpl<DockerDriverFactory> implements ExtensionPoint {
 
-    public abstract DockerDriver forJob(Job context, String remotingImage, String scmImage) throws IOException, InterruptedException;
+    public abstract DockerDriver forJob(Job context) throws IOException, InterruptedException;
 
 }

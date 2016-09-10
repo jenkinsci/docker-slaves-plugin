@@ -63,13 +63,9 @@ public class CliDockerDriver implements DockerDriver {
     private final boolean verbose;
 
     final DockerHostConfig dockerHost;
-    private String remotingImage;
-    private String scmImage;
 
-    public CliDockerDriver(DockerHostConfig dockerHost, String remotingImage, String scmImage) throws IOException, InterruptedException {
+    public CliDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
-        this.remotingImage = remotingImage;
-        this.scmImage = scmImage;
         verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");
     }
 
@@ -140,7 +136,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Container launchRemotingContainer(Launcher launcher, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(Launcher launcher, String dockerImage, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
 
         // Create a container for remoting
         ArgumentListBuilder args = new ArgumentListBuilder()
@@ -153,7 +149,7 @@ public class CliDockerDriver implements DockerDriver {
                 .add("--user", "10000:10000")
                 .add("--volume", workdir+":"+ DockerSlave.SLAVE_ROOT)
                 .add("--workdir", DockerSlave.SLAVE_ROOT)
-                .add(remotingImage)
+                .add(dockerImage)
                 .add("java")
 
                 // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
@@ -173,7 +169,7 @@ public class CliDockerDriver implements DockerDriver {
 
         // Inject current slave.jar to ensure adequate version running
         putFileContent(launcher, containerId, DockerSlave.SLAVE_ROOT, "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
-        Container remotingContainer = new Container(scmImage, containerId);
+        Container remotingContainer = new Container(dockerImage, containerId);
 
         // Run container in interactive mode to establish channel over stdin/stdout
         args = new ArgumentListBuilder()
@@ -182,11 +178,6 @@ public class CliDockerDriver implements DockerDriver {
         prependArgs(args);
         new CommandLauncher(args.toString(), dockerHost.getEnvironment()).launch(computer, listener);
         return remotingContainer;
-    }
-
-    @Override
-    public Container launchScmContainer(Launcher launcher, Container remotingContainer) throws IOException, InterruptedException {
-        return launchBuildContainer(launcher, scmImage, remotingContainer);
     }
 
     @Override

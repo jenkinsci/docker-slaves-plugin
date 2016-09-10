@@ -22,9 +22,7 @@ public interface DockerDriver extends Closeable {
 
     boolean hasContainer(Launcher launcher, String id) throws IOException, InterruptedException;
 
-    Container launchRemotingContainer(Launcher launcher, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException;
-
-    Container launchScmContainer(Launcher launcher, Container remotingContainer) throws IOException, InterruptedException;
+    Container launchRemotingContainer(Launcher launcher, String dockerImage, String workdir, SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException;
 
     Container launchBuildContainer(Launcher launcher, String image, Container remotingContainer) throws IOException, InterruptedException;
 

@@ -52,13 +52,19 @@ public class DockerProvisioner {
 
     protected final ContainerSetDefinition spec;
 
+    protected final String remotingImage;
 
-    public DockerProvisioner(ContainersContext context, TaskListener slaveListener, DockerDriver driver, Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
+    protected final String scmImage;
+
+
+    public DockerProvisioner(ContainersContext context, TaskListener slaveListener, DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.context = context;
         this.slaveListener = slaveListener;
         this.driver = driver;
         this.launcher = new Launcher.LocalLauncher(slaveListener);
         this.spec = spec;
+        this.remotingImage = remotingImage;
+        this.scmImage = scmImage;
 
         // Sanity check
         driver.serverVersion(launcher);
@@ -83,7 +89,7 @@ public class DockerProvisioner {
             context.setWorkdirVolume(volume);
         }
 
-        final Container remotingContainer = driver.launchRemotingContainer(launcher, volume, computer, listener);
+        final Container remotingContainer = driver.launchRemotingContainer(launcher, remotingImage, volume, computer, listener);
         context.setRemotingContainer(remotingContainer);
         return remotingContainer;
     }
@@ -103,7 +109,7 @@ public class DockerProvisioner {
     }
 
     public Container launchScmContainer() throws IOException, InterruptedException {
-        final Container scmContainer = driver.launchScmContainer(launcher, context.getRemotingContainer());
+        final Container scmContainer = driver.launchBuildContainer(launcher, scmImage, context.getRemotingContainer());
         context.setBuildContainer(scmContainer);
         return scmContainer;
     }

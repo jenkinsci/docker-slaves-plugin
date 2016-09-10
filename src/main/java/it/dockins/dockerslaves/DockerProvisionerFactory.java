@@ -38,11 +38,15 @@ public abstract class DockerProvisionerFactory {
     protected final DockerDriver driver;
     protected final Job job;
     protected final ContainerSetDefinition spec;
+    protected final String remotingImage;
+    protected final String scmImage;
 
-    public DockerProvisionerFactory(DockerDriver driver, Job job, ContainerSetDefinition spec) {
+    public DockerProvisionerFactory(DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) {
         this.driver = driver;
         this.job = job;
         this.spec = spec;
+        this.remotingImage = remotingImage;
+        this.scmImage = scmImage;
     }
 
     protected void prepareWorkspace(Job job, ContainersContext context) {
@@ -63,8 +67,8 @@ public abstract class DockerProvisionerFactory {
 
     public static class StandardJob extends DockerProvisionerFactory {
 
-        public StandardJob(DockerDriver driver, Job job) {
-            super(driver, job, (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class));
+        public StandardJob(DockerDriver driver, Job job, String remotingImage, String scmImage) {
+            super(driver, job, (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class), remotingImage, scmImage);
         }
 
         @Override
@@ -73,20 +77,20 @@ public abstract class DockerProvisionerFactory {
 
             prepareWorkspace(job, context);
 
-            return new DockerProvisioner(context, slaveListener, driver, job, spec);
+            return new DockerProvisioner(context, slaveListener, driver, job, spec, remotingImage, scmImage);
         }
     }
 
     public static class PipelineJob extends DockerProvisionerFactory {
 
-        public PipelineJob(DockerDriver driver, Job job, ContainerSetDefinition spec) {
-            super(driver, job, spec);
+        public PipelineJob(DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) {
+            super(driver, job, spec, remotingImage, scmImage);
         }
 
         @Override
         public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
             ContainersContext context = new ContainersContext(false);
-            return new DockerProvisioner(context, slaveListener, driver, job, spec);
+            return new DockerProvisioner(context, slaveListener, driver, job, spec, remotingImage, scmImage);
         }
     }
 }

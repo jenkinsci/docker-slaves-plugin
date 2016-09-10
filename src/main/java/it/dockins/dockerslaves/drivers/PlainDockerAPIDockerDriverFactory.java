@@ -45,8 +45,8 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
     }
 
     @Override
-    public DockerDriver forJob(Job context, String remotingImage, String scmImage) throws IOException, InterruptedException {
-        return client.forDockerHost(dockerHostSource.getDockerHost(context), remotingImage, scmImage);
+    public DockerDriver forJob(Job context) throws IOException, InterruptedException {
+        return client.forDockerHost(dockerHostSource.getDockerHost(context));
     }
 
     public enum CLIENT {
@@ -55,14 +55,14 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
                 return "Docker CLI (require docker executable on PATH)";
             }
 
-            DockerDriver forDockerHost(DockerHostConfig dockerHost, String remotingImage, String scmImage) throws IOException, InterruptedException {
-                return new CliDockerDriver(dockerHost, remotingImage, scmImage);
+            DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException {
+                return new CliDockerDriver(dockerHost);
             }
         };
 
         abstract String getDisplayName();
 
-        abstract DockerDriver forDockerHost(DockerHostConfig dockerHost, String remotingImage, String scmImage) throws IOException, InterruptedException;
+        abstract DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException;
     }
 
     @Extension
