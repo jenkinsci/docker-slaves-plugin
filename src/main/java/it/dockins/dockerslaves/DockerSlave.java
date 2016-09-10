@@ -51,16 +51,16 @@ public class DockerSlave extends OneShotSlave {
 
     public static final String SLAVE_ROOT = "/home/jenkins/";
 
-    private final DockerProvisionerFactory provisionerFactory;
+    private final DockerProvisioner provisioner;
 
-    public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisionerFactory provisionerFactory) throws Descriptor.FormException, IOException {
+    public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisioner provisioner) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
         super(name.replaceAll("/", " » "), nodeDescription, SLAVE_ROOT, labelString, new DockerComputerLauncher());
-        this.provisionerFactory = provisionerFactory;
+        this.provisioner = provisioner;
     }
 
     public DockerComputer createComputer() {
-        return new DockerComputer(this, provisionerFactory);
+        return new DockerComputer(this, provisioner);
     }
 
     @Override

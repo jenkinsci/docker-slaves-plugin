@@ -63,7 +63,7 @@ public abstract class DockerProvisionerFactory {
     }
 
 
-    public abstract DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException;
+    public abstract DockerProvisioner createProvisioner() throws IOException, InterruptedException;
 
     public static class StandardJob extends DockerProvisionerFactory {
 
@@ -72,12 +72,12 @@ public abstract class DockerProvisionerFactory {
         }
 
         @Override
-        public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
+        public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
             ContainersContext context = new ContainersContext();
 
             prepareWorkspace(job, context);
 
-            return new DockerProvisioner(context, slaveListener, driver, job, spec, remotingImage, scmImage);
+            return new DockerProvisioner(context, driver, job, spec, remotingImage, scmImage);
         }
     }
 
@@ -88,9 +88,9 @@ public abstract class DockerProvisionerFactory {
         }
 
         @Override
-        public DockerProvisioner createProvisioner(TaskListener slaveListener) throws IOException, InterruptedException {
+        public DockerProvisioner createProvisioner() throws IOException, InterruptedException {
             ContainersContext context = new ContainersContext(false);
-            return new DockerProvisioner(context, slaveListener, driver, job, spec, remotingImage, scmImage);
+            return new DockerProvisioner(context, driver, job, spec, remotingImage, scmImage);
         }
     }
 }

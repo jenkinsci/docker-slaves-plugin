@@ -58,7 +58,7 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
 
         boolean pull = forcePull;
         final Launcher launcher = new Launcher.LocalLauncher(listener);
-        boolean result = driver.checkImageExists(launcher, image);
+        boolean result = driver.checkImageExists(listener, image);
 
         if (!result) {
             // Could be a docker failure, but most probably image isn't available
@@ -67,7 +67,7 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
 
         if (pull) {
             listener.getLogger().println("Pulling docker image " + image);
-            driver.pullImage(launcher, image);
+            driver.pullImage(listener, image);
         }
 
         return image;

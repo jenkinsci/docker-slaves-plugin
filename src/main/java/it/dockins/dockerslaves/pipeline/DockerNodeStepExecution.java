@@ -142,7 +142,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         final Node node = new DockerSlave(slaveName, description, label,
                 cloud.createPipelineJobProvisionerFactory(
                         run.getParent(),
-                        spec));
+                        spec).createProvisioner());
 
         Jenkins.getActiveInstance().addNode(node);
 

@@ -89,7 +89,8 @@ public class ProvisionQueueListener extends QueueListener {
         String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
         String description = "Container slave for building " + job.getFullName();
         DockerSlaves plugin = DockerSlaves.get();
-        return new DockerSlave(slaveName, description, null, plugin.createStandardJobProvisionerFactory(job));
+        return new DockerSlave(slaveName, description, null, plugin.createStandardJobProvisionerFactory(job)
+            .createProvisioner());
     }
 
     /**

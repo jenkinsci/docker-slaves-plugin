@@ -39,28 +39,17 @@ public class DockerComputer extends OneShotComputer {
 
     private final DockerSlave slave;
 
-    private final DockerProvisionerFactory provisionerFactory;
-
     private DockerProvisioner provisioner;
 
-    public DockerComputer(DockerSlave slave, DockerProvisionerFactory provisionerFactory) {
+    public DockerComputer(DockerSlave slave, DockerProvisioner provisioner) {
         super(slave);
-        this.provisionerFactory = provisionerFactory;
+        this.provisioner = provisioner;
         this.slave = slave;
     }
 
     @Override
     public DockerSlave getNode() {
         return slave;
-    }
-
-    /*
-     * Create a container provisioner to setup this Jenkins "computer" (aka executor)
-     *
-     */
-    public DockerProvisioner createProvisioner(TaskListener listener) throws IOException, InterruptedException {
-        provisioner = provisionerFactory.createProvisioner(listener);
-        return provisioner;
     }
 
     @Override
