@@ -92,7 +92,7 @@ public class DefaultDockerProvisioner implements DockerProvisioner {
     }
 
     @Override
-    public Container launchBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
+    public Container launchBuildContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
         if (spec.getSideContainers().size() > 0 && context.getSideContainers().size() == 0) {
             // In a ideal world we would run side containers when DockerSlave.DockerSlaveSCMListener detect scm checkout completed
             // but then we don't have a ProcStarter reference. So do it first time a command is ran during the build
@@ -136,7 +136,7 @@ public class DefaultDockerProvisioner implements DockerProvisioner {
         } else {
             targetContainer = context.getBuildContainer();
             if (targetContainer == null) {
-                targetContainer = launchBuildContainer(procStarter, listener);
+                targetContainer = launchBuildContainers(procStarter, listener);
             }
         }
 
