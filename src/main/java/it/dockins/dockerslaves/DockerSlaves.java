@@ -36,9 +36,9 @@ import it.dockins.dockerslaves.drivers.PlainDockerAPIDockerDriverFactory;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
+import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -56,19 +56,11 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
      */
     private String defaultBuildContainerImageName;
 
-    private String scmContainerImageName;
-
-    /**
-     * Remoting Container image name. Jenkins Remoting will be launched in it.
-     */
-    private final String remotingContainerImageName = System.getProperty("com.cloudbees.jenkins.plugins.containerslaves.DockerSlaves.image", "jenkinsci/slave");
-
-    private DockerDriverFactory dockerDriverFactory;
+    private DockerProvisionerFactory dockerProvisionerFactory;
 
     public DockerSlaves() {
         init();
     }
-
 
     private Object readResolve() {
         init();
@@ -76,8 +68,8 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     private void init() {
-        if (this.dockerDriverFactory == null) {
-            dockerDriverFactory = new PlainDockerAPIDockerDriverFactory();
+        if (this.dockerProvisionerFactory == null) {
+            dockerProvisionerFactory = new DefaultDockerProvisionerFactory(new PlainDockerAPIDockerDriverFactory());
         }
     }
 
@@ -95,43 +87,29 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return defaultBuildContainerImageName;
     }
 
-    public String getScmContainerImageName() {
-        return StringUtils.isBlank(scmContainerImageName) ? "buildpack-deps:scm" : scmContainerImageName;
-    }
-
-    public String getRemotingContainerImageName() {
-        return StringUtils.isBlank(remotingContainerImageName) ? "jenkinsci/slave" : remotingContainerImageName;
-    }
-
     @DataBoundSetter
     public void setDefaultBuildContainerImageName(String defaultBuildContainerImageName) {
         this.defaultBuildContainerImageName = defaultBuildContainerImageName;
     }
 
-    public void setScmContainerImageName(String scmContainerImageName) {
-        this.scmContainerImageName = scmContainerImageName;
-    }
-
     @DataBoundSetter
-    public void setDockerDriverFactory(DockerDriverFactory dockerDriverFactory) {
-        this.dockerDriverFactory = dockerDriverFactory;
+    public void setDockerProvisionerFactory(DockerProvisionerFactory dockerProvisionerFactory) {
+        this.dockerProvisionerFactory = dockerProvisionerFactory;
     }
 
-    public DockerDriverFactory getDockerDriverFactory() {
-        return dockerDriverFactory;
+    public DockerProvisionerFactory getDockerProvisionerFactory() {
+        return dockerProvisionerFactory;
     }
 
-    public DockerProvisionerFactory createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
+    public DockerProvisioner createStandardJobProvisionerFactory(Job job) throws IOException, InterruptedException {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
-        final DockerDriver driver = dockerDriverFactory.forJob(job);
-        return new DockerProvisionerFactory.StandardJob(driver, job, getRemotingContainerImageName(), getScmContainerImageName());
+        ContainerSetDefinition spec = (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class);
+        return dockerProvisionerFactory.createProvisionerForClassicJob(job, spec);
     }
 
-    public DockerProvisionerFactory createPipelineJobProvisionerFactory(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
-
-        final DockerDriver driver = dockerDriverFactory.forJob(job);
-        return new DockerProvisionerFactory.PipelineJob(driver, job, spec, getRemotingContainerImageName(), getScmContainerImageName());
+    public DockerProvisioner createProvisionerForPipeline(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
+        return dockerProvisionerFactory.createProvisionerForPipeline(job, spec);
     }
 
     public static DockerSlaves get() {
