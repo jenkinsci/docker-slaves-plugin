@@ -1,19 +1,18 @@
-<?jelly escape-by-default='true'?>
 <!--
   ~ The MIT License
-  ~
+  ~  
   ~  Copyright (c) 2015, CloudBees, Inc.
-  ~
+  ~  
   ~  Permission is hereby granted, free of charge, to any person obtaining a copy
   ~  of this software and associated documentation files (the "Software"), to deal
   ~  in the Software without restriction, including without limitation the rights
   ~  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   ~  copies of the Software, and to permit persons to whom the Software is
   ~  furnished to do so, subject to the following conditions:
-  ~
+  ~  
   ~  The above copyright notice and this permission notice shall be included in
   ~  all copies or substantial portions of the Software.
-  ~
+  ~  
   ~  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   ~  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   ~  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,18 +22,6 @@
   ~  THE SOFTWARE.
   ~
   -->
-
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
-    <f:entry title="Remoting image" field="remotingImage">
-      <f:textbox default="jenkinsci/slave"/>
-    </f:entry>
-
-    <f:entry title="SCM Docker image" field="scmImage">
-      <f:textbox default="buildpack-deps:scm"/>
-    </f:entry>
-
-    <f:dropdownDescriptorSelector field="dockerDriverFactory" title="Docker API to use"/>
-
-
-</j:jelly>
+To support Jenkins internal plumbing, docker-slaves do run a dedicated container for jenkins remoting.
+You can override the image in used for this purpose with this option, anyway we recommend to use the official
+<a href="https://hub.docker.com/r/jenkinsci/slave">jenkinsci/slave</a>.
