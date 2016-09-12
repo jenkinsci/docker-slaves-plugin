@@ -31,6 +31,7 @@ import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.model.Job;
 import hudson.model.Run;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
+import it.dockins.dockerslaves.spi.DockerProvisioner;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactoryDescriptor;
 import org.apache.commons.lang.StringUtils;
@@ -94,14 +95,14 @@ public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
         final DockerDriver driver = dockerDriverFactory.forJob(job);
         ContainersContext context = new ContainersContext();
         prepareWorkspace(job, context);
-        return new DockerProvisioner(context, driver, job, spec, getRemotingImage(), getScmImage());
+        return new DefaultDockerProvisioner(context, driver, job, spec, getRemotingImage(), getScmImage());
     }
 
     @Override
     public DockerProvisioner createProvisionerForPipeline(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
         final DockerDriver driver = dockerDriverFactory.forJob(job);
         ContainersContext context = new ContainersContext(false);
-        return new DockerProvisioner(context, driver, job, spec, getRemotingImage(), getScmImage());
+        return new DefaultDockerProvisioner(context, driver, job, spec, getRemotingImage(), getScmImage());
     }
 
     @Extension

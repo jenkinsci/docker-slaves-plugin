@@ -39,6 +39,7 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
 import hudson.slaves.EphemeralNode;
 import it.dockins.dockerslaves.api.OneShotSlave;
+import it.dockins.dockerslaves.spi.DockerProvisioner;
 
 import java.io.IOException;
 

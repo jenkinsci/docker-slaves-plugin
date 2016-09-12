@@ -29,6 +29,7 @@ import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import it.dockins.dockerslaves.spi.DockerProvisioner;
 
 import java.io.IOException;
 import java.lang.Override;

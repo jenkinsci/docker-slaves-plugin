@@ -2,7 +2,6 @@ package it.dockins.dockerslaves.spi;
 
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Job;
-import it.dockins.dockerslaves.DockerProvisioner;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 
 import java.io.IOException;

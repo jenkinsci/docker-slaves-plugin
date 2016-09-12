@@ -28,6 +28,7 @@ package it.dockins.dockerslaves;
 import hudson.model.TaskListener;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.SlaveComputer;
+import it.dockins.dockerslaves.spi.DockerProvisioner;
 
 import java.io.IOException;
 import java.util.logging.Logger;

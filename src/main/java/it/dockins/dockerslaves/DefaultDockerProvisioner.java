@@ -33,6 +33,7 @@ import hudson.Proc;
 import hudson.model.TaskListener;
 import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
+import it.dockins.dockerslaves.spi.DockerProvisioner;
 
 import java.io.IOException;
 
@@ -40,7 +41,7 @@ import java.io.IOException;
  * Provision {@link Container}s based on ${@link ContainerSetDefinition} to provide a queued task
  * an executor.
  */
-public class DockerProvisioner {
+public class DefaultDockerProvisioner implements DockerProvisioner {
 
     protected final ContainersContext context;
 
@@ -53,7 +54,7 @@ public class DockerProvisioner {
     protected final String scmImage;
 
 
-    public DockerProvisioner(ContainersContext context, DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
+    public DefaultDockerProvisioner(ContainersContext context, DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.context = context;
         this.driver = driver;
         this.spec = spec;
@@ -64,10 +65,12 @@ public class DockerProvisioner {
         driver.serverVersion(TaskListener.NULL);
     }
 
+    @Override
     public ContainersContext getContext() {
         return context;
     }
 
+    @Override
     public Container launchRemotingContainer(final SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
         final Container existing = context.getRemotingContainer();
@@ -88,6 +91,7 @@ public class DockerProvisioner {
         return remotingContainer;
     }
 
+    @Override
     public Container launchBuildContainer(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
         if (spec.getSideContainers().size() > 0 && context.getSideContainers().size() == 0) {
             // In a ideal world we would run side containers when DockerSlave.DockerSlaveSCMListener detect scm checkout completed
@@ -102,6 +106,7 @@ public class DockerProvisioner {
         return buildContainer;
     }
 
+    @Override
     public Container launchScmContainer(TaskListener listener) throws IOException, InterruptedException {
         final Container scmContainer = driver.launchBuildContainer(listener, scmImage, context.getRemotingContainer());
         context.setBuildContainer(scmContainer);
@@ -119,6 +124,7 @@ public class DockerProvisioner {
         }
     }
 
+    @Override
     public Proc launchBuildProcess(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
         Container targetContainer = null;
 
@@ -137,6 +143,7 @@ public class DockerProvisioner {
         return driver.execInContainer(listener, targetContainer.getId(), procStarter);
     }
 
+    @Override
     public void clean(TaskListener listener) throws IOException, InterruptedException {
         for (Container instance : context.getSideContainers().values()) {
             driver.removeContainer(listener, instance);
