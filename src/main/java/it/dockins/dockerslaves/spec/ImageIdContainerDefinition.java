@@ -57,7 +57,6 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
     public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
 
         boolean pull = forcePull;
-        final Launcher launcher = new Launcher.LocalLauncher(listener);
         boolean result = driver.checkImageExists(listener, image);
 
         if (!result) {

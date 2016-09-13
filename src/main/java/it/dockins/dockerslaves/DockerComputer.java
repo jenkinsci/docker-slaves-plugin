@@ -39,7 +39,7 @@ public class DockerComputer extends OneShotComputer {
 
     private final DockerSlave slave;
 
-    private DockerProvisioner provisioner;
+    private final DockerProvisioner provisioner;
 
     public DockerComputer(DockerSlave slave, DockerProvisioner provisioner) {
         super(slave);
@@ -50,6 +50,11 @@ public class DockerComputer extends OneShotComputer {
     @Override
     public DockerSlave getNode() {
         return slave;
+    }
+
+    @Override
+    public Boolean isUnix() {
+        return Boolean.TRUE;
     }
 
     @Override

@@ -26,7 +26,7 @@ public class ProvisionScheduler extends QueueTaskDispatcher {
 
             int slaveCount = 0;
             DockerSlaves plugin = DockerSlaves.get();
-            for (Node node : Jenkins.getInstance().getNodes()) {
+            for (Node node : Jenkins.getActiveInstance().getNodes()) {
                 if (node instanceof DockerSlave) {
                     if (((DockerSlave)node).getQueueItemId() == item.getId()) {
                         return null;

@@ -90,7 +90,6 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         pathToContext.copyRecursiveTo(new FilePath(context));
         pathToDockerfile.copyTo(new FilePath(new File(context, "Dockerfile")));
 
-        final Launcher launcher = new Launcher.LocalLauncher(listener);
         if (driver.buildDockerfile(listener, context.getAbsolutePath(), tag, pull) != 0) {
             throw new IOException("Failed to build image from Dockerfile "+dockerfile);
         }

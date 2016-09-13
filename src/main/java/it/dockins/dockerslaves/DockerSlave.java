@@ -83,7 +83,7 @@ public class DockerSlave extends OneShotSlave {
     }
 
     /**
-     * Create a custom ${@link Launcher} which relies on plil <code>docker run</code> to start a new process
+     * Create a custom ${@link Launcher} which relies on <code>docker run</code> to start a new process
      */
     @Override
     public Launcher createLauncher(TaskListener listener) {
@@ -96,7 +96,8 @@ public class DockerSlave extends OneShotSlave {
         super.createLauncher(listener);
         final Channel channel = c.getChannel();
         if (channel == null) throw new IllegalStateException("Can't create a Launcher: channel not connected");
-        return new DockerLauncher(listener, channel, c.isUnix(), c.getProvisioner()).decorateFor(this);
+        return new DockerLauncher(listener, channel, c.isUnix(), provisioner)
+            .decorateFor(this);
     }
 
     /**
