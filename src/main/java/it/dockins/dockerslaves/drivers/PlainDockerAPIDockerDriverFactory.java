@@ -24,46 +24,23 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
 
     private final DockerHostSource dockerHostSource;
 
-    private final CLIENT client;
-
 
     @DataBoundConstructor
-    public PlainDockerAPIDockerDriverFactory(DockerHostSource dockerHostSource, CLIENT client) {
+    public PlainDockerAPIDockerDriverFactory(DockerHostSource dockerHostSource) {
         this.dockerHostSource = dockerHostSource;
-        this.client = client;
     }
 
     public PlainDockerAPIDockerDriverFactory(DockerServerEndpoint dockerHost) {
-        this(new DefaultDockerHostSource(dockerHost), CLIENT.CLI);
+        this(new DefaultDockerHostSource(dockerHost));
     }
 
     public DockerHostSource getDockerHostSource() {
         return dockerHostSource;
     }
 
-    public CLIENT getClient() {
-        return client;
-    }
-
     @Override
     public DockerDriver forJob(Job context) throws IOException, InterruptedException {
-        return client.forDockerHost(dockerHostSource.getDockerHost(context));
-    }
-
-    public enum CLIENT {
-        CLI {
-            String getDisplayName() {
-                return "Docker CLI (require docker executable on PATH)";
-            }
-
-            DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException {
-                return new CliDockerDriver(dockerHost);
-            }
-        };
-
-        abstract String getDisplayName();
-
-        abstract DockerDriver forDockerHost(DockerHostConfig dockerHost) throws IOException, InterruptedException;
+        return new CliDockerDriver(dockerHostSource.getDockerHost(context));
     }
 
     @Extension
@@ -72,15 +49,7 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Use plain Docker API";
-        }
-
-        public ListBoxModel doFillClientItems() {
-            final ListBoxModel options = new ListBoxModel();
-            for (CLIENT client : CLIENT.values()) {
-                options.add(client.getDisplayName(), client.name());
-            }
-            return options;
+            return "Docker CLI (require docker executable on PATH)";
         }
     }
 

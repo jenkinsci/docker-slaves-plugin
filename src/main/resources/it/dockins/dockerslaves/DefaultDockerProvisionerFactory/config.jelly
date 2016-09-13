@@ -26,6 +26,13 @@
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
+  <f:block>
+    <div style="border: solid 1px #000; padding:1em; margin-bottom: 1em; background: #6da2ff">
+      Build executor will be created as a composition of linked Docker containers.
+      This offers maximal flexibility on the build and side containers.
+    </div>
+  </f:block>
+
     <f:entry title="Remoting image" field="remotingImage">
       <f:textbox default="jenkinsci/slave"/>
     </f:entry>

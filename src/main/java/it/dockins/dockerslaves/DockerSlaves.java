@@ -57,7 +57,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
 
     private DockerProvisionerFactory dockerProvisionerFactory;
 
-    private int maxContainers = 10;
+    private int maxSlaves = 10;
 
     public void start() throws IOException {
         load();
@@ -101,13 +101,13 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         return getDockerProvisionerFactory().createProvisionerForClassicJob(job, spec);
     }
 
-    public int getMaxContainers() {
-        return maxContainers;
+    public int getMaxSlaves() {
+        return maxSlaves;
     }
 
     @DataBoundSetter
-    public void setMaxContainers(int maxContainers) {
-        this.maxContainers = maxContainers;
+    public void setMaxSlaves(int maxSlaves) {
+        this.maxSlaves = maxSlaves;
     }
 
     public DockerProvisioner createProvisionerForPipeline(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {

@@ -111,7 +111,7 @@ public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Default";
+            return "Compose docker containers";
         }
     }
 }
