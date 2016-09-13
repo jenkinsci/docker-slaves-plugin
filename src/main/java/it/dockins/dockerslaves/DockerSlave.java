@@ -30,6 +30,7 @@ import hudson.Launcher;
 import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Job;
+import hudson.model.Queue;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
@@ -54,10 +55,13 @@ public class DockerSlave extends OneShotSlave {
 
     private final DockerProvisioner provisioner;
 
-    public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisioner provisioner) throws Descriptor.FormException, IOException {
+    private final long queueItemId;
+
+    public DockerSlave(String name, String nodeDescription, String labelString, DockerProvisioner provisioner, Queue.Item queueItem) throws Descriptor.FormException, IOException {
         // TODO would be better to get notified when the build start, and get the actual build ID. But can't find the API for that
         super(name.replaceAll("/", " » "), nodeDescription, SLAVE_ROOT, labelString, new DockerComputerLauncher());
         this.provisioner = provisioner;
+        this.queueItemId = queueItem.getId();
     }
 
     public DockerComputer createComputer() {
@@ -72,6 +76,10 @@ public class DockerSlave extends OneShotSlave {
     @Override
     public DockerComputer getComputer() {
         return (DockerComputer) super.getComputer();
+    }
+
+    public long getQueueItemId() {
+        return queueItemId;
     }
 
     /**

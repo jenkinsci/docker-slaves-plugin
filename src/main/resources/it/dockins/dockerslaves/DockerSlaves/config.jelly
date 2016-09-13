@@ -32,6 +32,10 @@
 
     <f:dropdownDescriptorSelector field="dockerProvisionerFactory" title="Docker Provisioner"/>
 
+    <f:entry title="Maximum number of running containers" field="maxContainers">
+      <f:number clazz="positive-number" min="0" step="1" default="10"/>
+    </f:entry>
+
   </f:section>
 
 </j:jelly>

@@ -59,7 +59,7 @@ public class ProvisionQueueListener extends QueueListener {
             if (def == null) return;
 
             try {
-                final Node node = prepareExecutorFor(job);
+                final Node node = prepareExecutorFor(item, job);
 
                 DockerSlaveAssignmentAction action = new DockerSlaveAssignmentAction(node.getNodeName());
                 item.addAction(action);
@@ -76,12 +76,13 @@ public class ProvisionQueueListener extends QueueListener {
                 });
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Failure to create Docker Slave", e);
+                // TODO: should fail the build here, not just cancel the item without explanation
                 Jenkins.getActiveInstance().getQueue().cancel(item);
             }
         }
     }
 
-    private Node prepareExecutorFor(final AbstractProject job) throws Descriptor.FormException, IOException, InterruptedException {
+    private Node prepareExecutorFor(final Queue.BuildableItem item, final AbstractProject job) throws Descriptor.FormException, IOException, InterruptedException {
         LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
 
         // Immediately create a slave for this item
@@ -89,7 +90,7 @@ public class ProvisionQueueListener extends QueueListener {
         String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
         String description = "Container slave for building " + job.getFullName();
         DockerSlaves plugin = DockerSlaves.get();
-        return new DockerSlave(slaveName, description, null, plugin.createStandardJobProvisionerFactory(job));
+        return new DockerSlave(slaveName, description, null, plugin.createStandardJobProvisionerFactory(job),item);
     }
 
     /**
