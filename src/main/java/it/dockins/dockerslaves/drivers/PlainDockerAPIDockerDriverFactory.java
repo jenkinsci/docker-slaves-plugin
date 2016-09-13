@@ -9,6 +9,7 @@ import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import it.dockins.dockerslaves.spi.DockerDriverFactoryDescriptor;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
 import it.dockins.dockerslaves.spi.DockerHostSource;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -32,8 +33,8 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
         this.client = client;
     }
 
-    public PlainDockerAPIDockerDriverFactory() {
-        this(new DefaultDockerHostSource(), CLIENT.CLI);
+    public PlainDockerAPIDockerDriverFactory(DockerServerEndpoint dockerHost) {
+        this(new DefaultDockerHostSource(dockerHost), CLIENT.CLI);
     }
 
     public DockerHostSource getDockerHostSource() {

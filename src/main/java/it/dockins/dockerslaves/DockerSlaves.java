@@ -29,7 +29,6 @@ import hudson.Extension;
 import hudson.Plugin;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
-import hudson.model.Items;
 import hudson.model.Job;
 import hudson.slaves.Cloud;
 import it.dockins.dockerslaves.drivers.PlainDockerAPIDockerDriverFactory;
@@ -38,6 +37,7 @@ import it.dockins.dockerslaves.spi.DockerProvisioner;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -58,21 +58,6 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     private DockerProvisionerFactory dockerProvisionerFactory;
 
     private int maxContainers = 10;
-
-    public DockerSlaves() {
-        init();
-    }
-
-    private Object readResolve() {
-        init();
-        return this;
-    }
-
-    private void init() {
-        if (this.dockerProvisionerFactory == null) {
-            dockerProvisionerFactory = new DefaultDockerProvisionerFactory(new PlainDockerAPIDockerDriverFactory());
-        }
-    }
 
     public void start() throws IOException {
         load();
@@ -99,6 +84,13 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public DockerProvisionerFactory getDockerProvisionerFactory() {
+        if (dockerProvisionerFactory == null) {
+            final DefaultDockerProvisionerFactory factory = new DefaultDockerProvisionerFactory(
+                    new PlainDockerAPIDockerDriverFactory(dockerHost));
+            factory.setRemotingImage(remotingContainerImageName);
+            factory.setScmImage(scmContainerImageName);
+            return dockerProvisionerFactory = factory;
+        }
         return dockerProvisionerFactory;
     }
 
@@ -106,7 +98,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
         // TODO iterate on job's ItemGroup and it's parents so end-user can configure this at folder level.
 
         ContainerSetDefinition spec = (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class);
-        return dockerProvisionerFactory.createProvisionerForClassicJob(job, spec);
+        return getDockerProvisionerFactory().createProvisionerForClassicJob(job, spec);
     }
 
     public int getMaxContainers() {
@@ -119,7 +111,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
     }
 
     public DockerProvisioner createProvisionerForPipeline(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
-        return dockerProvisionerFactory.createProvisionerForPipeline(job, spec);
+        return getDockerProvisionerFactory().createProvisionerForPipeline(job, spec);
     }
 
     public static DockerSlaves get() {
@@ -133,7 +125,7 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
 
 
     static {
-        Items.XSTREAM2.aliasPackage("xyz.quoidneufdocker.jenkins", "it.dockins");
+        Jenkins.XSTREAM.aliasPackage("xyz.quoidneufdocker.jenkins", "it.dockins");
     }
 
     @Extension
@@ -144,4 +136,13 @@ public class DockerSlaves extends Plugin implements Describable<DockerSlaves> {
             return "Docker Slaves";
         }
     }
+
+
+    /// --- kept for backward compatibility
+
+    public String scmContainerImageName;
+
+    public String remotingContainerImageName;
+
+    public DockerServerEndpoint dockerHost;
 }
