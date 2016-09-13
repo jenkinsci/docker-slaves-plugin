@@ -35,7 +35,7 @@ public class ProvisionScheduler extends QueueTaskDispatcher {
                 }
             }
 
-            if (slaveCount >= plugin.getMaxContainers()) {
+            if (slaveCount >= plugin.getMaxSlaves()) {
                 return new WaitForADockerSlot();
             } else {
                 return null;
