@@ -40,7 +40,7 @@ public class DefaultDockerHostSource extends DockerHostSource {
     }
 
     @Extension
-    public static class DescriptorImp extends DockerHostSourceDescriptor {
+    public static class DescriptorImpl extends DockerHostSourceDescriptor {
 
         @Nonnull
         @Override
