@@ -18,6 +18,7 @@ import java.io.IOException;
 public class DefaultDockerHostSource extends DockerHostSource {
 
     private final DockerServerEndpoint dockerServerEndpoint;
+    public static final DockerServerEndpoint DEFAULT = new DockerServerEndpoint(null, null);
 
     public DefaultDockerHostSource() {
         this(new DockerServerEndpoint(null, null));
@@ -29,12 +30,13 @@ public class DefaultDockerHostSource extends DockerHostSource {
     }
 
     public DockerServerEndpoint getDockerServerEndpoint() {
-        return dockerServerEndpoint;
+
+        return dockerServerEndpoint != null ? dockerServerEndpoint : DEFAULT;
     }
 
     @Override
     public DockerHostConfig getDockerHost(Job job) throws IOException, InterruptedException {
-        return new DockerHostConfig(dockerServerEndpoint, job);
+        return new DockerHostConfig(getDockerServerEndpoint(), job);
     }
 
     @Extension
