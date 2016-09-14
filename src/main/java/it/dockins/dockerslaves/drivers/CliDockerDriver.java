@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static it.dockins.dockerslaves.DockerSlave.SLAVE_ROOT;
 import static java.nio.charset.StandardCharsets.*;
 
 /**
@@ -137,25 +138,23 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Container launchRemotingContainer(TaskListener listener, String dockerImage, String workdir, SlaveComputer computer) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(TaskListener listener, String dockerImage, String volume, SlaveComputer computer) throws IOException, InterruptedException {
 
         // Create a container for remoting
         ArgumentListBuilder args = new ArgumentListBuilder()
-                .add("create", "--interactive")
+            .add("create", "--interactive")
 
-                // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
-                .add("--log-driver=none")
+            // We disable container logging to sdout as we rely on this one as transport for jenkins remoting
+            .add("--log-driver=none")
 
-                .add("--env", "TMPDIR="+ DockerSlave.SLAVE_ROOT+".tmp")
-                .add("--user", "10000:10000")
-                .add("--volume", workdir+":"+ DockerSlave.SLAVE_ROOT)
-                .add("--workdir", DockerSlave.SLAVE_ROOT)
-                .add(dockerImage)
-                .add("java")
-
-                // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
-                .add("-Djava.io.tmpdir="+ DockerSlave.SLAVE_ROOT+".tmp")
-                .add("-jar").add(DockerSlave.SLAVE_ROOT+"slave.jar");
+            .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
+            .add("--user", "10000:10000")
+            .add("--volume", volume+":"+ SLAVE_ROOT)
+            .add(dockerImage)
+            .add("java")
+            // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
+            .add("-Djava.io.tmpdir="+ SLAVE_ROOT+".tmp")
+            .add("-jar").add(SLAVE_ROOT+"slave.jar");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Launcher launcher = new Launcher.LocalLauncher(listener);

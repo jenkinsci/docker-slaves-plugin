@@ -51,7 +51,7 @@ import java.io.IOException;
  */
 public class DockerSlave extends OneShotSlave {
 
-    public static final String SLAVE_ROOT = "/home/jenkins/";
+    public static final String SLAVE_ROOT = "/home/jenkins/.jenkins/";
 
     private final DockerProvisioner provisioner;
 
