@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.7</version>
+        <version>2.11</version>
     </parent>
 
     <groupId>it.dockins</groupId>
@@ -111,4 +111,28 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <profiles>
+        <!-- development profile to automatically install plugins, run with mvn -Prun-with-plugin hpi:run -->
+        <profile>
+            <id>run-with-plugins</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
+                    <artifactId>workflow-aggregator</artifactId>
+                    <version>2.3</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>git</artifactId>
+                    <version>2.6.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>credentials</artifactId>
+                    <version>2.1.4</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
