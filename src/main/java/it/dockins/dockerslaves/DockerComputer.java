@@ -25,6 +25,7 @@
 
 package it.dockins.dockerslaves;
 
+import hudson.EnvVars;
 import it.dockins.dockerslaves.api.OneShotComputer;
 import hudson.slaves.ComputerLauncher;
 import it.dockins.dockerslaves.spi.DockerProvisioner;
@@ -55,6 +56,13 @@ public class DockerComputer extends OneShotComputer {
     @Override
     public Boolean isUnix() {
         return Boolean.TRUE;
+    }
+
+
+    @Override
+    public EnvVars getEnvironment() throws IOException, InterruptedException {
+        // call to EnvVars#getRemote like standard Computer does, we get remoting container env, not build container one;
+        return new EnvVars();
     }
 
     @Override

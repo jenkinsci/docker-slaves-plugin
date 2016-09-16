@@ -185,8 +185,8 @@ public class CliDockerDriver implements DockerDriver {
         Container buildContainer = new Container(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
-                .add("--env", "TMPDIR=/home/jenkins/.tmp")
-                .add("--workdir", "/home/jenkins")
+                .add("--env", "TMPDIR="+SLAVE_ROOT+".tmp")
+                .add("--workdir", SLAVE_ROOT)
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--ipc=container:" + remotingContainer.getId())
@@ -296,6 +296,7 @@ public class CliDockerDriver implements DockerDriver {
         if (starter.pwd() != null) {
             args.add("/trampoline", "cdexec", starter.pwd().getRemote());
         }
+
         args.add("env").add(starter.envs());
 
         List<String> originalCmds = starter.cmds();
