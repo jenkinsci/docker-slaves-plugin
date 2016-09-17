@@ -78,7 +78,7 @@ public class DockerNodeStep extends AbstractStepImpl {
         this.sideContainers = sideContainers;
     }
 
-    @Extension
+    @Extension(optional = true)
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
         public DescriptorImpl() {
             super(DockerNodeStepExecution.class);
