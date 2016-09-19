@@ -23,6 +23,9 @@
  */
 package it.dockins.dockerslaves.pipeline;
 
+import hudson.AbortException;
+import hudson.Extension;
+import hudson.model.queue.QueueListener;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.DockerSlaves;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
@@ -91,6 +94,15 @@ import java.util.logging.Logger;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.WARNING;
 
+/**
+ * This class is heavily based (so to speak...) on org.jenkinsci.plugins.workflow.support.steps.ExecutorStepExecution
+ * The original code cannot be easily extended, PlaceholderTask constructor is private for example.
+ *
+ * As much as we hate copy / pasting, as an experimental implementation, we feel that it is still interesting
+ * to test the approach.
+ *
+ * See https://github.com/jenkinsci/workflow-durable-task-step-plugin/pull/15 for a discussion about that.
+ */
 public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
 
     @Inject(optional = true)
@@ -145,8 +157,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         Jenkins.getActiveInstance().addNode(node);
 
         Timer.get().schedule(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 Queue.Item item = Queue.getInstance().getItem(task);
                 if (item != null) {
                     PrintStream logger;
@@ -180,8 +191,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         if (j != null) {
             // if we are already running, kill the ongoing activities, which releases PlaceholderExecutable from its sleep loop
             // Similar to Executor.of, but distinct since we do not have the Executable yet:
-            COMPUTERS:
-            for (Computer c : j.getComputers()) {
+            COMPUTERS: for (Computer c : j.getComputers()) {
                 for (Executor e : c.getExecutors()) {
                     Queue.Executable exec = e.getCurrentExecutable();
                     if (exec instanceof PlaceholderTask.PlaceholderExecutable && ((PlaceholderTask.PlaceholderExecutable) exec).getParent().context.equals(getContext())) {
@@ -193,30 +203,83 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         }
         // Whether or not either of the above worked (and they would not if for example our item were canceled), make sure we die.
         getContext().onFailure(cause);
-        // TODO also would like to listen for our queue item being canceled directly (Queue.cancel(Item)) and interrupt automatically,
-        // but ScheduleResult.getCreateItem().getFuture().getStartCondition() is not a ListenableFuture so we cannot wait for it to be cancelled without consuming a thread,
-        // and Item.cancel(Queue) is private and cannot be overridden; the only workaround for now is to have a custom QueueListener
     }
 
-    /**
-     * Transient handle of a running executor task.
-     */
+    @Override public void onResume() {
+        super.onResume();
+        // See if we are still running, or scheduled to run. Cf. stop logic above.
+        for (Queue.Item item : Queue.getInstance().getItems()) {
+            if (item.task instanceof PlaceholderTask && ((PlaceholderTask) item.task).context.equals(getContext())) {
+                LOGGER.log(FINE, "Queue item for node block in {0} is still waiting after reload", run);
+                return;
+            }
+        }
+        Jenkins j = Jenkins.getInstance();
+        if (j != null) {
+            COMPUTERS: for (Computer c : j.getComputers()) {
+                for (Executor e : c.getExecutors()) {
+                    Queue.Executable exec = e.getCurrentExecutable();
+                    if (exec instanceof PlaceholderTask.PlaceholderExecutable && ((PlaceholderTask.PlaceholderExecutable) exec).getParent().context.equals(getContext())) {
+                        LOGGER.log(FINE, "Node block in {0} is running on {1} after reload", new Object[] {run, c.getName()});
+                        return;
+                    }
+                }
+            }
+        }
+        if (step == null) { // compatibility: used to be transient
+            listener.getLogger().println("Queue item for node block in " + run.getFullDisplayName() + " is missing (perhaps JENKINS-34281), but cannot reschedule");
+            return;
+        }
+        listener.getLogger().println("Queue item for node block in " + run.getFullDisplayName() + " is missing (perhaps JENKINS-34281); rescheduling");
+        try {
+            start();
+        } catch (Exception x) {
+            getContext().onFailure(x);
+        }
+    }
+
+    @Override public String getStatus() {
+        // Yet another copy of the same logic; perhaps this should be factored into some method returning a union of Queue.Item and PlaceholderExecutable?
+        for (Queue.Item item : Queue.getInstance().getItems()) {
+            if (item.task instanceof PlaceholderTask && ((PlaceholderTask) item.task).context.equals(getContext())) {
+                return "waiting for " + item.task.getFullDisplayName() + " to be scheduled; blocked: " + item.getWhy();
+            }
+        }
+        Jenkins j = Jenkins.getInstance();
+        if (j != null) {
+            COMPUTERS: for (Computer c : j.getComputers()) {
+                for (Executor e : c.getExecutors()) {
+                    Queue.Executable exec = e.getCurrentExecutable();
+                    if (exec instanceof PlaceholderTask.PlaceholderExecutable && ((PlaceholderTask.PlaceholderExecutable) exec).getParent().context.equals(getContext())) {
+                        return "running on " + c.getName();
+                    }
+                }
+            }
+        }
+        return "node block appears to be neither running nor scheduled";
+    }
+
+    @Extension public static class CancelledItemListener extends QueueListener {
+
+        @Override public void onLeft(Queue.LeftItem li) {
+            if (li.isCancelled()) {
+                if (li.task instanceof PlaceholderTask) {
+                    (((PlaceholderTask) li.task).context).onFailure(new AbortException(Messages.DockerNodeStepExecution_queue_task_cancelled()));
+                }
+            }
+        }
+
+    }
+
+    /** Transient handle of a running executor task. */
     private static final class RunningTask {
-        /**
-         * null until placeholder executable runs
-         */
-        @Nullable
-        AsynchronousExecution execution;
-        /**
-         * null until placeholder executable runs
-         */
-        @Nullable
-        Launcher launcher;
+        /** null until placeholder executable runs */
+        @Nullable AsynchronousExecution execution;
+        /** null until placeholder executable runs */
+        @Nullable Launcher launcher;
     }
 
     private static final String COOKIE_VAR = "JENKINS_SERVER_COOKIE";
-
-    // Sadly, constructor of PlaceholderTask is not public... so copying / pasting was mandatory
 
     @ExportedBean
     public static final class PlaceholderTask implements ContinuedTask, Serializable, AccessControlled {
@@ -362,8 +425,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
             return hasPermission(Item.CANCEL);
         }
 
-        public @CheckForNull
-        Run<?,?> run() {
+        public @CheckForNull Run<?,?> run() {
             try {
                 if (!context.isReady()) {
                     return null;
@@ -393,7 +455,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         @Override public String getDisplayName() {
             // TODO more generic to check whether FlowExecution.owner.executable is a ModelObject
             Run<?,?> r = runForDisplay();
-            return r != null ? "part of " + r.getFullDisplayName() : "Unknown Pipeline node step";
+            return r != null ? Messages.DockerNodeStepExecution_PlaceholderTask_displayName(r.getFullDisplayName()) : Messages.DockerNodeStepExecution_PlaceholderTask_displayName_unknown();
         }
 
         @Override public String getName() {
@@ -426,32 +488,36 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
             return cookie != null; // in which case this is after a restart and we still claim the executor
         }
 
-        private static void finish(@CheckForNull String cookie) {
+        private static void finish(@CheckForNull final String cookie) {
             if (cookie == null) {
                 return;
             }
             synchronized (runningTasks) {
-                RunningTask runningTask = runningTasks.remove(cookie);
+                final RunningTask runningTask = runningTasks.remove(cookie);
                 if (runningTask == null) {
                     LOGGER.log(FINE, "no running task corresponds to {0}", cookie);
                     return;
                 }
                 final AsynchronousExecution execution = runningTask.execution;
-                assert execution != null && runningTask.launcher != null;
+                if (execution == null) {
+                    // JENKINS-30759: finished before asynch execution was even scheduled
+                    return;
+                }
+                assert runningTask.launcher != null;
                 Timer.get().submit(new Runnable() { // JENKINS-31614
                     @Override public void run() {
                         execution.completed(null);
+                        try {
+                            runningTask.launcher.kill(Collections.singletonMap(COOKIE_VAR, cookie));
+                        } catch (ChannelClosedException x) {
+                            // fine, Jenkins was shutting down
+                        } catch (RequestAbortedException x) {
+                            // slave was exiting; too late to kill subprocesses
+                        } catch (Exception x) {
+                            LOGGER.log(Level.WARNING, "failed to shut down " + cookie, x);
+                        }
                     }
                 });
-                try {
-                    runningTask.launcher.kill(Collections.singletonMap(COOKIE_VAR, cookie));
-                } catch (ChannelClosedException x) {
-                    // fine, Jenkins was shutting down
-                } catch (RequestAbortedException x) {
-                    // slave was exiting; too late to kill subprocesses
-                } catch (Exception x) {
-                    LOGGER.log(Level.WARNING, "failed to shut down " + cookie, x);
-                }
             }
         }
 
@@ -537,7 +603,6 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                         listener.getLogger().println("Running on " + computer.getDisplayName() + " in " + workspace); // TODO hyperlink
                         context.newBodyInvoker()
                                 .withContexts(exec, computer, env, workspace)
-                                .withDisplayName(null)
                                 .withCallback(new Callback(cookie, lease))
                                 .start();
                         LOGGER.log(FINE, "started {0}", cookie);
@@ -553,7 +618,10 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                 synchronized (runningTasks) {
                     LOGGER.log(FINE, "waiting on {0}", cookie);
                     RunningTask runningTask = runningTasks.get(cookie);
-                    assert runningTask != null : "no entry for " + cookie + " among " + runningTasks.keySet();
+                    if (runningTask == null) {
+                        LOGGER.log(FINE, "running task apparently finished quickly for {0}", cookie);
+                        return;
+                    }
                     assert runningTask.execution == null;
                     assert runningTask.launcher == null;
                     runningTask.launcher = launcher;
