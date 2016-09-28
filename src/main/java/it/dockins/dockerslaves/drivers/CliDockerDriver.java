@@ -33,6 +33,7 @@ import hudson.org.apache.tools.tar.TarOutputStream;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
+import hudson.util.VersionNumber;
 import it.dockins.dockerslaves.Container;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
@@ -48,6 +49,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,13 +63,16 @@ import static java.nio.charset.StandardCharsets.*;
  */
 public class CliDockerDriver implements DockerDriver {
 
-    private final boolean verbose;
+    private final static boolean verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");;
 
-    final DockerHostConfig dockerHost;
+    private final DockerHostConfig dockerHost;
+
+    private final VersionNumber version;
 
     public CliDockerDriver(DockerHostConfig dockerHost) throws IOException, InterruptedException {
         this.dockerHost = dockerHost;
-        verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");
+        // Also acts as sanity check to ensure host and credentials are well set
+        version = new VersionNumber(serverVersion(TaskListener.NULL));
     }
 
     @Override
@@ -85,7 +90,7 @@ public class CliDockerDriver implements DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        final String volume = out.toString("UTF-8").trim();
+        final String volume = out.toString(UTF_8).trim();
 
         if (status != 0) {
             throw new IOException("Failed to create docker volume");
@@ -161,7 +166,7 @@ public class CliDockerDriver implements DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        String containerId = out.toString("UTF-8").trim();
+        String containerId = out.toString(UTF_8).trim();
 
         if (status != 0) {
             throw new IOException("Failed to create docker image");
@@ -201,7 +206,7 @@ public class CliDockerDriver implements DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        final String containerId = out.toString("UTF-8").trim();
+        final String containerId = out.toString(UTF_8).trim();
         buildContainer.setId(containerId);
 
         if (status != 0) {
@@ -225,14 +230,14 @@ public class CliDockerDriver implements DockerDriver {
     protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/group", out);
-        out.write("jenkins:x:10000:\n".getBytes(UTF_8));
+        out.write("jenkins:x:10000:\n".getBytes(StandardCharsets.UTF_8));
         putFileContent(launcher, containerId, "/etc", "group", out.toByteArray());
     }
 
     protected void injectJenkinsUnixUser(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/passwd", out);
-        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes(UTF_8));
+        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes(StandardCharsets.UTF_8));
         putFileContent(launcher, containerId, "/etc", "passwd", out.toByteArray());
     }
 
@@ -345,7 +350,7 @@ public class CliDockerDriver implements DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        final String containerId = out.toString("UTF-8").trim();
+        final String containerId = out.toString(UTF_8).trim();
         instance.setId(containerId);
 
         if (status != 0) {
@@ -413,13 +418,37 @@ public class CliDockerDriver implements DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        final String version = out.toString("UTF-8").trim();
+        final String version = out.toString(UTF_8).trim();
 
         if (status != 0) {
             throw new IOException("Failed to connect to docker API");
         }
 
         return version;
+    }
+
+    VersionNumber SWARM = new VersionNumber("1.12");
+    VersionNumber INFO_FORMAT = new VersionNumber("1.13");
+
+    public boolean usesSwarmMode(TaskListener listener) throws IOException, InterruptedException {
+        if (version.isOlderThan(SWARM)) return false;
+
+        ArgumentListBuilder args = new ArgumentListBuilder()
+                .add("docker", "info");
+        if (!version.isOlderThan(INFO_FORMAT)) {
+            args.add("--format", "{{.Swarm}}");
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Launcher launcher = new Launcher.LocalLauncher(listener);
+        int status = launchDockerCLI(launcher, args)
+                .stdout(out).stderr(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new IOException("Failed to connect to docker API");
+        }
+
+        return out.toString(UTF_8).contains("Swarm: active");
     }
 
     public void prependArgs(ArgumentListBuilder args){
@@ -441,4 +470,6 @@ public class CliDockerDriver implements DockerDriver {
                 .cmds(args)
                 .quiet(!verbose);
     }
+
+    public static final String UTF_8 = StandardCharsets.UTF_8.name();
 }

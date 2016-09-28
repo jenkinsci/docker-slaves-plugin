@@ -60,9 +60,6 @@ public class DefaultDockerProvisioner implements DockerProvisioner {
         this.spec = spec;
         this.remotingImage = remotingImage;
         this.scmImage = scmImage;
-
-        // Sanity check
-        driver.serverVersion(TaskListener.NULL);
     }
 
     @Override
