@@ -62,9 +62,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/ndeloof/docker-slaves-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:ndeloof/docker-slaves-plugin.git</developerConnection>
-        <url>https://github.com/ndeloof/docker-slaves-plugin</url>
+        <connection>scm:git:git://github.com/jenkinsci/docker-slaves-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/docker-slaves-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/docker-slaves-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
