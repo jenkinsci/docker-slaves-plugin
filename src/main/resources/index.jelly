@@ -28,5 +28,5 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  This plugin uses Containers to setup a Jenkins executor.
+  Uses <a href="https://www.docker.com/">Docker</a> containers to run Jenkins build agents.
 </div>

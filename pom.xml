@@ -39,7 +39,7 @@
     <packaging>hpi</packaging>
 
     <name>Docker Slaves Plugin</name>
-    <description>Run builds inside Docker containers</description>
+    <description>Uses Docker containers to run Jenkins build agents</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Docker+Slaves+Plugin</url>
     <licenses>
         <license>
