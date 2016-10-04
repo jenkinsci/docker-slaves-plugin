@@ -31,13 +31,13 @@ public abstract class DockerDriver implements Closeable {
 
     public abstract Proc execInContainer(TaskListener listener, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException;
 
-    public abstract int removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException;
+    public abstract void removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException;
 
     public abstract void pullImage(TaskListener listener, String image) throws IOException, InterruptedException;
 
     public abstract boolean checkImageExists(TaskListener listener, String image) throws IOException, InterruptedException;
 
-    public abstract int buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull) throws IOException, InterruptedException;
+    public abstract void buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull) throws IOException, InterruptedException;
 
     /**
      * Return server version string, used actually to check connectivity with backend

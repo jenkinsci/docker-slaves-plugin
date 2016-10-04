@@ -325,7 +325,7 @@ public class CliDockerDriver extends DockerDriver {
     }
 
     @Override
-    public int removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException {
+    public void removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("rm", "-f", instance.getId());
 
@@ -334,7 +334,9 @@ public class CliDockerDriver extends DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        return status;
+        if (status != 0) {
+            throw new IOException("Failed to remove container " + instance.getId());
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
@@ -400,7 +402,7 @@ public class CliDockerDriver extends DockerDriver {
     }
 
     @Override
-    public int buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException {
+    public void buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull)  throws IOException, InterruptedException {
         String pullOption = "--pull=";
         if (pull) {
             pullOption += "true";
@@ -414,8 +416,12 @@ public class CliDockerDriver extends DockerDriver {
                 .add(dockerfilePath);
 
         Launcher launcher = new Launcher.LocalLauncher(listener);
-        return launchDockerCLI(launcher, args)
+        int status = launchDockerCLI(launcher, args)
                 .stdout(launcher.getListener().getLogger()).join();
+
+        if (status != 0) {
+            throw new IOException("Failed to build docker image from Dockerfile " + dockerfilePath);
+        }
     }
 
     @Override
