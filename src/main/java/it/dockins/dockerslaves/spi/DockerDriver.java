@@ -8,38 +8,39 @@ import it.dockins.dockerslaves.Container;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Manage Docker resources creation and access so docker-slaves can run a build.
  * <p>
  * Implementation is responsible to adapt docker infrastructure APIs
  */
-public interface DockerDriver extends Closeable {
+public abstract class DockerDriver implements Closeable {
 
-    boolean hasVolume(TaskListener listener, String name) throws IOException, InterruptedException;
+    public abstract boolean hasVolume(TaskListener listener, String name) throws IOException, InterruptedException;
 
-    String createVolume(TaskListener listener) throws IOException, InterruptedException;
+    public abstract String createVolume(TaskListener listener) throws IOException, InterruptedException;
 
-    boolean hasContainer(TaskListener listener, String id) throws IOException, InterruptedException;
+    public abstract boolean hasContainer(TaskListener listener, String id) throws IOException, InterruptedException;
 
-    Container launchRemotingContainer(TaskListener listener, String dockerImage, String workdir, SlaveComputer computer) throws IOException, InterruptedException;
+    public abstract Container launchRemotingContainer(TaskListener listener, String image, String workdir, SlaveComputer computer) throws IOException, InterruptedException;
 
-    Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer) throws IOException, InterruptedException;
+    public abstract Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer, List<String> mounts) throws IOException, InterruptedException;
 
-    Proc execInContainer(TaskListener listener, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException;
+    public abstract Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<String> mounts) throws IOException, InterruptedException;
 
-    int removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException;
+    public abstract Proc execInContainer(TaskListener listener, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException;
 
-    void launchSideContainer(TaskListener listener, Container instance, Container remotingContainer) throws IOException, InterruptedException;
+    public abstract int removeContainer(TaskListener listener, Container instance) throws IOException, InterruptedException;
 
-    void pullImage(TaskListener listener, String image) throws IOException, InterruptedException;
+    public abstract void pullImage(TaskListener listener, String image) throws IOException, InterruptedException;
 
-    boolean checkImageExists(TaskListener listener, String image) throws IOException, InterruptedException;
+    public abstract boolean checkImageExists(TaskListener listener, String image) throws IOException, InterruptedException;
 
-    int buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull) throws IOException, InterruptedException;
+    public abstract int buildDockerfile(TaskListener listener, String dockerfilePath, String tag, boolean pull) throws IOException, InterruptedException;
 
     /**
      * Return server version string, used actually to check connectivity with backend
      */
-    String serverVersion(TaskListener listener) throws IOException, InterruptedException;
+    public abstract String serverVersion(TaskListener listener) throws IOException, InterruptedException;
 }

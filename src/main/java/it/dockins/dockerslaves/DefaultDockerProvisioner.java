@@ -26,6 +26,7 @@
 package it.dockins.dockerslaves;
 
 import hudson.model.Job;
+import it.dockins.dockerslaves.spec.ContainerDefinition;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
@@ -36,12 +37,14 @@ import it.dockins.dockerslaves.spec.SideContainerDefinition;
 import it.dockins.dockerslaves.spi.DockerProvisioner;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Provision {@link Container}s based on ${@link ContainerSetDefinition} to provide a queued task
  * an executor.
  */
-public class DefaultDockerProvisioner implements DockerProvisioner {
+public class DefaultDockerProvisioner extends DockerProvisioner {
 
     protected final ContainersContext context;
 
@@ -97,15 +100,17 @@ public class DefaultDockerProvisioner implements DockerProvisioner {
             createSideContainers(starter, listener);
         }
 
-        String buildImage = spec.getBuildHostImage().getImage(driver, starter, listener);
-        final Container buildContainer = driver.launchBuildContainer(listener, buildImage, context.getRemotingContainer());
+        final ContainerDefinition build = spec.getBuildHostImage();
+        String buildImage = build.getImage(driver, starter, listener);
+        final List<String> mounts = build.getMounts();
+        final Container buildContainer = driver.launchBuildContainer(listener, buildImage, context.getRemotingContainer(), mounts);
         context.setBuildContainer(buildContainer);
         return buildContainer;
     }
 
     @Override
     public Container launchScmContainer(TaskListener listener) throws IOException, InterruptedException {
-        final Container scmContainer = driver.launchBuildContainer(listener, scmImage, context.getRemotingContainer());
+        final Container scmContainer = driver.launchBuildContainer(listener, scmImage, context.getRemotingContainer(), Collections.EMPTY_LIST);
         context.setBuildContainer(scmContainer);
         return scmContainer;
     }
@@ -113,11 +118,12 @@ public class DefaultDockerProvisioner implements DockerProvisioner {
     private void createSideContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException {
         for (SideContainerDefinition definition : spec.getSideContainers()) {
             final String name = definition.getName();
-            final String image = definition.getSpec().getImage(driver, starter, listener);
+            final ContainerDefinition sidecar = definition.getSpec();
+            final String image = sidecar.getImage(driver, starter, listener);
+            final List<String> mounts = sidecar.getMounts();
             listener.getLogger().println("Starting " + name + " container");
-            Container container = new Container(image);
+            Container container = driver.launchSideContainer(listener, image, context.getRemotingContainer(), mounts);
             context.getSideContainers().put(name, container);
-            driver.launchSideContainer(listener, container, context.getRemotingContainer());
         }
     }
 
@@ -136,7 +142,6 @@ public class DefaultDockerProvisioner implements DockerProvisioner {
                 targetContainer = launchBuildContainers(procStarter, listener);
             }
         }
-
         return driver.execInContainer(listener, targetContainer.getId(), procStarter);
     }
 

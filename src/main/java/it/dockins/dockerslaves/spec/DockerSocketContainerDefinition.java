@@ -26,23 +26,48 @@
 package it.dockins.dockerslaves.spec;
 
 import hudson.EnvVars;
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 /**
+ * Configure a sidecar container to expose the host's docker socket inside container set,
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
+public class DockerSocketContainerDefinition extends ContainerDefinition {
 
-    public abstract String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
+    @DataBoundConstructor
+    public DockerSocketContainerDefinition() {
+    }
 
-    public void setupEnvironment(EnvVars env) {}
+    @Override
+    public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) {
+        return "dockins/dockersock";
+    }
 
-    public List<String> getMounts() { return Collections.EMPTY_LIST; }
+    public List<String> getMounts() {
+        return Collections.singletonList("/var/run/docker.sock:/var/run/docker.sock");
+    }
+
+    @Override
+    public void setupEnvironment(EnvVars env) {
+        env.put("DOCKER_HOST", "tcp://localhost:2375");
+    }
+
+    @Extension(ordinal = -666)
+    public static class DescriptorImpl extends Descriptor<ContainerDefinition> {
+
+        @Override
+        public String getDisplayName() {
+            return "Access host's docker daemon";
+        }
+    }
 }

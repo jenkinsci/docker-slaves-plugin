@@ -55,13 +55,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static it.dockins.dockerslaves.DockerSlave.SLAVE_ROOT;
-import static java.nio.charset.StandardCharsets.*;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
  */
-public class CliDockerDriver implements DockerDriver {
+public class CliDockerDriver extends DockerDriver {
 
     private final static boolean verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");;
 
@@ -143,7 +142,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Container launchRemotingContainer(TaskListener listener, String dockerImage, String volume, SlaveComputer computer) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(TaskListener listener, String image, String volume, SlaveComputer computer) throws IOException, InterruptedException {
 
         // Create a container for remoting
         ArgumentListBuilder args = new ArgumentListBuilder()
@@ -155,7 +154,7 @@ public class CliDockerDriver implements DockerDriver {
             .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
             .add("--user", "10000:10000")
             .add("--volume", volume+":"+ SLAVE_ROOT)
-            .add(dockerImage)
+            .add(image)
             .add("java")
             // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
             .add("-Djava.io.tmpdir="+ SLAVE_ROOT+".tmp")
@@ -174,7 +173,7 @@ public class CliDockerDriver implements DockerDriver {
 
         // Inject current slave.jar to ensure adequate version running
         putFileContent(launcher, containerId, DockerSlave.SLAVE_ROOT, "slave.jar", new Slave.JnlpJar("slave.jar").readFully());
-        Container remotingContainer = new Container(dockerImage, containerId);
+        Container remotingContainer = new Container(image, containerId);
 
         // Run container in interactive mode to establish channel over stdin/stdout
         args = new ArgumentListBuilder()
@@ -186,7 +185,7 @@ public class CliDockerDriver implements DockerDriver {
     }
 
     @Override
-    public Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer) throws IOException, InterruptedException {
+    public Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer, List<String> mounts) throws IOException, InterruptedException {
         Container buildContainer = new Container(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
@@ -196,6 +195,10 @@ public class CliDockerDriver implements DockerDriver {
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--ipc=container:" + remotingContainer.getId())
                 .add("--user", "10000:10000");
+
+        for (String mount : mounts) {
+            args.add("-v", mount);
+        }
 
         args.add(buildContainer.getImageName());
 
@@ -337,13 +340,18 @@ public class CliDockerDriver implements DockerDriver {
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
 
     @Override
-    public void launchSideContainer(TaskListener listener, Container instance, Container remotingContainer) throws IOException, InterruptedException {
+    public Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<String> mounts) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
-                .add("--ipc=container:" + remotingContainer.getId())
-                .add(instance.getImageName());
+                .add("--ipc=container:" + remotingContainer.getId());
+
+        for (String mount : mounts) {
+            args.add("-v", mount);
+        }
+
+        args.add(image);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Launcher launcher = new Launcher.LocalLauncher(listener);
@@ -351,7 +359,7 @@ public class CliDockerDriver implements DockerDriver {
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
         final String containerId = out.toString(UTF_8).trim();
-        instance.setId(containerId);
+
 
         if (status != 0) {
             throw new IOException("Failed to run docker image");
@@ -359,6 +367,8 @@ public class CliDockerDriver implements DockerDriver {
 
         launchDockerCLI(launcher, new ArgumentListBuilder()
                 .add("start", containerId)).start();
+
+        return new Container(image, containerId);
     }
 
     @Override

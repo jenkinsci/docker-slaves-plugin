@@ -12,32 +12,32 @@ import java.io.IOException;
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public interface DockerProvisioner {
+public abstract class DockerProvisioner {
 
-    ContainersContext getContext();
+    public abstract ContainersContext getContext();
 
     /**
      * Launch a container to host jenkins remoting agent and establish a channel as a Jenkins slave.
      */
-    Container launchRemotingContainer(SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException;
+    public abstract Container launchRemotingContainer(SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException;
 
     /**
      * Launch a container whith adequate tools to run the SCM checkout build phase.
      */
-    Container launchScmContainer(TaskListener listener) throws IOException, InterruptedException;
+    public abstract Container launchScmContainer(TaskListener listener) throws IOException, InterruptedException;
 
     /**
      * Launch build environment as defined by (@link Job}'s {@link it.dockins.dockerslaves.spec.ContainerSetDefinition}.
      */
-    Container launchBuildContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException;
+    public abstract Container launchBuildContainers(Launcher.ProcStarter starter, TaskListener listener) throws IOException, InterruptedException;
 
     /**
      * Run specified process inside the main build container
      */
-    Proc launchBuildProcess(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
+    public abstract Proc launchBuildProcess(Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
 
     /**
      * Cleanup all allocated resources
      */
-    void clean(TaskListener listener) throws IOException, InterruptedException;
+    public abstract void clean(TaskListener listener) throws IOException, InterruptedException;
 }
