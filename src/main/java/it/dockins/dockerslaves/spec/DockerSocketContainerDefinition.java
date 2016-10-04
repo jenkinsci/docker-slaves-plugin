@@ -27,14 +27,12 @@ package it.dockins.dockerslaves.spec;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractDescribableImpl;
+import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class DockerSocketContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) {
+    public String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) {
         return "dockins/dockersock";
     }
 

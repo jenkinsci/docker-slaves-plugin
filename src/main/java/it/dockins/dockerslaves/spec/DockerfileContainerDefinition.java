@@ -27,7 +27,6 @@ package it.dockins.dockerslaves.spec;
 
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.Launcher;
 import hudson.Util;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
@@ -69,12 +68,10 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+    public String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         boolean pull = forcePull;
         if (image != null) return image;
         String tag = Long.toHexString(System.nanoTime());
-
-        final FilePath workspace = procStarter.pwd();
 
         final FilePath pathToContext = workspace.child(contextPath);
         if (!pathToContext.exists()) {

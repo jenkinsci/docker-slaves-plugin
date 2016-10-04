@@ -26,7 +26,7 @@
 package it.dockins.dockerslaves.spec;
 
 import hudson.Extension;
-import hudson.Launcher;
+import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
@@ -54,7 +54,7 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
     }
 
     @Override
-    public String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException {
+    public String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
 
         boolean pull = forcePull;
         boolean result = driver.checkImageExists(listener, image);

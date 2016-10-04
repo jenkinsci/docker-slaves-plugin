@@ -26,7 +26,7 @@
 package it.dockins.dockerslaves.spec;
 
 import hudson.EnvVars;
-import hudson.Launcher;
+import hudson.FilePath;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
 
-    public abstract String getImage(DockerDriver driver, Launcher.ProcStarter procStarter, TaskListener listener) throws IOException, InterruptedException;
+    public abstract String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) throws IOException, InterruptedException;
 
     public void setupEnvironment(EnvVars env) {}
 

@@ -95,14 +95,14 @@ public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
         final DockerDriver driver = dockerDriverFactory.forJob(job);
         ContainersContext context = new ContainersContext();
         prepareWorkspace(job, context);
-        return new DefaultDockerProvisioner(context, driver, job, spec, getRemotingImage(), getScmImage());
+        return new DefaultDockerProvisioner(context, driver, spec, getRemotingImage(), getScmImage());
     }
 
     @Override
     public DockerProvisioner createProvisionerForPipeline(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException {
         final DockerDriver driver = dockerDriverFactory.forJob(job);
         ContainersContext context = new ContainersContext(false);
-        return new DefaultDockerProvisioner(context, driver, job, spec, getRemotingImage(), getScmImage());
+        return new DefaultDockerProvisioner(context, driver, spec, getRemotingImage(), getScmImage());
     }
 
     @Extension

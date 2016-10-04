@@ -25,7 +25,6 @@
 
 package it.dockins.dockerslaves;
 
-import hudson.model.Job;
 import it.dockins.dockerslaves.spec.ContainerDefinition;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
@@ -57,7 +56,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
     protected final String scmImage;
 
 
-    public DefaultDockerProvisioner(ContainersContext context, DockerDriver driver, Job job, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
+    public DefaultDockerProvisioner(ContainersContext context, DockerDriver driver, ContainerSetDefinition spec, String remotingImage, String scmImage) throws IOException, InterruptedException {
         this.context = context;
         this.driver = driver;
         this.spec = spec;
@@ -101,7 +100,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
         }
 
         final ContainerDefinition build = spec.getBuildHostImage();
-        String buildImage = build.getImage(driver, starter, listener);
+        String buildImage = build.getImage(driver, starter.pwd(), listener);
         final List<String> mounts = build.getMounts();
         final Container buildContainer = driver.launchBuildContainer(listener, buildImage, context.getRemotingContainer(), mounts);
         context.setBuildContainer(buildContainer);
@@ -119,7 +118,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
         for (SideContainerDefinition definition : spec.getSideContainers()) {
             final String name = definition.getName();
             final ContainerDefinition sidecar = definition.getSpec();
-            final String image = sidecar.getImage(driver, starter, listener);
+            final String image = sidecar.getImage(driver, starter.pwd(), listener);
             final List<String> mounts = sidecar.getMounts();
             listener.getLogger().println("Starting " + name + " container");
             Container container = driver.launchSideContainer(listener, image, context.getRemotingContainer(), mounts);
