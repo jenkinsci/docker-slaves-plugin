@@ -3,14 +3,14 @@ package it.dockins.dockerslaves.spi;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Item;
-import hudson.remoting.VirtualChannel;
-import jenkins.model.Jenkins;
+import hudson.security.ACL;
+import org.acegisecurity.context.SecurityContext;
+import org.acegisecurity.context.SecurityContextHolder;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Configuration options used to access a specific (maybe dedicated to a build) Docker Host.
@@ -31,7 +31,12 @@ public class DockerHostConfig implements Closeable {
 
     public DockerHostConfig(DockerServerEndpoint endpoint, Item context) throws IOException, InterruptedException {
         this.endpoint = endpoint;
-        keys = endpoint.newKeyMaterialFactory(context, FilePath.localChannel).materialize();
+        final SecurityContext impersonate = ACL.impersonate(ACL.SYSTEM);
+        try {
+            keys = endpoint.newKeyMaterialFactory(context, FilePath.localChannel).materialize();
+        } finally {
+            SecurityContextHolder.setContext(impersonate);
+        }
     }
 
     public DockerServerEndpoint getEndpoint() {
