@@ -37,6 +37,9 @@ import hudson.util.VersionNumber;
 import it.dockins.dockerslaves.Container;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
+import it.dockins.dockerslaves.hints.MemoryHint;
+import it.dockins.dockerslaves.hints.VolumeHint;
+import it.dockins.dockerslaves.spec.Hint;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
 import org.apache.commons.io.IOUtils;
@@ -185,7 +188,7 @@ public class CliDockerDriver extends DockerDriver {
     }
 
     @Override
-    public Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer, List<String> mounts) throws IOException, InterruptedException {
+    public Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints) throws IOException, InterruptedException {
         Container buildContainer = new Container(image);
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
@@ -196,9 +199,7 @@ public class CliDockerDriver extends DockerDriver {
                 .add("--ipc=container:" + remotingContainer.getId())
                 .add("--user", "10000:10000");
 
-        for (String mount : mounts) {
-            args.add("-v", mount);
-        }
+        applyHints(hints, args);
 
         args.add(buildContainer.getImageName());
 
@@ -228,6 +229,18 @@ public class CliDockerDriver extends DockerDriver {
         }
 
         return buildContainer;
+    }
+
+    private void applyHints(List<Hint> hints, ArgumentListBuilder args) {
+        for (Hint hint : hints) {
+            if (hint instanceof MemoryHint) {
+                args.add("-m", ((MemoryHint) hint).getMemory());
+            } else if (hint instanceof VolumeHint) {
+                args.add("-v", ((VolumeHint) hint).getVolume());
+            } else {
+                // unsupported hint, just ignored
+            }
+        }
     }
 
     protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
@@ -342,16 +355,14 @@ public class CliDockerDriver extends DockerDriver {
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
 
     @Override
-    public Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<String> mounts) throws IOException, InterruptedException {
+    public Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--ipc=container:" + remotingContainer.getId());
 
-        for (String mount : mounts) {
-            args.add("-v", mount);
-        }
+        applyHints(hints, args);
 
         args.add(image);
 

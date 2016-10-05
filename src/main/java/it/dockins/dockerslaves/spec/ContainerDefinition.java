@@ -30,6 +30,7 @@ import hudson.FilePath;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -40,9 +41,18 @@ import java.util.List;
  */
 public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
 
+    private List<Hint> hints;
+
+    public List<Hint> getHints() {
+        return hints;
+    }
+
+    @DataBoundSetter
+    public void setHints(List<Hint> hints) {
+        this.hints = hints;
+    }
+
     public abstract String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) throws IOException, InterruptedException;
 
     public void setupEnvironment(EnvVars env) {}
-
-    public List<String> getMounts() { return Collections.EMPTY_LIST; }
 }

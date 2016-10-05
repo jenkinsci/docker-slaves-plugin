@@ -101,8 +101,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
 
         final ContainerDefinition build = spec.getBuildHostImage();
         String buildImage = build.getImage(driver, starter.pwd(), listener);
-        final List<String> mounts = build.getMounts();
-        final Container buildContainer = driver.launchBuildContainer(listener, buildImage, context.getRemotingContainer(), mounts);
+        final Container buildContainer = driver.launchBuildContainer(listener, buildImage, context.getRemotingContainer(), build.getHints());
         context.setBuildContainer(buildContainer);
         return buildContainer;
     }
@@ -119,9 +118,8 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
             final String name = definition.getName();
             final ContainerDefinition sidecar = definition.getSpec();
             final String image = sidecar.getImage(driver, starter.pwd(), listener);
-            final List<String> mounts = sidecar.getMounts();
             listener.getLogger().println("Starting " + name + " container");
-            Container container = driver.launchSideContainer(listener, image, context.getRemotingContainer(), mounts);
+            Container container = driver.launchSideContainer(listener, image, context.getRemotingContainer(), sidecar.getHints());
             context.getSideContainers().put(name, container);
         }
     }

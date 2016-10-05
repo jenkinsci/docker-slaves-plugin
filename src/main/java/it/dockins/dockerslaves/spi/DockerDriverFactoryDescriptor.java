@@ -5,5 +5,5 @@ import hudson.model.Descriptor;
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class DockerDriverFactoryDescriptor extends Descriptor<DockerDriverFactory> {
+public abstract class DockerDriverFactoryDescriptor extends Descriptor<DockerDriverFactory> {
 }

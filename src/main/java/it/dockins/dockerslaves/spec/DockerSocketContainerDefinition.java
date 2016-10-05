@@ -30,6 +30,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
+import it.dockins.dockerslaves.hints.VolumeHint;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -51,8 +52,9 @@ public class DockerSocketContainerDefinition extends ContainerDefinition {
         return "dockins/dockersock";
     }
 
-    public List<String> getMounts() {
-        return Collections.singletonList("/var/run/docker.sock:/var/run/docker.sock");
+    @Override
+    public List<Hint> getHints() {
+        return Collections.singletonList((Hint) new VolumeHint("/var/run/docker.sock:/var/run/docker.sock"));
     }
 
     @Override
