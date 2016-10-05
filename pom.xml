@@ -33,7 +33,7 @@
         <version>2.11</version>
     </parent>
 
-    <groupId>it.dockins</groupId>
+    <groupId>io.jenkins.plugins</groupId>
     <artifactId>docker-slaves</artifactId>
     <version>1.0.4-SNAPSHOT</version>
     <packaging>hpi</packaging>
