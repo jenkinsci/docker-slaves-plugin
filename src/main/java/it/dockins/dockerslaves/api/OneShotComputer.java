@@ -28,12 +28,14 @@ import hudson.Extension;
 import hudson.model.Computer;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.remoting.Channel;
 import hudson.slaves.ComputerListener;
 import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -97,8 +99,6 @@ public abstract class OneShotComputer extends SlaveComputer {
     public Charset getDefaultCharset() {
         return StandardCharsets.UTF_8;
     }
-
-
 
     // --- we need this to workaround hudson.slaves.SlaveComputer#taskListener being private
     private TaskListener listener;

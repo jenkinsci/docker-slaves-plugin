@@ -96,6 +96,9 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         return (OneShotComputer) super.getComputer();
     }
 
+
+
+
     /**
      * Assign a ${@link Queue.Executable} to this OneShotSlave. By design, only one Queue.Executable can be assigned, then slave is shut down.
      * This method has to be called just as the ${@link Run} as been created. It run the actual launch of the executor

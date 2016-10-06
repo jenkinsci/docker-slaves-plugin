@@ -3,9 +3,9 @@ package it.dockins.dockerslaves.spi;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
-import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.Container;
 import it.dockins.dockerslaves.ContainersContext;
+import it.dockins.dockerslaves.DockerComputer;
 
 import java.io.IOException;
 
@@ -19,7 +19,7 @@ public abstract class DockerProvisioner {
     /**
      * Launch a container to host jenkins remoting agent and establish a channel as a Jenkins slave.
      */
-    public abstract Container launchRemotingContainer(SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException;
+    public abstract Container launchRemotingContainer(DockerComputer computer, TaskListener listener) throws IOException, InterruptedException;
 
     /**
      * Launch a container whith adequate tools to run the SCM checkout build phase.

@@ -70,7 +70,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
     }
 
     @Override
-    public Container launchRemotingContainer(final SlaveComputer computer, TaskListener listener) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(final DockerComputer computer, TaskListener listener) throws IOException, InterruptedException {
         // if remoting container already exists, we reuse it
         final Container existing = context.getRemotingContainer();
         if (existing != null) {

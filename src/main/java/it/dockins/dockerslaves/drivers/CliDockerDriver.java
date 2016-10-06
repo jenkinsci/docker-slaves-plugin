@@ -35,6 +35,7 @@ import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.VersionNumber;
 import it.dockins.dockerslaves.Container;
+import it.dockins.dockerslaves.DockerComputer;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
 import it.dockins.dockerslaves.hints.MemoryHint;
@@ -145,7 +146,7 @@ public class CliDockerDriver extends DockerDriver {
     }
 
     @Override
-    public Container launchRemotingContainer(TaskListener listener, String image, String volume, SlaveComputer computer) throws IOException, InterruptedException {
+    public Container launchRemotingContainer(TaskListener listener, String image, String volume, DockerComputer computer) throws IOException, InterruptedException {
 
         // Create a container for remoting
         ArgumentListBuilder args = new ArgumentListBuilder()

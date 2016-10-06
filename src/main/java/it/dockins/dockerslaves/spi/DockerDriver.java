@@ -5,6 +5,7 @@ import hudson.Proc;
 import hudson.model.TaskListener;
 import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.Container;
+import it.dockins.dockerslaves.DockerComputer;
 import it.dockins.dockerslaves.spec.Hint;
 
 import java.io.Closeable;
@@ -24,7 +25,7 @@ public abstract class DockerDriver implements Closeable {
 
     public abstract boolean hasContainer(TaskListener listener, String id) throws IOException, InterruptedException;
 
-    public abstract Container launchRemotingContainer(TaskListener listener, String image, String workdir, SlaveComputer computer) throws IOException, InterruptedException;
+    public abstract Container launchRemotingContainer(TaskListener listener, String image, String workdir, DockerComputer computer) throws IOException, InterruptedException;
 
     public abstract Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints) throws IOException, InterruptedException;
 
