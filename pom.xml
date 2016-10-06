@@ -35,7 +35,7 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>docker-slaves</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>hpi</packaging>
 
     <name>Docker Slaves Plugin</name>
@@ -65,7 +65,7 @@
         <connection>scm:git:git://github.com/jenkinsci/docker-slaves-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/docker-slaves-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/docker-slaves-plugin</url>
-        <tag>HEAD</tag>
+        <tag>docker-slaves-1.0.4</tag>
     </scm>
 
     <properties>
