@@ -233,6 +233,7 @@ public class CliDockerDriver extends DockerDriver {
     }
 
     private void applyHints(List<Hint> hints, ArgumentListBuilder args) {
+        if (hints == null) return;
         for (Hint hint : hints) {
             if (hint instanceof MemoryHint) {
                 args.add("-m", ((MemoryHint) hint).getMemory());
