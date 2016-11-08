@@ -55,6 +55,7 @@ import java.util.Set;
 
 public class DockerNodeStep extends AbstractStepImpl {
     private List<String> sideContainers;
+    private boolean socket = false;
 
     @CheckForNull
     private final String image;
@@ -76,6 +77,15 @@ public class DockerNodeStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setSideContainers(List<String> sideContainers) {
         this.sideContainers = sideContainers;
+    }
+
+    public boolean getSocket() {
+        return socket;
+    }
+
+    @DataBoundSetter
+    public void setSocket(boolean socket) {
+        this.socket = socket;
     }
 
     @Extension(optional = true)
