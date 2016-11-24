@@ -27,7 +27,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
 
   <!-- additional entries from derived classes -->
-  <st:include page="configure-entries.jelly" it="${instance}" optional="true"/>
+  <st:include page="configure-entries.jelly" class="${descriptor.clazz}" optional="true"/>
 
   <f:entry title="Advanced settings">
       <f:repeatableHeteroProperty field="hints"
