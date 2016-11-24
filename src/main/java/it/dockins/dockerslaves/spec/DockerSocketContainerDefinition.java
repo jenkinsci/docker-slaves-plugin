@@ -28,7 +28,6 @@ package it.dockins.dockerslaves.spec;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.hints.VolumeHint;
 import it.dockins.dockerslaves.spi.DockerDriver;
@@ -63,7 +62,7 @@ public class DockerSocketContainerDefinition extends ContainerDefinition {
     }
 
     @Extension(ordinal = -666)
-    public static class DescriptorImpl extends Descriptor<ContainerDefinition> {
+    public static class DescriptorImpl extends ContainerDefinitionDescriptor {
 
         @Override
         public String getDisplayName() {

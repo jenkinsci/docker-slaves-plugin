@@ -28,7 +28,6 @@ package it.dockins.dockerslaves.spec;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Util;
-import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import it.dockins.dockerslaves.spi.DockerDriver;
@@ -94,7 +93,7 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
     }
 
     @Extension
-    public static class DescriptorImpl extends Descriptor<ContainerDefinition> {
+    public static class DescriptorImpl extends ContainerDefinitionDescriptor {
 
         @Override
         public String getDisplayName() {

@@ -33,7 +33,6 @@ import it.dockins.dockerslaves.spi.DockerDriver;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**

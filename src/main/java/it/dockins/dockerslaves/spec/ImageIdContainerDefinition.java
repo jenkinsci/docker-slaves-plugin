@@ -27,7 +27,6 @@ package it.dockins.dockerslaves.spec;
 
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -73,7 +72,7 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
     }
 
     @Extension(ordinal = 99)
-    public static class DescriptorImpl extends Descriptor<ContainerDefinition> {
+    public static class DescriptorImpl extends ContainerDefinitionDescriptor {
 
         @Override
         public String getDisplayName() {

@@ -25,18 +25,24 @@
 
 package it.dockins.dockerslaves.spec;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import hudson.Extension;
+import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
-import hudson.model.Job;
+import it.dockins.dockerslaves.DockerSlaves;
+import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import net.sf.json.JSONObject;
 
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * Definition for a set of containers to host the build.
@@ -98,6 +104,29 @@ public class ContainerSetDefinition extends JobProperty {
             if (containersDefinition.isNullObject()) return null;
             return req.bindJSON(ContainerSetDefinition.class, containersDefinition);
         }
+
+        public Collection<ContainerDefinitionDescriptor> getMainContainerDescriptors() {
+            final DockerProvisionerFactory factory = DockerSlaves.get().getDockerProvisionerFactory();
+
+            return Collections2.filter(ContainerDefinitionDescriptor.all(), new Predicate<ContainerDefinitionDescriptor>() {
+                @Override
+                public boolean apply(@Nullable ContainerDefinitionDescriptor d) {
+                    return factory.canBeUsedAsMainContainer(d);
+                }
+            });
+        }
+
+        public Collection<ContainerDefinitionDescriptor> getSideContainerDescriptors() {
+            final DockerProvisionerFactory factory = DockerSlaves.get().getDockerProvisionerFactory();
+
+            return Collections2.filter(ContainerDefinitionDescriptor.all(), new Predicate<ContainerDefinitionDescriptor>() {
+                @Override
+                public boolean apply(@Nullable ContainerDefinitionDescriptor d) {
+                    return factory.canBeUsedAsSideContainer(d);
+                }
+            });
+        }
+
     }
 
 }
