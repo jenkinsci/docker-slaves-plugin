@@ -29,7 +29,7 @@ public abstract class DockerDriver implements Closeable {
 
     public abstract Container launchBuildContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints) throws IOException, InterruptedException;
 
-    public abstract Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints) throws IOException, InterruptedException;
+    public abstract Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints, String containerName) throws IOException, InterruptedException;
 
     public abstract Proc execInContainer(TaskListener listener, String containerId, Launcher.ProcStarter starter) throws IOException, InterruptedException;
 

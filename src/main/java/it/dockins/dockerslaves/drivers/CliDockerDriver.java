@@ -357,9 +357,10 @@ public class CliDockerDriver extends DockerDriver {
     private static final Logger LOGGER = Logger.getLogger(ProvisionQueueListener.class.getName());
 
     @Override
-    public Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints) throws IOException, InterruptedException {
+    public Container launchSideContainer(TaskListener listener, String image, Container remotingContainer, List<Hint> hints, String containerName) throws IOException, InterruptedException {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("create")
+                .add("--name",containerName)
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--ipc=container:" + remotingContainer.getId());
@@ -502,3 +503,4 @@ public class CliDockerDriver extends DockerDriver {
 
     public static final String UTF_8 = StandardCharsets.UTF_8.name();
 }
+
