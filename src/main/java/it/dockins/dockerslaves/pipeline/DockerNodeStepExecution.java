@@ -29,6 +29,7 @@ import hudson.model.queue.QueueListener;
 import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.DockerSlaves;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
+import it.dockins.dockerslaves.spec.DockerSocketContainerDefinition;
 import it.dockins.dockerslaves.spec.ImageIdContainerDefinition;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
 import com.google.inject.Inject;
@@ -146,6 +147,9 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                 sideContainers.add(new SideContainerDefinition(entry,
                         new ImageIdContainerDefinition(entry, false)));
             }
+        }
+        if(step.getSocket()) {
+            sideContainers.add(new SideContainerDefinition("socket", new DockerSocketContainerDefinition()));
         }
 
         ContainerSetDefinition spec = new ContainerSetDefinition(
