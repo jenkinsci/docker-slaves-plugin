@@ -157,6 +157,7 @@ public class CliDockerDriver extends DockerDriver {
 
             .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
             .add("--user", "10000:10000")
+            .add("--rm")
             .add("--volume", volume+":"+ SLAVE_ROOT)
             .add(image)
             .add("java")
