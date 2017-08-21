@@ -117,16 +117,16 @@ To be considered
 Supporting rkt runtime could be great from a security POV. rkt is able to launch containers isolated inside a small KVM process, greatly enhancing security (https://coreos.com/blog/rkt-0.8-with-new-vm-support/)
 
 ## Other ideas
- * Browse workspace after build completion by running a fresh new container with columes-from build's data-container
+ * Browse workspace after build completion by running a fresh new container with volumes-from build's data-container
  * Slave view do offer a terminal access to the slave environment. Could rely on https://wiki.jenkins-ci.org/display/JENKINS/Remote+Terminal+Access+Plugin
  * Side containers or build container as a axis in multi-configuration job
  * Build throttling
  * Memory High Water Mark monitoring
- * integrate with ClearContainers for enhanced security
+ * Integrate with ClearContainers for enhanced security
 
 ### Scalability
- * introduce and extension point to get Dockerhost based on job to run. Can rely on docker-swarm with container affinity, can also be a set of hosts managed by jenkins, running a dedicated monitoring container to check host load, optionnaly auto-scaling (using docker-machine ?).
+ * Introduce and extension point to get Dockerhost based on job to run. Can rely on docker-swarm with container affinity, can also be a set of hosts managed by jenkins, running a dedicated monitoring container to check host load, optionnaly auto-scaling (using docker-machine ?).
 
-### perf enhancements
- * put remoting JAR cache into docker slave image so launching slave will be much faster (add a second, read-only cache directory in `hudson.remoting.FileSystemJarCache`). On startup jenkins would then build the remoting image, then remoting channel can start without delay for future builds.
+### Perf enhancements
+ * Put remoting JAR cache into docker slave image so launching slave will be much faster (add a second, read-only cache directory in `hudson.remoting.FileSystemJarCache`). On startup jenkins would then build the remoting image, then remoting channel can start without delay for future builds.
  
