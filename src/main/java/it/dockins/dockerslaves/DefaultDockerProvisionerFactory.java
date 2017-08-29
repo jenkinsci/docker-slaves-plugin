@@ -64,7 +64,7 @@ public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
     }
 
     public String getRemotingImage() {
-        return StringUtils.isBlank(remotingImage) ? "jenkins/agent" : remotingImage;
+        return StringUtils.isBlank(remotingImage) ? "jenkins/slave" : remotingImage;
     }
 
     @DataBoundSetter
