@@ -34,7 +34,7 @@
   </f:block>
 
     <f:entry title="Remoting image" field="remotingImage">
-      <f:textbox default="jenkinsci/slave"/>
+      <f:textbox default="jenkins/agent"/>
     </f:entry>
 
     <f:entry title="SCM Docker image" field="scmImage">
