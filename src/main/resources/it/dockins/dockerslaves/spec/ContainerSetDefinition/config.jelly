@@ -37,6 +37,10 @@
           </f:entry>
         </f:repeatableProperty>
       </f:entry>
+      
+      <f:entry title="Docker host URI for slave" field="hosturi">
+              <f:textbox />
+          </f:entry>
 
   </f:optionalBlock>
 

@@ -1,16 +1,18 @@
 package it.dockins.dockerslaves;
 
-import hudson.Extension;
-import hudson.model.Job;
-import it.dockins.dockerslaves.spi.DockerHostConfig;
-import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
-import org.kohsuke.stapler.DataBoundConstructor;
-import it.dockins.dockerslaves.spi.DockerHostSource;
-import it.dockins.dockerslaves.spi.DockerHostSourceDescriptor;
+import java.io.IOException;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
+
+import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import hudson.Extension;
+import hudson.model.Job;
+import it.dockins.dockerslaves.spec.ContainerSetDefinition;
+import it.dockins.dockerslaves.spi.DockerHostConfig;
+import it.dockins.dockerslaves.spi.DockerHostSource;
+import it.dockins.dockerslaves.spi.DockerHostSourceDescriptor;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -36,7 +38,20 @@ public class DefaultDockerHostSource extends DockerHostSource {
 
     @Override
     public DockerHostConfig getDockerHost(Job job) throws IOException, InterruptedException {
-        return new DockerHostConfig(getDockerServerEndpoint(), job);
+
+        ContainerSetDefinition spec = (ContainerSetDefinition) job
+                .getProperty(ContainerSetDefinition.class);
+
+        if (spec != null && spec.getHosturi() != null
+                && !spec.getHosturi().isEmpty()) {
+            DockerServerEndpoint endpoint = new DockerServerEndpoint(
+                    spec.getHosturi(),
+                    getDockerServerEndpoint().getCredentialsId());
+            return new DockerHostConfig(endpoint, job);
+        } else {
+            return new DockerHostConfig(getDockerServerEndpoint(), job);
+        }
+
     }
 
     @Extension
