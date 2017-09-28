@@ -83,11 +83,11 @@ public class ProvisionQueueListener extends QueueListener {
     }
 
     private Node prepareExecutorFor(final Queue.BuildableItem item, final AbstractProject job) throws Descriptor.FormException, IOException, InterruptedException {
-        LOGGER.info("Creating a Container slave to host " + job.toString() + "#" + job.getNextBuildNumber());
+        LOGGER.info("Creating a container slave to host " + job.toString() + ", item id " + item.getId());
 
         // Immediately create a slave for this item
         // Real provisioning will happen later
-        String slaveName = "Container for " +job.getName() + "#" + job.getNextBuildNumber();
+        String slaveName = "Container for item " + item.getId();
         String description = "Container slave for building " + job.getFullName();
         DockerSlaves plugin = DockerSlaves.get();
         return new DockerSlave(slaveName, description, null, plugin.createStandardJobProvisionerFactory(job),item);
