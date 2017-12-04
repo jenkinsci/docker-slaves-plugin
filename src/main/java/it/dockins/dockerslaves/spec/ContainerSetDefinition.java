@@ -28,6 +28,7 @@ package it.dockins.dockerslaves.spec;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
@@ -88,8 +89,8 @@ public class ContainerSetDefinition extends JobProperty {
     public static class DescriptorImpl extends JobPropertyDescriptor {
 
         @Override
-        public boolean isApplicable(Class<? extends Job> jobType) {
-            return true;
+        public boolean isApplicable(Class<? extends Job> type) {
+            return AbstractProject.class.isAssignableFrom(type);
         }
 
         @Override
