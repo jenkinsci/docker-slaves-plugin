@@ -25,8 +25,18 @@
 
 package it.dockins.dockerslaves.spec;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -35,13 +45,6 @@ import hudson.model.JobPropertyDescriptor;
 import it.dockins.dockerslaves.DockerSlaves;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 
 
@@ -55,10 +58,14 @@ public class ContainerSetDefinition extends JobProperty {
 
     private final List<SideContainerDefinition> sideContainers;
 
+    public final String hosturi;
+
     @DataBoundConstructor
-    public ContainerSetDefinition(ContainerDefinition buildHostImage, List<SideContainerDefinition> sideContainers) {
+    public ContainerSetDefinition(ContainerDefinition buildHostImage,
+            List<SideContainerDefinition> sideContainers, String hosturi) {
         this.buildHostImage = buildHostImage;
         this.sideContainers = sideContainers == null ? Collections.<SideContainerDefinition>emptyList() : sideContainers;
+        this.hosturi = hosturi;
     }
 
     /**
@@ -73,7 +80,8 @@ public class ContainerSetDefinition extends JobProperty {
      * @return a replacement JobBuildsContainersDefinition that went through the constructor
      */
     private Object readResolve() {
-        return new ContainerSetDefinition(buildHostImage, sideContainers);
+        return new ContainerSetDefinition(buildHostImage, sideContainers,
+                hosturi);
     }
 
     public ContainerDefinition getBuildHostImage() {
@@ -83,6 +91,10 @@ public class ContainerSetDefinition extends JobProperty {
 
     public List<SideContainerDefinition> getSideContainers() {
         return sideContainers;
+    }
+
+    public String getHosturi() {
+        return hosturi;
     }
 
     @Extension

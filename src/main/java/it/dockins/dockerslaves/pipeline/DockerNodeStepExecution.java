@@ -153,7 +153,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         }
 
         ContainerSetDefinition spec = new ContainerSetDefinition(
-                new ImageIdContainerDefinition(step.getImage(), false), sideContainers);
+                new ImageIdContainerDefinition(step.getImage(), false), sideContainers, null);
 
         final Node node = new DockerSlave(slaveName, description, label,
                 cloud.createProvisionerForPipeline(run.getParent(), spec), item);
