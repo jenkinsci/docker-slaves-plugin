@@ -92,6 +92,10 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         return tag;
     }
 
+    public boolean isForcePull() {
+        return forcePull;
+    }
+
     @Extension
     public static class DescriptorImpl extends ContainerDefinitionDescriptor {
 

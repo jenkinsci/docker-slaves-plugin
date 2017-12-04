@@ -71,6 +71,10 @@ public class ImageIdContainerDefinition extends ContainerDefinition {
         return image;
     }
 
+    public boolean isForcePull() {
+        return forcePull;
+    }
+
     @Extension(ordinal = 99)
     public static class DescriptorImpl extends ContainerDefinitionDescriptor {
 
