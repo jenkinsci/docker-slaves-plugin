@@ -158,7 +158,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         final Node node = new DockerSlave(slaveName, description, label,
                 cloud.createProvisionerForPipeline(run.getParent(), spec), item);
 
-        Jenkins.getActiveInstance().addNode(node);
+        Jenkins.getInstance().addNode(node);
 
         Timer.get().schedule(new Runnable() {
             @Override public void run() {
@@ -395,21 +395,21 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         @Override public ACL getACL() {
             try {
                 if (!context.isReady()) {
-                    return Jenkins.getActiveInstance().getACL();
+                    return Jenkins.getInstance().getACL();
                 }
                 FlowExecution exec = context.get(FlowExecution.class);
                 if (exec == null) {
-                    return Jenkins.getActiveInstance().getACL();
+                    return Jenkins.getInstance().getACL();
                 }
                 Queue.Executable executable = exec.getOwner().getExecutable();
                 if (executable instanceof AccessControlled) {
                     return ((AccessControlled) executable).getACL();
                 } else {
-                    return Jenkins.getActiveInstance().getACL();
+                    return Jenkins.getInstance().getACL();
                 }
             } catch (Exception x) {
                 LOGGER.log(FINE, null, x);
-                return Jenkins.getActiveInstance().getACL();
+                return Jenkins.getInstance().getACL();
             }
         }
 

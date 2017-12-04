@@ -137,7 +137,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         }
 
         try {
-            Jenkins.getActiveInstance().removeNode(this);
+            Jenkins.getInstance().removeNode(this);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -26,6 +26,7 @@
 package it.dockins.dockerslaves;
 
 import hudson.EnvVars;
+import hudson.model.Computer;
 import it.dockins.dockerslaves.api.OneShotComputer;
 import hudson.slaves.ComputerLauncher;
 import it.dockins.dockerslaves.spi.DockerProvisioner;
@@ -69,14 +70,17 @@ public class DockerComputer extends OneShotComputer {
     protected void terminate() {
         LOGGER.info("Stopping Docker Slave after build completion");
         setAcceptingTasks(false);
-        try {
-            provisioner.clean(getListener());
-        } catch (InterruptedException e) {
-            e.printStackTrace(); //FIXME
-        } catch (IOException e) {
-            e.printStackTrace(); //FIXME
-        }
         super.terminate();
+        Computer.threadPoolForRemoting.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    provisioner.clean(getListener());
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public DockerProvisioner getProvisioner() {

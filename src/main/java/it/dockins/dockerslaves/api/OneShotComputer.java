@@ -26,6 +26,7 @@ package it.dockins.dockerslaves.api;
 
 import hudson.Extension;
 import hudson.model.Computer;
+import hudson.model.Executor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
@@ -73,19 +74,16 @@ public abstract class OneShotComputer extends SlaveComputer {
         return slave;
     }
 
+
     @Override
-    protected boolean isAlive() {
-        if (getNode().hasExecutable()) {
-            // #isAlive is used from removeExecutor to determine if executors should be created to replace a terminated one
-            // We hook into this lifecycle implementation detail (sic) to get notified as the build completed
-            terminate();
-        }
-        return super.isAlive();
+    protected void removeExecutor(Executor e) {
+        terminate();
+        super.removeExecutor(e);
     }
 
     protected void terminate() {
         try {
-            Jenkins.getActiveInstance().removeNode(slave);
+            Jenkins.getInstance().removeNode(slave);
         } catch (IOException e) {
             e.printStackTrace();
         }

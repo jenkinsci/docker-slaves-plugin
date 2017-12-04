@@ -43,7 +43,7 @@ public class DockerSlaveAssignmentAction extends InvisibleAction implements Labe
 
     public @CheckForNull
     DockerSlave getAssignedNodeName() {
-        return (DockerSlave) Jenkins.getActiveInstance().getNode(assignedNodeName);
+        return (DockerSlave) Jenkins.getInstance().getNode(assignedNodeName);
     }
 
     @Override
