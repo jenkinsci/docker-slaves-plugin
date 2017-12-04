@@ -119,7 +119,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
             final ContainerDefinition sidecar = definition.getSpec();
             final String image = sidecar.getImage(driver, starter.pwd(), listener);
             listener.getLogger().println("Starting " + name + " container");
-            Container container = driver.launchSideContainer(listener, image, context.getRemotingContainer(), sidecar.getHints());
+            Container container = driver.launchSideContainer(listener, image, context.getRemotingContainer(), sidecar.getHints(), name);
             context.getSideContainers().put(name, container);
         }
     }
