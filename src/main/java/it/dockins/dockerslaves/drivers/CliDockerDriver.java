@@ -40,6 +40,7 @@ import it.dockins.dockerslaves.DockerSlave;
 import it.dockins.dockerslaves.ProvisionQueueListener;
 import it.dockins.dockerslaves.hints.MemoryHint;
 import it.dockins.dockerslaves.hints.VolumeHint;
+import it.dockins.dockerslaves.hints.RawOptionsHint;
 import it.dockins.dockerslaves.spec.Hint;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
@@ -63,6 +64,7 @@ import static it.dockins.dockerslaves.DockerSlave.SLAVE_ROOT;
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  * @author <a href="mailto:yoann.dubreuil@gmail.com">Yoann Dubreuil</a>
+ * @author <a href="mailto:leks.molecul@gmail.com">Alexey Galkin</a>
  */
 public class CliDockerDriver extends DockerDriver {
 
@@ -240,6 +242,8 @@ public class CliDockerDriver extends DockerDriver {
                 args.add("-m", ((MemoryHint) hint).getMemory());
             } else if (hint instanceof VolumeHint) {
                 args.add("-v", ((VolumeHint) hint).getVolume());
+            } else if (hint instanceof RawOptionsHint) {
+                args.add(((RawOptionsHint) hint).getOptions());
             } else {
                 // unsupported hint, just ignored
             }
