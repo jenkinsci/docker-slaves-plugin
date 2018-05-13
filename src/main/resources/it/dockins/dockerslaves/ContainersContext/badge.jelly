@@ -25,7 +25,7 @@ THE SOFTWARE.
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
    <a href="${link}docker/">
-   <img title="Built inside Docker container"
+   <img title="${%Built inside Docker container}"
         src="${rootURL}/plugin/docker-slaves/images/16x16/docker-logo.png"/>
    </a>
 </j:jelly>
