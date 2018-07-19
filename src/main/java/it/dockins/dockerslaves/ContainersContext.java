@@ -108,7 +108,7 @@ public class ContainersContext implements BuildBadgeAction {
 
     @Override
     public String getDisplayName() {
-        return "Docker Build Context";
+        return Messages.Docker_Build_Context();
     }
 
     @Override

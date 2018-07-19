@@ -33,15 +33,15 @@
     </div>
   </f:block>
 
-    <f:entry title="Remoting image" field="remotingImage">
+    <f:entry title="${%Remoting image}" field="remotingImage">
       <f:textbox default="jenkins/slave"/>
     </f:entry>
 
-    <f:entry title="SCM Docker image" field="scmImage">
+    <f:entry title="${%SCM Docker image}" field="scmImage">
       <f:textbox default="buildpack-deps:scm"/>
     </f:entry>
 
-    <f:dropdownDescriptorSelector field="dockerDriverFactory" title="Docker API to use"/>
+    <f:dropdownDescriptorSelector field="dockerDriverFactory" title="${%Docker API to use}"/>
 
 
 </j:jelly>

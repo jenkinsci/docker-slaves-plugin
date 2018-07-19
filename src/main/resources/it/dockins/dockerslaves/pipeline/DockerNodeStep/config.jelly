@@ -29,7 +29,7 @@
     <f:textbox/>
   </f:entry>
 
-  <f:entry field="sideContainers" title="Side containers">
+  <f:entry field="sideContainers" title="${%Side containers}">
     <f:textbox/>
   </f:entry>
 

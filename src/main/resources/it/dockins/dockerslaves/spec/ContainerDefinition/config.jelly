@@ -29,9 +29,9 @@
   <!-- additional entries from derived classes -->
   <st:include page="configure-entries.jelly" class="${descriptor.clazz}" optional="true"/>
 
-  <f:entry title="Advanced settings">
+  <f:entry title="${%Advanced settings}">
       <f:repeatableHeteroProperty field="hints"
-          addCaption="Add" deleteCaption="Delete" hasHeader="false" oneEach="true" />
+          addCaption="${%Add}" deleteCaption="${%Delete}" hasHeader="false" oneEach="true" />
   </f:entry>
 
 </j:jelly>
