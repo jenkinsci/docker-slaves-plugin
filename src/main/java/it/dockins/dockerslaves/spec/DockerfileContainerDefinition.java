@@ -69,7 +69,7 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
     @Override
     public String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         boolean pull = forcePull;
-        if (image != null) return image;
+        if (image != null && driver.checkImageExists(listener, image)) return image;
         String tag = Long.toHexString(System.nanoTime());
 
         final FilePath pathToContext = workspace.child(contextPath);
