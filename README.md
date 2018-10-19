@@ -12,7 +12,7 @@ See [announcement](http://blog.loof.fr/2015/09/introducing-docker-slaves-jenkins
 ## Status
 
 Prototyping (Docker Global Hack Day). Don't run in production. Use at your own risk. etc.
-Current implementation focus on Docker runtime, after cleanup the docker specific code will be isolated in a dedicated docker-slaves pluigin.
+Current implementation focus on Docker runtime, after cleanup the docker specific code will be isolated in a dedicated docker-slaves plugin.
 
 see https://issues.jenkins-ci.org/browse/JENKINS/component/20839 for issues/tasks/RFE
 
@@ -59,7 +59,7 @@ To host a build, plugin will :
 * create a data container to host the project workspace.
 * run a predefined slave container which is designed to just establish jenkins remoting channel. 
 * run a container for the scm to checkout project code
-* (optionnaly) build a fresh new container image based on a Dockerfile stored in SCM
+* (optionally) build a fresh new container image based on a Dockerfile stored in SCM
 * run a (set of) containers configured by user as part of the job configuration. All them are linked together and share network
 
 ## Architecture
@@ -80,7 +80,7 @@ API.
 This implementation do run the slave remoting container using a plain `docker run` command and rely on docker stdin/stdout as remoting transport (i.e. CommandLauncher or equivalent). 
 The Launcher is decorated so command/process to be launched on the slave are directly executed with `docker exec`.
 
-General idea is to avoid to use Jenkins remoting to launch processes but directly rely on Docker for this (what docker finally is is just an `execve` on steriods!). That magically brings long-running tasks for free.
+General idea is to avoid to use Jenkins remoting to launch processes but directly rely on Docker for this (what docker finally is is just an `execve` on steroids!). That magically brings long-running tasks for free.
 
 ![Docker implementation](docs/docker.png)
 
@@ -94,7 +94,7 @@ Note: this implementation relies on docker cli ran from jenkins master, and as s
 ## Provisioning issue reporting
 
 As the build container(s) are only used by a build, we'd like the container bootstrap log to be included in the job logs, or at least attached to the build action. This would help to diagnose provisioning issues.
-For the same purpose, when the initial remoting container can't be provisionned, we'd like to mark the build as `NOT_BUILT` and attach docker logs
+For the same purpose, when the initial remoting container can't be provisioned, we'd like to mark the build as `NOT_BUILT` and attach docker logs
 
 ## Alternate implementations
 Plugin is designed on top of Docker CLI features, but the general concept could apply to other container engines / docker cluster managers. We plan to extract a common skeleton into container-slaves-plugin, and experiment with alternate implementations.
@@ -125,7 +125,7 @@ Supporting rkt runtime could be great from a security POV. rkt is able to launch
  * Integrate with ClearContainers for enhanced security
 
 ### Scalability
- * Introduce and extension point to get Dockerhost based on job to run. Can rely on docker-swarm with container affinity, can also be a set of hosts managed by jenkins, running a dedicated monitoring container to check host load, optionnaly auto-scaling (using docker-machine ?).
+ * Introduce and extension point to get Dockerhost based on job to run. Can rely on docker-swarm with container affinity, can also be a set of hosts managed by jenkins, running a dedicated monitoring container to check host load, optionally auto-scaling (using docker-machine ?).
 
 ### Perf enhancements
  * Put remoting JAR cache into docker slave image so launching slave will be much faster (add a second, read-only cache directory in `hudson.remoting.FileSystemJarCache`). On startup jenkins would then build the remoting image, then remoting channel can start without delay for future builds.

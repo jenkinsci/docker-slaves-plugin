@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * Launchs initials containers
+ * Launches initials containers
  */
 public class DockerComputerLauncher extends ComputerLauncher {
 
