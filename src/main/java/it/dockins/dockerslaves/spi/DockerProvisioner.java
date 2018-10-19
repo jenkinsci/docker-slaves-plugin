@@ -22,7 +22,7 @@ public abstract class DockerProvisioner {
     public abstract Container launchRemotingContainer(DockerComputer computer, TaskListener listener) throws IOException, InterruptedException;
 
     /**
-     * Launch a container whith adequate tools to run the SCM checkout build phase.
+     * Launch a container with adequate tools to run the SCM checkout build phase.
      */
     public abstract Container launchScmContainer(TaskListener listener) throws IOException, InterruptedException;
 

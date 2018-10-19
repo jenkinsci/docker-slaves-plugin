@@ -146,7 +146,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
     }
 
     /**
-     * Pipeline does not use the same mecanism to use nodes, so we also need to consider ${@link #createLauncher(TaskListener)}
+     * Pipeline does not use the same mechanism to use nodes, so we also need to consider ${@link #createLauncher(TaskListener)}
      * as an event to determine first use of the slave.
      */
     @Override

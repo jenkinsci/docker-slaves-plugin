@@ -9,13 +9,13 @@ the API doesn't strictly match our needs.
 ## Build Pod
 
 The Jenkins slave is created as a set of containers, a.k.a. "pod", oen of them being used to establish the jenkins remoting 
-communication channel, the others to run build steps, sharing volumes and network. This set of container is internaly documented
+communication channel, the others to run build steps, sharing volumes and network. This set of container is internally documented
 as `com.cloudbees.jenkins.plugins.containerslaves.DockerBuildContext`.
 
 ## Provisioner
 
 Jenkins relies on `hudson.slaves.NodeProvisioner` to determine if and when a new executor has to be created by the
-`hudson.slaves.Cloud` implementation. This introduces unecessary delay provisioning our container slave (pod).
+`hudson.slaves.Cloud` implementation. This introduces unnecessary delay provisioning our container slave (pod).
 As a workaround, we register a custom `hudson.model.queue.QueueListener` to be notified just as a job enter the build queue,
 then can create the required containers without delay. It also assign a unique `hudson.model.Label`, to ensure this container
 will only run once and assigned to this exact build.
@@ -30,7 +30,7 @@ technical details
 
 We arbitrary choose to launch command inside containers with UNIX user `jenkins` (uid 10000, gid 100) which is defined in the remoting container image.
 
-To use this  user in unkwown containers images, we use `docker cp` to update `/etc/passwd` and `/etc/group` (so commands like `id -a ` work as expected).
+To use this  user in unknown containers images, we use `docker cp` to update `/etc/passwd` and `/etc/group` (so commands like `id -a ` work as expected).
 
 
 
