@@ -29,7 +29,6 @@ import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
-import hudson.org.apache.tools.tar.TarOutputStream;
 import hudson.slaves.CommandLauncher;
 import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
@@ -47,6 +46,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
+import org.apache.tools.tar.TarOutputStream;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 
 import java.io.ByteArrayInputStream;
