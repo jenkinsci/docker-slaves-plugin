@@ -3,7 +3,6 @@ package it.dockins.dockerslaves.spi;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
-import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.Container;
 import it.dockins.dockerslaves.DockerComputer;
 import it.dockins.dockerslaves.spec.Hint;

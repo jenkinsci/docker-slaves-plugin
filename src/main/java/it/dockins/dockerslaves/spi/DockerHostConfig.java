@@ -5,8 +5,6 @@ import hudson.FilePath;
 import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.jenkinsci.plugins.docker.commons.credentials.KeyMaterial;
 

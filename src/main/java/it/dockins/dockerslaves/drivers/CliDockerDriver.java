@@ -30,7 +30,6 @@ import hudson.Proc;
 import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.slaves.CommandLauncher;
-import hudson.slaves.SlaveComputer;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.VersionNumber;
 import it.dockins.dockerslaves.Container;

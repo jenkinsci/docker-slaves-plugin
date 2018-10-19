@@ -2,12 +2,10 @@ package it.dockins.dockerslaves.drivers;
 
 import hudson.Extension;
 import hudson.model.Job;
-import hudson.util.ListBoxModel;
 import it.dockins.dockerslaves.DefaultDockerHostSource;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import it.dockins.dockerslaves.spi.DockerDriverFactoryDescriptor;
-import it.dockins.dockerslaves.spi.DockerHostConfig;
 import it.dockins.dockerslaves.spi.DockerHostSource;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
