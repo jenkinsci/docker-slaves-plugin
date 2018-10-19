@@ -116,11 +116,7 @@ public class CliDockerDriver extends DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        if (status != 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return status == 0;
     }
 
 
@@ -138,11 +134,7 @@ public class CliDockerDriver extends DockerDriver {
         int status = launchDockerCLI(launcher, args)
                 .stdout(out).stderr(launcher.getListener().getLogger()).join();
 
-        if (status != 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return status == 0;
     }
 
     @Override
