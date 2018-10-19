@@ -165,7 +165,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         @Override
         public void onStarted(Run run, TaskListener listener) {
             Computer c = Computer.currentComputer();
-            if (c != null && c instanceof OneShotComputer) {
+            if (c instanceof OneShotComputer) {
                 final OneShotSlave node = ((OneShotComputer) c).getNode();
                 node.provision(listener);
             }
