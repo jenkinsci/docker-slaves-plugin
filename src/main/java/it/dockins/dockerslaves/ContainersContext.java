@@ -42,7 +42,7 @@ public class ContainersContext implements BuildBadgeAction {
 
     protected Container scmContainer;
 
-    protected Map<String, Container> sideContainers = new HashMap<String, Container>();
+    protected Map<String, Container> sideContainers = new HashMap<>();
 
     /**
      * Flag to indicate the SCM checkout build phase is running.

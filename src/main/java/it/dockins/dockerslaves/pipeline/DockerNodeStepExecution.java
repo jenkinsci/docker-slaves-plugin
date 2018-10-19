@@ -289,7 +289,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
     public static final class PlaceholderTask implements ContinuedTask, Serializable, AccessControlled {
 
         /** keys are {@link #cookie}s */
-        private static final Map<String,RunningTask> runningTasks = new HashMap<String,RunningTask>();
+        private static final Map<String,RunningTask> runningTasks = new HashMap<>();
 
         private final StepContext context;
         private String label;
