@@ -68,7 +68,6 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
 
     @Override
     public String getImage(DockerDriver driver, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
-        boolean pull = forcePull;
         if (image != null) return image;
         String tag = Long.toHexString(System.nanoTime());
 
@@ -86,7 +85,7 @@ public class DockerfileContainerDefinition extends ContainerDefinition {
         pathToContext.copyRecursiveTo(new FilePath(context));
         pathToDockerfile.copyTo(new FilePath(new File(context, "Dockerfile")));
 
-        driver.buildDockerfile(listener, context.getAbsolutePath(), tag, pull);
+        driver.buildDockerfile(listener, context.getAbsolutePath(), tag, forcePull);
         Util.deleteRecursive(context);
         this.image = tag;
         return tag;
