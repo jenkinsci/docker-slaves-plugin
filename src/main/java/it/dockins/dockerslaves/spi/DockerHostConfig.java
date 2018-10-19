@@ -4,6 +4,7 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Item;
 import hudson.security.ACL;
+import hudson.security.ACLContext;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
@@ -31,11 +32,8 @@ public class DockerHostConfig implements Closeable {
 
     public DockerHostConfig(DockerServerEndpoint endpoint, Item context) throws IOException, InterruptedException {
         this.endpoint = endpoint;
-        final SecurityContext impersonate = ACL.impersonate(ACL.SYSTEM);
-        try {
+        try (ACLContext oldContext = ACL.as(ACL.SYSTEM)) {
             keys = endpoint.newKeyMaterialFactory(context, FilePath.localChannel).materialize();
-        } finally {
-            SecurityContextHolder.setContext(impersonate);
         }
     }
 
