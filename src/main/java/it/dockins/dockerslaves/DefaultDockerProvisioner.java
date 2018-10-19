@@ -26,6 +26,7 @@
 package it.dockins.dockerslaves;
 
 import it.dockins.dockerslaves.spec.ContainerDefinition;
+import it.dockins.dockerslaves.spec.Hint;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
@@ -108,7 +109,7 @@ public class DefaultDockerProvisioner extends DockerProvisioner {
 
     @Override
     public Container launchScmContainer(TaskListener listener) throws IOException, InterruptedException {
-        final Container scmContainer = driver.launchBuildContainer(listener, scmImage, context.getRemotingContainer(), Collections.EMPTY_LIST);
+        final Container scmContainer = driver.launchBuildContainer(listener, scmImage, context.getRemotingContainer(), Collections.<Hint>emptyList());
         context.setBuildContainer(scmContainer);
         return scmContainer;
     }
