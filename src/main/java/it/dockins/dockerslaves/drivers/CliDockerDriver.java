@@ -66,7 +66,7 @@ import static it.dockins.dockerslaves.DockerSlave.SLAVE_ROOT;
  */
 public class CliDockerDriver extends DockerDriver {
 
-    private final static boolean verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");;
+    private final static boolean verbose = Boolean.getBoolean(DockerDriver.class.getName()+".verbose");
 
     private final DockerHostConfig dockerHost;
 
