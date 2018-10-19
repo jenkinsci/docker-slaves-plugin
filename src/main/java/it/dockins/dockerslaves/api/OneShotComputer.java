@@ -29,14 +29,12 @@ import hudson.model.Computer;
 import hudson.model.Executor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.remoting.Channel;
 import hudson.slaves.ComputerListener;
 import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 

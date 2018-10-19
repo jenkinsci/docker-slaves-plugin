@@ -32,13 +32,11 @@ import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
-import hudson.slaves.SlaveComputer;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
 import it.dockins.dockerslaves.spi.DockerProvisioner;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Provision {@link Container}s based on ${@link ContainerSetDefinition} to provide a queued task

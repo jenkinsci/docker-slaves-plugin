@@ -3,7 +3,6 @@ package it.dockins.dockerslaves;
 import hudson.Extension;
 import hudson.model.Job;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
 import it.dockins.dockerslaves.spi.DockerHostSource;
