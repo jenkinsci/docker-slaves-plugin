@@ -150,6 +150,7 @@ public class CliDockerDriver extends DockerDriver {
             .add("--user", "1000:1000")
             .add("--rm")
             .add("--volume", volume+":"+ SLAVE_ROOT)
+            .add("--ipc=shareable")
             .add(image)
             .add("java")
             // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
