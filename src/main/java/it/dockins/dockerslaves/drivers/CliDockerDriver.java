@@ -1,18 +1,18 @@
 /*
  * The MIT License
- *  
+ *
  *  Copyright (c) 2015, CloudBees, Inc.
- *  
+ *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
- *  
+ *
  *  The above copyright notice and this permission notice shall be included in
  *  all copies or substantial portions of the Software.
- *  
+ *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -147,7 +147,7 @@ public class CliDockerDriver extends DockerDriver {
             .add("--log-driver=none")
 
             .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
-            .add("--user", "10000:10000")
+            .add("--user", "1000:1000")
             .add("--rm")
             .add("--volume", volume+":"+ SLAVE_ROOT)
             .add(image)
@@ -190,7 +190,7 @@ public class CliDockerDriver extends DockerDriver {
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--ipc=container:" + remotingContainer.getId())
-                .add("--user", "10000:10000");
+                .add("--user", "1000:1000");
 
         applyHints(hints, args);
 
@@ -240,14 +240,14 @@ public class CliDockerDriver extends DockerDriver {
     protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/group", out);
-        out.write("jenkins:x:10000:\n".getBytes(StandardCharsets.UTF_8));
+        out.write("jenkins:x:1000:\n".getBytes(StandardCharsets.UTF_8));
         putFileContent(launcher, containerId, "/etc", "group", out.toByteArray());
     }
 
     protected void injectJenkinsUnixUser(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/passwd", out);
-        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes(StandardCharsets.UTF_8));
+        out.write("jenkins:x:1000:1000::/home/jenkins:/bin/false\n".getBytes(StandardCharsets.UTF_8));
         putFileContent(launcher, containerId, "/etc", "passwd", out.toByteArray());
     }
 
