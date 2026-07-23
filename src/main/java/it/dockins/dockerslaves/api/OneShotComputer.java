@@ -33,7 +33,7 @@ import hudson.slaves.ComputerListener;
 import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -68,7 +68,7 @@ public abstract class OneShotComputer extends SlaveComputer {
     }
 
     @Override
-    public @Nonnull OneShotSlave getNode() {
+    public @NonNull OneShotSlave getNode() {
         return slave;
     }
 
@@ -81,7 +81,7 @@ public abstract class OneShotComputer extends SlaveComputer {
 
     protected void terminate() {
         try {
-            Jenkins.getInstance().removeNode(slave);
+            Jenkins.get().removeNode(slave);
         } catch (IOException e) {
             e.printStackTrace();
         }

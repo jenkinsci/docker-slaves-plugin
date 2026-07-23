@@ -28,7 +28,7 @@ technical details
 
 ## Security
 
-We arbitrary choose to launch command inside containers with UNIX user `jenkins` (uid 10000, gid 100) which is defined in the remoting container image.
+We arbitrary choose to launch command inside containers with UNIX user `jenkins` (uid 1000, gid 1000) which is defined in the remoting container image.
 
 To use this  user in unknown containers images, we use `docker cp` to update `/etc/passwd` and `/etc/group` (so commands like `id -a ` work as expected).
 

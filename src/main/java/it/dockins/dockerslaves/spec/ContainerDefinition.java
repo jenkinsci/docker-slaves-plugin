@@ -27,9 +27,11 @@ package it.dockins.dockerslaves.spec;
 
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.model.AbstractDescribableImpl;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spi.DockerDriver;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
@@ -38,9 +40,14 @@ import java.util.List;
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public abstract class ContainerDefinition extends AbstractDescribableImpl<ContainerDefinition> {
+public abstract class ContainerDefinition implements Describable<ContainerDefinition> {
 
     private List<Hint> hints;
+
+    @Override
+    public Descriptor<ContainerDefinition> getDescriptor() {
+        return Jenkins.get().getDescriptorOrDie(getClass());
+    }
 
     public List<Hint> getHints() {
         return hints;

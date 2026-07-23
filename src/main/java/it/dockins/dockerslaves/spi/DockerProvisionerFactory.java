@@ -1,10 +1,12 @@
 package it.dockins.dockerslaves.spi;
 
-import hudson.model.AbstractDescribableImpl;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
 import hudson.model.Job;
 import it.dockins.dockerslaves.spec.ContainerDefinitionDescriptor;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import it.dockins.dockerslaves.spec.DockerSocketContainerDefinition;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 
@@ -14,7 +16,12 @@ import java.io.IOException;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public abstract class DockerProvisionerFactory extends AbstractDescribableImpl<DockerProvisionerFactory> {
+public abstract class DockerProvisionerFactory implements Describable<DockerProvisionerFactory> {
+
+    @Override
+    public Descriptor<DockerProvisionerFactory> getDescriptor() {
+        return Jenkins.get().getDescriptorOrDie(getClass());
+    }
 
     public abstract DockerProvisioner createProvisionerForClassicJob(Job job, ContainerSetDefinition spec) throws IOException, InterruptedException;
 

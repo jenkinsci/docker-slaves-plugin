@@ -76,8 +76,8 @@ import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -158,7 +158,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         final Node node = new DockerSlave(slaveName, description, label,
                 cloud.createProvisionerForPipeline(run.getParent(), spec), item);
 
-        Jenkins.getInstance().addNode(node);
+        Jenkins.get().addNode(node);
 
         Timer.get().schedule(new Runnable() {
             @Override public void run() {
@@ -191,7 +191,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                 break;
             }
         }
-        Jenkins j = Jenkins.getInstance();
+        Jenkins j = Jenkins.getInstanceOrNull();
         if (j != null) {
             // if we are already running, kill the ongoing activities, which releases PlaceholderExecutable from its sleep loop
             // Similar to Executor.of, but distinct since we do not have the Executable yet:
@@ -218,7 +218,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                 return;
             }
         }
-        Jenkins j = Jenkins.getInstance();
+        Jenkins j = Jenkins.getInstanceOrNull();
         if (j != null) {
             COMPUTERS: for (Computer c : j.getComputers()) {
                 for (Executor e : c.getExecutors()) {
@@ -249,7 +249,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                 return "waiting for " + item.task.getFullDisplayName() + " to be scheduled; blocked: " + item.getWhy();
             }
         }
-        Jenkins j = Jenkins.getInstance();
+        Jenkins j = Jenkins.getInstanceOrNull();
         if (j != null) {
             COMPUTERS: for (Computer c : j.getComputers()) {
                 for (Executor e : c.getExecutors()) {
@@ -328,7 +328,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
             if (label == null) {
                 return null;
             } else if (label.isEmpty()) {
-                Jenkins j = Jenkins.getInstance();
+                Jenkins j = Jenkins.getInstanceOrNull();
                 if (j == null) {
                     return null;
                 }
@@ -342,7 +342,7 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
             if (label == null) {
                 return null;
             }
-            Jenkins j = Jenkins.getInstance();
+            Jenkins j = Jenkins.getInstanceOrNull();
             if (j == null) {
                 return null;
             }
@@ -395,21 +395,21 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
         @Override public ACL getACL() {
             try {
                 if (!context.isReady()) {
-                    return Jenkins.getInstance().getACL();
+                    return Jenkins.get().getACL();
                 }
                 FlowExecution exec = context.get(FlowExecution.class);
                 if (exec == null) {
-                    return Jenkins.getInstance().getACL();
+                    return Jenkins.get().getACL();
                 }
                 Queue.Executable executable = exec.getOwner().getExecutable();
                 if (executable instanceof AccessControlled) {
                     return ((AccessControlled) executable).getACL();
                 } else {
-                    return Jenkins.getInstance().getACL();
+                    return Jenkins.get().getACL();
                 }
             } catch (Exception x) {
                 LOGGER.log(FINE, null, x);
-                return Jenkins.getInstance().getACL();
+                return Jenkins.get().getACL();
             }
         }
 
@@ -640,7 +640,10 @@ public class DockerNodeStepExecution extends AbstractStepExecutionImpl {
                             if (masterExecutor != null) {
                                 masterExecutor.interrupt();
                             } else { // ?
-                                super.getExecutor().recordCauseOfInterruption(r, listener);
+                                Executor ownExecutor = super.getExecutor();
+                                if (ownExecutor != null) {
+                                    ownExecutor.recordCauseOfInterruption(r, listener);
+                                }
                             }
                         }
                         @Override public boolean blocksRestart() {

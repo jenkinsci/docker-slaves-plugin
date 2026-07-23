@@ -31,7 +31,7 @@ import hudson.model.labels.LabelAssignmentAction;
 import hudson.model.queue.SubTask;
 import jenkins.model.Jenkins;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 public class DockerSlaveAssignmentAction extends InvisibleAction implements LabelAssignmentAction {
 
@@ -43,7 +43,7 @@ public class DockerSlaveAssignmentAction extends InvisibleAction implements Labe
 
     public @CheckForNull
     DockerSlave getAssignedNodeName() {
-        return (DockerSlave) Jenkins.getInstance().getNode(assignedNodeName);
+        return (DockerSlave) Jenkins.get().getNode(assignedNodeName);
     }
 
     @Override

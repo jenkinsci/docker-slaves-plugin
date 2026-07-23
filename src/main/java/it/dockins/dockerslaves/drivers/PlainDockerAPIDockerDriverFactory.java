@@ -10,7 +10,7 @@ import it.dockins.dockerslaves.spi.DockerHostSource;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerServerEndpoint;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -44,7 +44,7 @@ public class PlainDockerAPIDockerDriverFactory extends DockerDriverFactory {
     @Extension
     public static class DescriptorImp extends DockerDriverFactoryDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Docker CLI (require docker executable on PATH)";

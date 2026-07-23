@@ -11,7 +11,7 @@ container.
 `/home/jenkins` is set as VOLUME, so it can be reused for a subsequent build, or browsed after the build 
 as long as the container isn't removed.
 
-Build commands are run inside arbitrary containers, ran as user `jenkins` (uid:10000, gid:10000) so there's no permission issue accessing the 
+Build commands are run inside arbitrary containers, ran as user `jenkins` (uid:1000, gid:1000) so there's no permission issue accessing the 
 workspace and other files inside `/home/jenkins`. This user is automatically created in container user do configure for the build.
 
 

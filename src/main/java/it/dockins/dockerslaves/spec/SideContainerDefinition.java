@@ -26,14 +26,15 @@
 package it.dockins.dockerslaves.spec;
 
 import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class SideContainerDefinition extends AbstractDescribableImpl<SideContainerDefinition> {
+public class SideContainerDefinition implements Describable<SideContainerDefinition> {
 
     private final String name;
     private final ContainerDefinition spec;
@@ -42,6 +43,11 @@ public class SideContainerDefinition extends AbstractDescribableImpl<SideContain
     public SideContainerDefinition(String name, ContainerDefinition spec) {
         this.name = name;
         this.spec = spec;
+    }
+
+    @Override
+    public Descriptor<SideContainerDefinition> getDescriptor() {
+        return Jenkins.get().getDescriptorOrDie(getClass());
     }
 
     public String getName() {
