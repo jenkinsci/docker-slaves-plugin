@@ -36,7 +36,7 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>docker-slaves</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
     <packaging>hpi</packaging>
 
     <name>Docker Slaves Plugin</name>
@@ -49,19 +49,6 @@
         </license>
     </licenses>
 
-    <developers>
-        <developer>
-            <id>ndeloof</id>
-            <name>Nicolas De Loof</name>
-            <email>nicolas.deloof@gmail.com</email>
-        </developer>
-        <developer>
-            <id>ydubreuil</id>
-            <name>Yoann Dubreuil</name>
-            <email>yoann.dubreuil@gmail.com</email>
-        </developer>
-    </developers>
-
     <scm>
         <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
         <developerConnection>scm:git:https://github.com/${gitHubRepo}.git</developerConnection>
@@ -70,8 +57,7 @@
     </scm>
 
     <properties>
-        <revision>1.0.8</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/docker-slaves-plugin</gitHubRepo>
         <jenkins.baseline>2.555</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
