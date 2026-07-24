@@ -9,7 +9,7 @@ import hudson.model.TaskListener;
 import it.dockins.dockerslaves.spec.ContainerSetDefinition;
 import it.dockins.dockerslaves.spec.SideContainerDefinition;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -19,7 +19,7 @@ import java.io.IOException;
 public class ContainerSpecEnvironmentContributor extends EnvironmentContributor {
 
     @Override
-    public void buildEnvironmentFor(@Nonnull Run r, @Nonnull EnvVars envs, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    public void buildEnvironmentFor(@NonNull Run r, @NonNull EnvVars envs, @NonNull TaskListener listener) throws IOException, InterruptedException {
         final Job job = r.getParent();
         final ContainerSetDefinition property = (ContainerSetDefinition) job.getProperty(ContainerSetDefinition.class);
         if (property == null) return;

@@ -11,7 +11,7 @@ import java.util.List;
 public class ContainerDefinitionDescriptor extends Descriptor<ContainerDefinition> {
 
     public static List<ContainerDefinitionDescriptor> all() {
-        return Jenkins.getInstance().getDescriptorList(ContainerDefinition.class);
+        return Jenkins.get().getDescriptorList(ContainerDefinition.class);
     }
 
     public boolean canBeUsedForMainContainer() {

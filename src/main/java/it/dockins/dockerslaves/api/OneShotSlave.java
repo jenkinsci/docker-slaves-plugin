@@ -37,13 +37,11 @@ import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.EphemeralNode;
-import hudson.slaves.NodeProperty;
 import hudson.slaves.RetentionStrategy;
 import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * A slave that is designed to be used only once, for a specific ${@link hudson.model.Run}, and as such has a life cycle
@@ -73,7 +71,12 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
     private boolean provisioningFailed = false;
 
     public OneShotSlave(String name, String nodeDescription, String remoteFS, String labelString, ComputerLauncher launcher) throws Descriptor.FormException, IOException {
-        super(name, nodeDescription, remoteFS, 1, Mode.EXCLUSIVE, labelString, NOOP_LAUNCHER, RetentionStrategy.NOOP, Collections.<NodeProperty<?>>emptyList());
+        super(name, remoteFS, NOOP_LAUNCHER);
+        setNodeDescription(nodeDescription);
+        setNumExecutors(1);
+        setMode(Mode.EXCLUSIVE);
+        setLabelString(labelString);
+        setRetentionStrategy(RetentionStrategy.NOOP);
         this.realLauncher = launcher;
     }
 
@@ -120,9 +123,10 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         }
 
         try {
-            realLauncher.launch(this.getComputer(), listener);
+            final OneShotComputer computer = getComputer();
+            realLauncher.launch(computer, listener);
 
-            if (getComputer().isActuallyOffline()) {
+            if (computer != null && computer.isActuallyOffline()) {
                 provisionFailed(new IllegalStateException("Computer is offline after launch"));
             }
         } catch (Exception e) {
@@ -137,7 +141,7 @@ public abstract class OneShotSlave extends Slave implements EphemeralNode {
         }
 
         try {
-            Jenkins.getInstance().removeNode(this);
+            Jenkins.get().removeNode(this);
         } catch (IOException e) {
             e.printStackTrace();
         }

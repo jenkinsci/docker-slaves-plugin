@@ -36,9 +36,8 @@ import it.dockins.dockerslaves.DockerSlaves;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -99,7 +98,7 @@ public class ContainerSetDefinition extends JobProperty {
         }
 
         @Override
-        public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public JobProperty<?> newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             if (formData.isNullObject()) return null;
             JSONObject containersDefinition = formData.getJSONObject("containersDefinition");
             if (containersDefinition.isNullObject()) return null;
@@ -111,7 +110,7 @@ public class ContainerSetDefinition extends JobProperty {
 
             return Collections2.filter(ContainerDefinitionDescriptor.all(), new Predicate<ContainerDefinitionDescriptor>() {
                 @Override
-                public boolean apply(@Nullable ContainerDefinitionDescriptor d) {
+                public boolean apply(ContainerDefinitionDescriptor d) {
                     return factory.canBeUsedAsMainContainer(d);
                 }
             });
@@ -122,7 +121,7 @@ public class ContainerSetDefinition extends JobProperty {
 
             return Collections2.filter(ContainerDefinitionDescriptor.all(), new Predicate<ContainerDefinitionDescriptor>() {
                 @Override
-                public boolean apply(@Nullable ContainerDefinitionDescriptor d) {
+                public boolean apply(ContainerDefinitionDescriptor d) {
                     return factory.canBeUsedAsSideContainer(d);
                 }
             });

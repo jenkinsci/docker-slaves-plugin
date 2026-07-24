@@ -68,7 +68,7 @@ public class ProvisionQueueListener extends QueueListener {
                     @Override
                     public void run() {
                         try {
-                            Jenkins.getInstance().addNode(node);
+                            Jenkins.get().addNode(node);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -77,7 +77,7 @@ public class ProvisionQueueListener extends QueueListener {
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Failure to create Docker Slave", e);
                 // TODO: should fail the build here, not just cancel the item without explanation
-                Jenkins.getInstance().getQueue().cancel(item);
+                Jenkins.get().getQueue().cancel(item);
             }
         }
     }
@@ -104,7 +104,7 @@ public class ProvisionQueueListener extends QueueListener {
             Node slave = action.getAssignedNodeName();
             if (slave == null) return;
             try {
-                Jenkins.getInstance().removeNode(slave);
+                Jenkins.get().removeNode(slave);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Failure to remove One-Shot Slave", e);
             }

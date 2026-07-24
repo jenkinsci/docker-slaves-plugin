@@ -25,6 +25,7 @@
 
 package it.dockins.dockerslaves.drivers;
 
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.Slave;
@@ -147,9 +148,10 @@ public class CliDockerDriver extends DockerDriver {
             .add("--log-driver=none")
 
             .add("--env", "TMPDIR="+ SLAVE_ROOT+".tmp")
-            .add("--user", "10000:10000")
+            .add("--user", "1000:1000")
             .add("--rm")
             .add("--volume", volume+":"+ SLAVE_ROOT)
+            .add("--ipc=shareable")
             .add(image)
             .add("java")
             // set TMP directory within the /home/jenkins/ volume so it can be shared with other containers
@@ -190,7 +192,7 @@ public class CliDockerDriver extends DockerDriver {
                 .add("--volumes-from", remotingContainer.getId())
                 .add("--net=container:" + remotingContainer.getId())
                 .add("--ipc=container:" + remotingContainer.getId())
-                .add("--user", "10000:10000");
+                .add("--user", "1000:1000");
 
         applyHints(hints, args);
 
@@ -240,14 +242,14 @@ public class CliDockerDriver extends DockerDriver {
     protected void injectJenkinsUnixGroup(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/group", out);
-        out.write("jenkins:x:10000:\n".getBytes(StandardCharsets.UTF_8));
+        out.write("jenkins:x:1000:\n".getBytes(StandardCharsets.UTF_8));
         putFileContent(launcher, containerId, "/etc", "group", out.toByteArray());
     }
 
     protected void injectJenkinsUnixUser(Launcher launcher, String containerId) throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         getFileContent(launcher, containerId, "/etc/passwd", out);
-        out.write("jenkins:x:10000:10000::/home/jenkins:/bin/false\n".getBytes(StandardCharsets.UTF_8));
+        out.write("jenkins:x:1000:1000::/home/jenkins:/bin/false\n".getBytes(StandardCharsets.UTF_8));
         putFileContent(launcher, containerId, "/etc", "passwd", out.toByteArray());
     }
 
@@ -308,8 +310,9 @@ public class CliDockerDriver extends DockerDriver {
         ArgumentListBuilder args = new ArgumentListBuilder()
                 .add("exec", containerId);
 
-        if (starter.pwd() != null) {
-            args.add("/trampoline", "cdexec", starter.pwd().getRemote());
+        final FilePath pwd = starter.pwd();
+        if (pwd != null) {
+            args.add("/trampoline", "cdexec", pwd.getRemote());
         }
 
         args.add("env").add(starter.envs());

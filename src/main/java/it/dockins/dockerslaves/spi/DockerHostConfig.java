@@ -30,7 +30,7 @@ public class DockerHostConfig implements Closeable {
 
     public DockerHostConfig(DockerServerEndpoint endpoint, Item context) throws IOException, InterruptedException {
         this.endpoint = endpoint;
-        try (ACLContext oldContext = ACL.as(ACL.SYSTEM)) {
+        try (ACLContext oldContext = ACL.as2(ACL.SYSTEM2)) {
             keys = endpoint.newKeyMaterialFactory(context, FilePath.localChannel).materialize();
         }
     }

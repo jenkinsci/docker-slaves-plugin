@@ -38,7 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
@@ -108,7 +108,7 @@ public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
     @Extension
     public static class DescriptorImpl extends DockerProvisionerFactoryDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Compose docker containers";

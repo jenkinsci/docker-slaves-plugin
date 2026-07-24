@@ -1,8 +1,10 @@
 package it.dockins.dockerslaves.spi;
 
 import hudson.ExtensionPoint;
-import hudson.model.AbstractDescribableImpl;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
 import hudson.model.Job;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 
@@ -14,7 +16,12 @@ import java.io.IOException;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public abstract class DockerHostSource extends AbstractDescribableImpl<DockerHostSource> implements ExtensionPoint{
+public abstract class DockerHostSource implements ExtensionPoint, Describable<DockerHostSource> {
+
+    @Override
+    public Descriptor<DockerHostSource> getDescriptor() {
+        return Jenkins.get().getDescriptorOrDie(getClass());
+    }
 
     /**
      * Allocate / Determine best Docker host to use to build this Job.

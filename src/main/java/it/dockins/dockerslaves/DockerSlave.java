@@ -96,7 +96,7 @@ public class DockerSlave extends OneShotSlave {
         super.createLauncher(listener);
         final Channel channel = c.getChannel();
         if (channel == null) throw new IllegalStateException("Can't create a Launcher: channel not connected");
-        return new DockerLauncher(listener, channel, c.isUnix(), provisioner)
+        return new DockerLauncher(listener, channel, Boolean.TRUE.equals(c.isUnix()), provisioner)
             .decorateFor(this);
     }
 

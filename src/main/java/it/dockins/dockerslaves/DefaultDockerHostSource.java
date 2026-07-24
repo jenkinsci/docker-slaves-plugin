@@ -8,7 +8,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import it.dockins.dockerslaves.spi.DockerHostSource;
 import it.dockins.dockerslaves.spi.DockerHostSourceDescriptor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -41,7 +41,7 @@ public class DefaultDockerHostSource extends DockerHostSource {
     @Extension
     public static class DescriptorImpl extends DockerHostSourceDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Standalone Docker daemon / Docker Swarm cluster";
