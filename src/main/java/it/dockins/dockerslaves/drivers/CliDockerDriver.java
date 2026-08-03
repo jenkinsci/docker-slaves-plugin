@@ -42,7 +42,6 @@ import it.dockins.dockerslaves.spec.Hint;
 import it.dockins.dockerslaves.spi.DockerDriver;
 import it.dockins.dockerslaves.spi.DockerHostConfig;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 import org.apache.tools.tar.TarOutputStream;
@@ -103,7 +102,7 @@ public class CliDockerDriver extends DockerDriver {
 
     @Override
     public boolean hasVolume(TaskListener listener, String name) throws IOException, InterruptedException {
-        if (StringUtils.isEmpty(name)) {
+        if (name == null || name.isEmpty()) {
             return false;
         }
 
@@ -121,7 +120,7 @@ public class CliDockerDriver extends DockerDriver {
 
     @Override
     public boolean hasContainer(TaskListener listener, String id) throws IOException, InterruptedException {
-        if (StringUtils.isEmpty(id)) {
+        if (id == null || id.isEmpty()) {
             return false;
         }
 
