@@ -34,7 +34,6 @@ import it.dockins.dockerslaves.spi.DockerDriverFactory;
 import it.dockins.dockerslaves.spi.DockerProvisioner;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactory;
 import it.dockins.dockerslaves.spi.DockerProvisionerFactoryDescriptor;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -60,11 +59,11 @@ public class DefaultDockerProvisionerFactory extends DockerProvisionerFactory {
     }
 
     public String getScmImage() {
-        return StringUtils.isBlank(scmImage) ? "buildpack-deps:scm" : scmImage;
+        return (scmImage == null || scmImage.trim().isEmpty()) ? "buildpack-deps:scm" : scmImage;
     }
 
     public String getRemotingImage() {
-        return StringUtils.isBlank(remotingImage) ? "jenkins/slave" : remotingImage;
+        return (remotingImage == null || remotingImage.trim().isEmpty()) ? "jenkins/slave" : remotingImage;
     }
 
     @DataBoundSetter
